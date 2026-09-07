@@ -63,6 +63,13 @@ public class ArtCard : MonoBehaviour
     //根据CurrentCore来刷新卡面
     public void SetCard()
     {
+        var presentation = GetComponent<Assets.Script.DynamicCards.DynamicCardPresentation>();
+        if (presentation == null) presentation = gameObject.AddComponent<Assets.Script.DynamicCards.DynamicCardPresentation>();
+        presentation.Configure(CardBorder.rectTransform, Content.transform);
+        // This is the hover/detail portrait, not a card in the progressively loaded grid.
+        Assets.Script.DynamicCards.DynamicCardView.Bind(CardImg, CurrentCore.CardArtsId,
+            CurrentCore.IsCardBack || CurrentCore.Conceal, largePreview: true, playPreviewAudio: false,
+            presentationRoot: (RectTransform)transform);
         Content.gameObject.SetActive(!(_currentCore.IsCardBack || _currentCore.Conceal));
         var iconCount = 0;
         var use = this.GetComponent<CardMoveInfo>();

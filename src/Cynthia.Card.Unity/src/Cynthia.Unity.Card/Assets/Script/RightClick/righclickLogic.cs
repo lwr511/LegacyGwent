@@ -92,6 +92,8 @@ public class righclickLogic : MonoBehaviour
         DisplayID=CardId;
         History.Add(DisplayID);
         CardInfo = GwentMap.CardMap[CardId];
+        Assets.Script.DynamicCards.DynamicCardView.Bind(CardImg, CardInfo.CardArtsId, false, true,
+            Assets.Script.DynamicCards.DynamicCardView.FindCardRoot(CardImg.transform, CardBorder.transform));
 
         SoundIndex=0;
         SoundCount=AudioManager.Instance.GetVoiceLineCount(CardInfo.CardArtsId);

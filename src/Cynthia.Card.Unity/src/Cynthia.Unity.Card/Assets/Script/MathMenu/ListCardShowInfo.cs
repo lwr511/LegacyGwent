@@ -27,6 +27,7 @@ public class ListCardShowInfo : MonoBehaviour
 
     private void SetCardInfo(int strength, string name, int count = 1, Group group = Group.Gold, string artid = "15230800")
     {
+        Assets.Script.DynamicCards.DynamicCardView.Bind(Miniature, artid, false, false, null, true);
         Border.sprite = (group == Group.Gold ? Gold : (group == Group.Silver ? Silver : Copper));
         Strength.text = strength.ToString();
         Name.text = name;
