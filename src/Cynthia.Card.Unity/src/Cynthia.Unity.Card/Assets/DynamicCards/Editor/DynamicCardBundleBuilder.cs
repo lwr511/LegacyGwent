@@ -14,49 +14,112 @@ namespace Assets.Script.DynamicCards.Editor
     public static class DynamicCardBundleBuilder
     {
         public const int CardsPerPart = 32;
+        [Serializable] private class SourceEntry { public string path, hash; public long length, ticks; }
+        [Serializable] private class SourceCache { public SourceEntry[] files; }
+        private static Dictionary<string, SourceEntry> sourceCache;
+        private static int sourceHashReads;
+        private static int savedSourceHashReads;
+
+        private static void LoadSourceCache(string directory)
+        {
+            sourceCache = new Dictionary<string, SourceEntry>(StringComparer.Ordinal);
+            sourceHashReads = 0;
+            savedSourceHashReads = 0;
+            string path = directory + "/cards.source-hashes.json";
+            if (!File.Exists(path)) return;
+            try
+            {
+                var cache = JsonUtility.FromJson<SourceCache>(File.ReadAllText(path));
+                if (cache != null && cache.files != null)
+                    foreach (var entry in cache.files) sourceCache[entry.path] = entry;
+            }
+            catch (Exception exception) { Debug.LogWarning("Recalculating dynamic card source hashes: " + exception.Message); }
+        }
+
+        private static void SaveSourceCache(string directory)
+        {
+            string path = directory + "/cards.source-hashes.json";
+            if (sourceHashReads == savedSourceHashReads && File.Exists(path)) return;
+            File.WriteAllText(path, JsonUtility.ToJson(new SourceCache { files = sourceCache.Values.ToArray() }));
+            savedSourceHashReads = sourceHashReads;
+        }
 
         public static string Build(BuildTarget target)
         {
             var catalog = JsonUtility.FromJson<DynamicCardCatalog>(File.ReadAllText(DynamicCardLibrary.CatalogAsset));
             var cards = catalog.cards.OrderBy(c => c.prefab, StringComparer.Ordinal).ToArray();
+            if (cards.Any(c => !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Latest/", StringComparison.Ordinal)))
+                throw new BuildFailedException("Only latest GWENT premium scenes belong in this catalog.");
+            if (cards.GroupBy(c => c.id).Any(g => g.Count() != 1) ||
+                cards.SelectMany(c => c.artIds ?? new string[0]).GroupBy(id => id).Any(g => g.Count() != 1))
+                throw new BuildFailedException("Each premium scene and card art must have one catalog entry.");
             int batchSize;
             if (!int.TryParse(Environment.GetEnvironmentVariable("DYNAMIC_CARDS_PER_PART"), out batchSize)) batchSize = CardsPerPart;
             batchSize = Math.Max(1, Math.Min(CardsPerPart, batchSize));
             string directory = "Library/DynamicCardsBundles/" + target;
             Directory.CreateDirectory(directory);
+            LoadSourceCache(directory);
             string ready = directory + "/" + DynamicCardLibrary.BundleFile + ".editor-ready";
             if (File.Exists(ready)) File.Delete(ready);
             var parts = new List<DynamicCardBundlePart>();
             var included = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var fileHashes = new Dictionary<string, string>(StringComparer.Ordinal);
             for (int offset = 0; offset < cards.Length; offset += batchSize)
             {
                 var group = cards.Skip(offset).Take(batchSize).ToArray();
                 var assets = group.SelectMany(c => new[] { c.prefab, c.audio }).Where(p => !string.IsNullOrEmpty(p)).Distinct().ToArray();
                 foreach (var asset in assets) included.Add(asset);
                 var part = new DynamicCardBundlePart { file = "cards-" + (offset / batchSize).ToString("000") + ".bundle", prefabs = group.Select(c => c.prefab).ToArray() };
-                BuildOne(directory, part.file, assets, part.prefabs, target);
+                BuildOne(directory, part.file, assets, part.prefabs, target, fileHashes);
                 parts.Add(part);
                 Debug.Log("DYNAMIC_PART_PROGRESS cards=" + Math.Min(offset + batchSize, cards.Length) + "/" + cards.Length);
             }
-            var extras = Directory.GetFiles(DynamicCardLibrary.ContentRoot, "*", SearchOption.AllDirectories)
+            var extras = Directory.GetFiles(DynamicCardLibrary.ContentRoot + "Latest", "*", SearchOption.AllDirectories)
                 .Select(p => p.Replace('\\', '/')).Where(p => (p.EndsWith(".wav") || p.EndsWith(".bytes")) && !included.Contains(p)).OrderBy(p => p).ToArray();
             for (int offset = 0; offset < extras.Length; offset += CardsPerPart)
             {
                 var part = new DynamicCardBundlePart { file = "cards-extra-" + (offset / CardsPerPart).ToString("000") + ".bundle", prefabs = new string[0] };
-                BuildOne(directory, part.file, extras.Skip(offset).Take(CardsPerPart).ToArray(), part.prefabs, target);
+                BuildOne(directory, part.file, extras.Skip(offset).Take(CardsPerPart).ToArray(), part.prefabs, target, fileHashes);
                 parts.Add(part);
             }
-            BuildOne(directory, DynamicCardLibrary.BundleFile, new[] { DynamicCardLibrary.CatalogAsset }, new string[0], target);
+            BuildOne(directory, DynamicCardLibrary.BundleFile, new[] { DynamicCardLibrary.CatalogAsset }, new string[0], target, fileHashes);
             File.WriteAllText(directory + "/" + DynamicCardLibrary.BundleIndexFile, JsonUtility.ToJson(new DynamicCardBundleIndex { parts = parts.ToArray() }, true));
             Debug.Log("DYNAMIC_PARTITION_BUILD_DONE cards=" + cards.Length + " parts=" + parts.Count);
             return directory + "/" + DynamicCardLibrary.BundleFile;
         }
 
-        private static void BuildOne(string directory, string file, string[] assets, string[] prefabs, BuildTarget target)
+        private static string SourceHash(string path, Dictionary<string, string> hashes)
+        {
+            string hash;
+            if (hashes.TryGetValue(path, out hash)) return hash;
+            var file = new FileInfo(path);
+            SourceEntry cached;
+            if (sourceCache.TryGetValue(path, out cached) && cached.length == file.Length && cached.ticks == file.LastWriteTimeUtc.Ticks)
+                hash = cached.hash;
+            else
+            {
+                sourceHashReads++;
+                using (var stream = File.OpenRead(path))
+                using (var sha = SHA256.Create()) hash = Convert.ToBase64String(sha.ComputeHash(stream));
+                sourceCache[path] = new SourceEntry { path = path, hash = hash, length = file.Length, ticks = file.LastWriteTimeUtc.Ticks };
+            }
+            hashes.Add(path, hash);
+            return hash;
+        }
+
+        private static void BuildOne(string directory, string file, string[] assets, string[] prefabs, BuildTarget target, Dictionary<string, string> fileHashes)
         {
             string path = directory + "/" + file;
             string stamp = path + ".inputs";
-            string input = Application.unityVersion + "\n" + target + "\npartition-v1\n" + string.Join("\n", assets.Select(p => p + ":" + AssetDatabase.GetAssetDependencyHash(p)));
+            // Unity 2019's dependency hash did not invalidate these bundles after a bulk
+            // texture reimport. Include actual dependency and importer bytes; hash shared
+            // files once per build so unchanged parts remain safely reusable.
+            var dependencies = AssetDatabase.GetDependencies(assets, true).Concat(assets)
+                .SelectMany(p => new[] { p, p + ".meta" }).Where(File.Exists)
+                .Distinct().OrderBy(p => p, StringComparer.Ordinal);
+            string input = Application.unityVersion + "\n" + target + "\npartition-source-v2\n" +
+                string.Join("\n", assets) + "\n" +
+                string.Join("\n", dependencies.Select(p => p + ":" + SourceHash(p, fileHashes)));
             string hash;
             using (var sha = SHA256.Create()) hash = Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(input)));
             bool reusable = File.Exists(path) && File.Exists(stamp) && File.ReadAllText(stamp) == hash + ":" + new FileInfo(path).Length;
@@ -64,7 +127,7 @@ namespace Assets.Script.DynamicCards.Editor
             {
                 Debug.Log("DYNAMIC_PART_BUILD " + file + " assets=" + assets.Length);
                 var build = new AssetBundleBuild { assetBundleName = file, assetNames = assets };
-                var result = BuildPipeline.BuildAssetBundles(directory, new[] { build }, BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.StrictMode, target);
+                var result = BuildPipeline.BuildAssetBundles(directory, new[] { build }, BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.StrictMode | BuildAssetBundleOptions.ForceRebuildAssetBundle, target);
                 if (result == null) throw new BuildFailedException("Dynamic card part failed: " + file);
             }
             var bundle = AssetBundle.LoadFromFile(path);
@@ -76,7 +139,8 @@ namespace Assets.Script.DynamicCards.Editor
             }
             finally { bundle.Unload(true); }
             File.WriteAllText(stamp, hash + ":" + new FileInfo(path).Length);
-            Debug.Log("DYNAMIC_PART_READY " + file + " bytes=" + new FileInfo(path).Length + " reused=" + reusable);
+            SaveSourceCache(directory);
+            Debug.Log("DYNAMIC_PART_READY " + file + " bytes=" + new FileInfo(path).Length + " reused=" + reusable + " sourceHashReads=" + sourceHashReads);
             EditorUtility.UnloadUnusedAssetsImmediate();
             GC.Collect();
         }

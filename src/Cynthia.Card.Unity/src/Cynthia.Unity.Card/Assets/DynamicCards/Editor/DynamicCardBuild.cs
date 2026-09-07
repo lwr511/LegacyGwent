@@ -75,6 +75,8 @@ namespace Assets.Script.DynamicCards.Editor
         {
             if (!File.Exists(DynamicCardLibrary.CatalogAsset)) throw new BuildFailedException("Dynamic card content has not been imported. Disable animated content or import it first.");
             if (EditorApplication.isPlaying) throw new BuildFailedException("Stop Play Mode before rebuilding dynamic card packages.");
+            if(target==BuildTarget.StandaloneWindows64 || target==BuildTarget.StandaloneWindows)
+                DynamicCardTextureCompression.Apply();
             string directory = "Library/DynamicCardsBundles/" + target;
             string bundle = DynamicCardBundleBuilder.Build(target);
             File.WriteAllText(directory + "/content.hash", ContentHash());
