@@ -115,6 +115,7 @@ public class CardShowInfo : MonoBehaviour
     //根据CurrentCore来刷新卡面
     public void SetCard(bool asyncLoadAsset = true)
     {
+        Assets.Script.DynamicCards.DynamicCardView.Bind(CardImg, CurrentCore.CardArtsId, CurrentCore.IsCardBack || CurrentCore.Conceal);
         // Debug.Log("刷新了卡牌设置");
         // Debug.Log($"卡牌名称是:{CurrentCore.Name},生命状态是:{CurrentCore.HealthStatus}");
         var iconCount = 0;
@@ -234,6 +235,8 @@ public class CardShowInfo : MonoBehaviour
     }
     public void Reverse()
     {
+        if (_currentCore.IsCardBack || _currentCore.Conceal)
+            Assets.Script.DynamicCards.DynamicCardView.Bind(CardImg, _currentCore.CardArtsId, true);
         DOTween.Sequence().Append(transform.DOLocalRotate(new Vector3(0, 90, 0), 0.15f))
             .AppendCallback(SetCard)
             .Append(transform.DOLocalRotate(new Vector3(0, 0, 0), 0.15f));
