@@ -222,6 +222,7 @@ namespace Assets.Script.DynamicCards
             }
             if (bundle == null)
             {
+                Debug.LogWarning("Dynamic cards are loading directly from editor assets because the verified package cache is unavailable. Rebuild packages through Tools > Dynamic Cards > Build Options to restore asynchronous page loading.");
                 var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(CatalogAsset);
                 if (asset != null) json = asset.text;
                 yield return null;

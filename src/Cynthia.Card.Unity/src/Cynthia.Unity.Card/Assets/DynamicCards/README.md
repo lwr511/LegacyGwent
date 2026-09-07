@@ -4,11 +4,11 @@
 
 ## 内容与覆盖范围
 
-三个本地来源的场景均保留：王权之陨落 255、旧版 Gwent 461、新目录 GWENT 1,279，共 1,995 个源场景版本。这里包含同一卡牌的不同版本，不能视为 1,995 张独立卡牌。现有项目 671 个卡图 ID 中有 650 个可靠对应，另 21 个保持普通卡。项目尚未使用的场景也在目录中保留。
+2026-09-07 起仅保留新版 GWENT 的 1,279 个场景，每个源场景 ID 和每个卡图 ID 在目录中都只出现一次。现有项目 671 个卡图 ID 中有 618 个可靠对应，另 53 个保持普通卡；其中 32 个此前依靠旧版素材显示动态卡。新版中项目尚未使用的场景也保留，以便以后添加卡牌。
 
-`Content/catalog.json` 保存对应关系。素材分别位于 `Content` 的原有数字目录、`Content/Legacy2017` 和 `Content/Latest`；通用依赖放在 `Content/CompatibilityDependencies`。模型、纹理、动画、音频、粒子和兼容脚本均隔离在本模块。来源盘点、逐卡对应和未匹配列表见 `work/DynamicCards/client_source_scene_inventory.csv`、`client_project_card_coverage.csv` 和 `client_card_coverage.json`。
+`Content/catalog.json` 保存唯一对应关系。模型、纹理、动画、音频及粒子素材集中在 `Content/Latest`；共享贴图和声音位于其子目录。新版依赖闭包不需要旧版 Content 目录；旧版卡场景和未引用素材已从正式 Content 移除。当前整理记录在 `work/DynamicCards/LatestOnly`，早期三来源盘点文件仅作历史记录。
 
-杰洛特 11210300、伊格尼 11210200 优先使用已验证的 Native 版本；金龙、兰伯特、休普、终末之战使用 Latest 版本，具体记录在 `preferred_card_sources.json`。可靠图像匹配及同一原始 Template.Id 的 ArtId 关系用于补齐映射，不以相似编号任意配对。
+杰洛特 11210300、伊格尼 11210200 等也统一使用新版映射，不再保留 Native 优先例外。匹配沿用已有可靠图像匹配及 Template.Id 证据，不用相似编号猜测缺失卡牌。打包器拒绝旧来源场景或重复映射，附加音频也只从 Latest 目录收集。
 
 ## 动画与画面
 
@@ -34,11 +34,15 @@ CI 可设置 `LEGACY_GWENT_DYNAMIC_CARDS=1` 或 `0`。程序调用 BuildPipeline
 
 ## 验证边界
 
+以下 1,995 版本及 9.03 GiB 数据是整理前的历史验证，不能作为当前新版唯一目录的验收结果。新版映射及缺失卡图记录位于 `work/DynamicCards/LatestOnly`，最新压缩包结果位于 `work/DynamicCards/Optimization`。此次依赖扫描包含动画曲线，发现四份已存在的 Source 动画有同一个缺失脚本 GUID（`3e080548dacc61344a5969d8317f5acc`）；它不是删除旧目录造成的，尚未在此次资源整理中修复。场景去重不等于所有视觉效果已验收，也不等于跨分包共享依赖已经消除重复。
+
+新版整理验证：正式 Content 恰有 1,279 个 Card.prefab，卡图无重复绑定；19,643 个 prefab/material/controller 引用检查无缺失 GUID 和重复 GUID。Windows 包内场景全为 Latest，总计 43 个发布文件（42 个 bundle 加索引），已替换本机编辑器缓存。隔离 PlayMode 使用新包验证杰洛特、伊格尼、金龙的动态首帧及随后画面变化，并验证旧版独有卡回退静态；这不是全量卡牌视觉验收。证据分别为 `content-result.json`、`client_guid_audit.json`（上一级目录）、`build-result.json`、`runtime-result.json` 和 `delivery-result.json`；完整卡图变更清单是 `card-mapping.csv`。
+
 全量结构检查：1995 个场景，20302 个粒子系统，3493 个 Animator，问题数 0（`premium_structure_audit.json`）。另有 134 个槽位经原始场景确认本来就是空材质，单独计数；未启用的粒子拖尾槽位不视为丢失材质。741 个迁移着色器通过支持性和编译错误检查（`premium_shader_audit.log`）。
 
 12 个重点版本做了连续画面检查。`geralt_timeline_final.log` 验证真实运行组件的完整水鬼、切割、持久循环和重播；`focused_partition_player.log` 在独立运行版验证 60 个请求的顺序、预览优先、暂停后台动画、离屏释放、跨包隔离、加载途中取消及资源包重载。该小规模测试按每包 4 个场景构建，以覆盖跨包情况；正式默认最多 32 个。`focused_partition_stage.log` 验证构建开关关闭/开启、全部分包随程序发布及原文件恢复。
 
-完整运行包已安装：66 个发布文件，9.70 GB（9.03 GiB）。`premium_full_bundle.log` 验证全部 1,995 场景；`premium_full_queue.log` 验证完整包的队列、预览暂停、跨包释放、加载途中取消和重载；`geralt_full_partition_timeline.log` 验证完整包中的杰洛特入场、切割、循环和重播。
+整理前的运行包曾有 66 个发布文件、9.70 GB（9.03 GiB）。`premium_full_bundle.log` 验证当时全部 1,995 场景；`premium_full_queue.log` 验证当时完整包的队列、预览暂停、跨包释放、加载途中取消和重载；`geralt_full_partition_timeline.log` 验证当时完整包中的杰洛特入场、切割、循环和重播。纹理优化前，新版唯一场景包的重建结果为 1,279 场景、7.01 GB（约 6.53 GiB），记录于 `work/DynamicCards/LatestOnly/build-result.json`。
 
 这些证据不等于逐帧验收全部 1,995 个版本，也不等于完整游戏或手机真机的性能保证。部分源控制器条件转场、AvatarMask、专有脚本和音频事件仍需按卡牌继续核对。兰伯特的部分黑色前景在直接加载原始 Unity 2022 场景时同样存在（`OriginalLambert`），该对照没有包含原游戏完整收藏 UI。旧版 12230611 的 mesh_middle 第 114 根骨骼在源文件中本就缺失，按原始绑定矩阵恢复了保底姿势，不能声称恢复了该骨骼的独立动画（`source_bindpose_fallback.txt`）。Latest 15760101 则从原始 Avatar 默认姿势补回缺失骨骼并重新绑定动画。
 
@@ -85,8 +89,30 @@ Evidence: work/DynamicCards/PreviewPivot/test.log has PRESENTATION_PASS from iso
 
 ## Desktop source checkpoint and external content
 
-This Git checkpoint contains the integration, runtime/editor scripts, shaders and the 1,995-variant catalog. Extracted models, textures, animations, audio and particle assets in `Assets/DynamicCards/Content` are local external content (approximately 78 GiB), excluded from Git. Their existing files and Unity .meta GUIDs must be backed up together. The catalog alone cannot recreate them.
+The source includes the integration, runtime/editor scripts, shaders and latest-only catalog. Extracted models, textures, animations, audio and particle assets in `Assets/DynamicCards/Content/Latest` are local external content (approximately 43.76 GiB after texture consolidation), excluded from Git. Their existing files and Unity .meta GUIDs must be backed up together. The catalog alone cannot recreate them. The earlier commit a852fc646 documented a three-source, approximately 78 GiB content snapshot.
 
-To reproduce this workstation's dynamic cards on another machine, copy the complete Content directory with its .meta files into the same project path. For editor playback, also copy `Library/DynamicCardsBundles/StandaloneWindows64` (approximately 9.03 GiB, including index and editor-ready marker), or rebuild it through the module's Build Options menu. Windows player builds can optionally include these bundles. Without the external content/bundles, this source checkpoint is not a complete dynamic-art distribution; static-card fallback remains available.
+To reproduce this workstation's dynamic cards on another machine, copy the complete current Content directory with its .meta files into the same project path. For editor playback, also copy the matching `Library/DynamicCardsBundles/StandaloneWindows64` (including index and editor-ready marker), or rebuild it through the module's Build Options menu. Do not reuse the old 1,995-scene bundles with the new catalog. Windows player builds can optionally include these bundles. Without the external content/bundles, this source checkpoint is not a complete dynamic-art distribution; static-card fallback remains available.
 
-Android packaging experiments and toolchain work are outside this checkpoint. Desktop evidence above is limited to the stated audits and isolated tests; it does not establish full-game or all-card visual acceptance.
+The unfinished local Android build workspace has been removed and its runtime external-content loader reverted. Desktop evidence above is limited to the stated audits and isolated tests; it does not establish full-game or all-card visual acceptance.
+
+## 2026-09-07：Windows 包体积与小卡加载修复
+
+保留全部 1,279 个新版场景及唯一映射，发布包由 7,011,978,254 字节（6.53 GiB）降到 3,285,218,316 字节（3.06 GiB），减少 53.1%。43 个发布文件均经过读取和场景名单验证。
+
+只合并 PNG 内容及导入设置完全一致的重复贴图：10,024 份减至 5,075 份，材质引用和转换记录同步更新。Windows 常规贴图改用 DXT5 Crunch、质量 80，保留原分辨率上限、mipmap、色彩空间及 alpha 设置，极小常量贴图保持原格式。剩余源 PNG 像素未改写；运行包压缩是有损的。8 张大贴图抽样的最大平均 RGBA 误差为 0.009865，尺寸不变；这不是全量卡牌的视觉验收。动画曲线、模型和粒子参数未为压体积而删减。
+
+编辑器缓存现在正确处理 `.meta` 自身的刷新及新包已不包含的旧文件删除；真实内容或导入设置改动仍使缓存失效。修复了错误失效后退回同步 AssetDatabase 读取的退化。无可用包时会输出明确警告。逐张加载、显示顺序、预览优先及离屏释放策略保持现有行为。
+
+分包复用同时改为依赖文件及 `.meta` 的 SHA256 指纹；按文件大小和修改时间缓存已计算指纹，依赖变更时强制重建该分包，未变更则复用。回归实际验证了未变更包保持不动，以及依赖贴图的导入设置改动会重建并进入最终包。
+
+同一台机器、Unity 2019.4.1f1 隔离 PlayMode、同样 20 张中立金卡的页面：
+
+| 加载路径 | 全部动态首帧就绪 | P95 帧耗时 | 最大帧耗时 |
+| --- | ---: | ---: | ---: |
+| 缓存失效，直接读取编辑器素材 | 22.52 秒 | 346.5 ms | 9914.1 ms |
+| 原有效异步包 | 2.87 秒 | 17.5 ms | 217.7 ms |
+| 本次压缩后的有效异步包 | 2.80 秒 | 17.5 ms | 205.7 ms |
+
+每次使用新 Unity 进程，未控制操作系统磁盘缓存；结果不代表所有设备或正式收藏 UI 的保证。新包另外通过杰洛特、伊格尼、金龙的动态画面变化及缺失资源静态回退检查。缓存误失效、依赖变更重建、19,643 个场景/材质/控制器引用检查均通过。详细本地证据在 `work/DynamicCards/Optimization`：`build-result.json`、`page-optimized.json`、`cache-test.json`、`bundle-cache-test.json`、`runtime-result.json`、`final-guid-audit.json`、`delivery-result.json`。
+
+当前源 Content 约 43.76 GiB；这是编辑用模型、动画和源贴图，不能与压缩后的发布包混为一个口径。源码提交仍不包含被忽略的 Content 素材及 Library 资源包；完整素材及其 `.meta` 需要单独备份。本机正式缓存已替换为本次验证的版本。首次编辑器刷新导入设置可能产生一次性导入开销。
