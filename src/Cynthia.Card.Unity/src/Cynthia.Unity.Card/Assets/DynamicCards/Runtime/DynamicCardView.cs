@@ -53,7 +53,7 @@ namespace Assets.Script.DynamicCards
             get
             {
                 var canvas = art.canvas;
-                var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+                var camera = DisplayCamera(canvas);
                 return ScreenBounds(art.rectTransform, camera).center;
             }
         }
@@ -68,7 +68,8 @@ namespace Assets.Script.DynamicCards
             { if (!presentation.AncestorsVisible(art.transform)) return false; }
             else if (art.canvasRenderer.cull || art.canvasRenderer.GetInheritedAlpha() <= .001f) return false;
             var canvas = art.canvas;
-            var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            var camera = DisplayCamera(canvas);
+            if (canvas.renderMode != RenderMode.ScreenSpaceOverlay && camera == null) return false;
             Rect bounds = ScreenBounds(art.rectTransform, camera);
             Rect screen = camera != null ? camera.pixelRect : new Rect(0, 0, Screen.width, Screen.height);
             if (!bounds.Overlaps(screen)) return false;
@@ -80,6 +81,14 @@ namespace Assets.Script.DynamicCards
                     if (!bounds.Overlaps(ScreenBounds((RectTransform)parent, camera))) return false;
             }
             return true;
+        }
+
+        private static Camera DisplayCamera(Canvas canvas)
+        {
+            if (canvas.renderMode == RenderMode.ScreenSpaceOverlay) return null;
+            // Battle cards have world-space canvases without an assigned event camera.
+            // Match their rendering camera instead of treating world units as screen pixels.
+            return canvas.worldCamera != null ? canvas.worldCamera : Camera.main;
         }
 
         private Rect ScreenBounds(RectTransform rect, Camera camera)
@@ -97,7 +106,7 @@ namespace Assets.Script.DynamicCards
         private bool CanCreate(int version)
         {
             if (!IsCurrent(version)) return false;
-            if (IsVisible() && (preview || !HasVisiblePreview)) return true;
+            if (IsVisible()) return true;
             // A scroll can hide a card while its asset request is in flight.
             DynamicCardLibrary.Instance.Enqueue(this, version);
             return false;
@@ -214,7 +223,7 @@ namespace Assets.Script.DynamicCards
             if (miniature)
             {
                 surface.rectTransform.anchorMin = Vector2.zero; surface.rectTransform.anchorMax = Vector2.one;
-                surface.uvRect = new Rect(.185f, .52f, .633f, .19f);
+                UpdateThumbnailFraming();
             }
             foreach (var animator in model.GetComponentsInChildren<Animator>(true)) { animator.applyRootMotion=false; animator.Rebind(); animator.Update(0); }
             NormalizeStageRoot();
@@ -228,9 +237,25 @@ namespace Assets.Script.DynamicCards
             { sound = model.AddComponent<AudioSource>(); sound.clip = clip; sound.loop = true; sound.spatialBlend = 0; sound.Play(); }
             ApplyCut();
             NormalizeStageRoot();
+            // Animator.Rebind/Update has sampled startup opacity, but LateUpdate has not
+            // run yet. Apply it before exposing the first frame of multi-part card rigs.
+            foreach (var property in model.GetComponentsInChildren<DynamicCardAnimatedMaterialProperty>())
+                if (property.isActiveAndEnabled) property.ApplyNow();
             renderCamera.Render();
             surface.enabled = true;
             if (presentation != null) presentation.Reveal(true);
+        }
+
+        private void UpdateThumbnailFraming()
+        {
+            if (miniature && surface != null)
+                surface.uvRect = DynamicCardFraming.ThumbnailRegion(surface.rectTransform.rect.size);
+        }
+
+        private void OnRectTransformDimensionsChange()
+        {
+            // Layout groups and window resizing can resize a row after its card has loaded.
+            UpdateThumbnailFraming();
         }
 
         private float nextRender;
@@ -238,7 +263,7 @@ namespace Assets.Script.DynamicCards
         {
             if (model == null || renderCamera == null || surface == null || !surface.enabled) return;
             bool visible = IsVisible();
-            bool running = visible && (preview || !HasVisiblePreview);
+            bool running = visible;
             if (model.activeSelf != running) model.SetActive(running);
             if (!visible)
             {
@@ -247,7 +272,6 @@ namespace Assets.Script.DynamicCards
                 return;
             }
             invisibleSince = -1;
-            // Keep the last thumbnail image while the detail card owns the animation budget.
             if (!running) return;
             NormalizeStageRoot();
             age += Time.unscaledDeltaTime;
@@ -267,7 +291,7 @@ namespace Assets.Script.DynamicCards
             if(sourceControllers!=null)sourceControllers.Tick(age,Time.unscaledDeltaTime,pitch,yaw);
             surface.color = art.color;
             // Thumbnail textures need fewer redraws; each card has its own phase to spread camera work.
-            if(preview || (!HasVisiblePreview && Time.unscaledTime>=nextRender))
+            if(preview || Time.unscaledTime>=nextRender)
             {
                 renderCamera.Render();
                 float step=1f/24f;float phase=(GetInstanceID()&31)/32f*step;
@@ -312,10 +336,11 @@ namespace Assets.Script.DynamicCards
             // Older exported scenes can be parked facing the card back. An explicit
             // source startup transform takes precedence (some cards intentionally turn).
             if (!entry.prefab.Contains("/Legacy2017/")) return;
-            var root = model.transform.Find(entry.id);
+            string sourceId = string.IsNullOrEmpty(entry.sourceId) ? entry.id : entry.sourceId;
+            var root = model.transform.Find(sourceId);
             if (root == null) return;
             foreach (var setup in entry.initialTransforms ?? new DynamicCardInitialTransform[0])
-                if (setup.path == entry.id) return;
+                if (setup.path == sourceId) return;
             if (Quaternion.Angle(root.localRotation, Quaternion.Euler(0, 180, 0)) < .01f)
                 root.localRotation = Quaternion.identity;
         }

@@ -1,0 +1,22 @@
+{
+  "loopClipsFixed": 115,
+  "oneShotRestored": 97,
+  "loopRestored": 18,
+  "loopAffectedScenes": 78,
+  "duplicateClipScenes": [
+    "11590100",
+    "15660100",
+    "13230201",
+    "13221601"
+  ],
+  "eventCount": 601,
+  "verifiedScenes": 580,
+  "verifiedClips": 1316,
+  "verifiedManifestFiles": 220,
+  "packageFiles": 22,
+  "packageBytes": 1344434418,
+  "cacheReady": true,
+  "cahir": "PASS light one-shot held across 12 samples; body continues",
+  "contracts": "PASS cards=580 clips=1316 issues=0",
+  "durationIssues": ""
+}

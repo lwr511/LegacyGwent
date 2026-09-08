@@ -286,12 +286,15 @@ public class MatchInfo : MonoBehaviour
 
     public void SetMatchArtCard(CardStatus card, bool isOver = true)
     {
+        if (!isOver || card == null || string.IsNullOrEmpty(card.CardId)) return;
+        if (ShowArtCard.gameObject.activeSelf && ReferenceEquals(ShowArtCard.CurrentCore, card)) return;
         ShowArtCard.CurrentCore = card;
-        ShowArtCard.gameObject.SetActive(isOver);
+        ShowArtCard.gameObject.SetActive(true);
     }
 
     public void SetDeck(DeckModel deck, string id)
     {
+        ShowArtCard.gameObject.SetActive(false);
         Debug.Log($"设置");
         CurrentDeckId = id;
         var count = CardsContext.childCount;

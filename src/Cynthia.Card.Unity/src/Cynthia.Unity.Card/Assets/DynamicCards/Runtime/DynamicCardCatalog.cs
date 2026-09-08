@@ -28,6 +28,8 @@ namespace Assets.Script.DynamicCards
     public class DynamicCardEntry
     {
         public string id;
+        public string sourceId;
+        public string sourceVersion;
         public string[] artIds;
         public string prefab;
         public string audio;

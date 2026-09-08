@@ -14,11 +14,18 @@ public class Bootstrapper : MonoBehaviour
     {
         if (DependencyResolver.Container != null)
             return;
-        var IP = Dns.GetHostEntry("cynthia.ovyno.com").AddressList[0];
+        string serverUrl;
+#if UNITY_EDITOR
+        if (UnityEditor.EditorPrefs.GetBool("LegacyGwent.UseLocalServer." + Application.dataPath, true))
+            serverUrl = "http://127.0.0.1:5005/hub/gwent";
+        else
+#endif
+            serverUrl = $"http://{Dns.GetHostEntry("cynthia.ovyno.com").AddressList[0]}:5005/hub/gwent";
+        Debug.Log("[LegacyGwent] Connecting to " + serverUrl);
         var builder = new ContainerBuilder();
         builder.Register(x => DependencyResolver.Container).SingleInstance();
         builder.Register(
-            x => new HubConnectionBuilder().WithUrl($"http://{IP}:5005/hub/gwent", HttpTransportType.WebSockets, options => { options.SkipNegotiation = true; })
+            x => new HubConnectionBuilder().WithUrl(serverUrl, HttpTransportType.WebSockets, options => { options.SkipNegotiation = true; })
                     .AddJsonProtocol(options => options.PayloadSerializerOptions.Converters.Add(new BoolConverter()))
                     .AddJsonProtocol(options => options.PayloadSerializerOptions.Converters.Add(new ListOperationConverter()))
                     .Build()
