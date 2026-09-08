@@ -52,7 +52,7 @@ namespace Cynthia.Card.Server
             {
                 webBuilder.UseStartup<Startup>()
                 .UseNLog()
-                .UseUrls("http://*:5005");
+                .UseUrls(System.Environment.GetEnvironmentVariable("LEGACY_GWENT_LISTEN_URL") ?? "http://*:5005");
             });
     }
 }

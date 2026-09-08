@@ -19,6 +19,8 @@ public class righclickLogic : MonoBehaviour
     public string DisplayID;
     private int SoundIndex;
     private int SoundCount;
+    private int cardRequest;
+    private RectTransform dynamicCardRoot;
 
     //fields
     public GameObject LinkedCard;
@@ -92,8 +94,17 @@ public class righclickLogic : MonoBehaviour
         DisplayID=CardId;
         History.Add(DisplayID);
         CardInfo = GwentMap.CardMap[CardId];
+        int request = ++cardRequest;
+        if (dynamicCardRoot == null)
+            dynamicCardRoot = Assets.Script.DynamicCards.DynamicCardView.FindCardRoot(CardImg.transform, CardBorder.transform);
+        if (dynamicCardRoot != null)
+        {
+            var presentation = dynamicCardRoot.GetComponent<Assets.Script.DynamicCards.DynamicCardPresentation>();
+            if (presentation == null) presentation = dynamicCardRoot.gameObject.AddComponent<Assets.Script.DynamicCards.DynamicCardPresentation>();
+            presentation.Configure(CardBorder.rectTransform, null);
+        }
         Assets.Script.DynamicCards.DynamicCardView.Bind(CardImg, CardInfo.CardArtsId, false, true,
-            Assets.Script.DynamicCards.DynamicCardView.FindCardRoot(CardImg.transform, CardBorder.transform));
+            dynamicCardRoot);
 
         SoundIndex=0;
         SoundCount=AudioManager.Instance.GetVoiceLineCount(CardInfo.CardArtsId);
@@ -119,7 +130,7 @@ public class righclickLogic : MonoBehaviour
         
         Addressables.LoadAssetAsync<Sprite>(CardInfo.CardArtsId).Completed += (obj) =>
         {
-            CardImg.sprite = obj.Result;
+            if (this != null && request == cardRequest) CardImg.sprite = obj.Result;
         };
 
 

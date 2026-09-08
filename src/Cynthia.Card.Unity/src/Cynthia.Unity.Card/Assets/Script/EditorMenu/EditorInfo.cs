@@ -267,12 +267,20 @@ public class EditorInfo : MonoBehaviour
 
     public void ResetEditor()
     {
-        EditorSearch.text = "";
-        ShowSearch.text = "";
+        ClearCardPreview();
+        EditorSearch.SetTextWithoutNotify("");
+        ShowSearch.SetTextWithoutNotify("");
+        _editorSearchMessage = "";
+        _showSearchMessage = "";
         _nowSwitchFaction = Faction.All;
+        _showFaction = Faction.All;
+        _nowShow = (int)Faction.All;
+        for (var i = 0; i < ShowButtons.Length; i++)
+            ShowButtons[i].SetIsOnWithoutNotify(i == _nowShow);
         //
+        // An already selected toggle does not emit a change event on entry.
+        AutoSetShowCards();
         SetDeckList(_clientService.User.Decks);
-        ShowButtons[0].isOn = true;
     }
 
     public void ShowFactionClick()
@@ -304,6 +312,7 @@ public class EditorInfo : MonoBehaviour
 
     public void SetDeckList(IList<DeckModel> decks)
     {
+        if (_deckPrefabMap == null) Start();
         //设置已有卡组
         RemoveAllChild(ShowDecksContext);
         var button = Instantiate(AddDeckButtonPrefab);
@@ -311,11 +320,18 @@ public class EditorInfo : MonoBehaviour
         //-----
         decks.ForAll(x =>
         {
-            if (_deckPrefabMap == null) Start();
-            if (x.Id != "blacklist")
+            if (x != null && x.Id != "blacklist")
             {
-                var deck = Instantiate(_deckPrefabMap[GwentMap.CardMap[x.Leader].Faction]);
-                string leaderartid = GwentMap.CardMap[x.Leader].CardArtsId;
+                if (string.IsNullOrEmpty(x.Leader) ||
+                    !GwentMap.CardMap.TryGetValue(x.Leader, out var leader) ||
+                    !_deckPrefabMap.TryGetValue(leader.Faction, out var prefab) || prefab == null)
+                {
+                    // Keep the saved deck intact; an unsupported deck must not abort collection entry.
+                    Debug.LogWarning($"Cannot display deck '{x.Id}': unsupported leader '{x.Leader}'.");
+                    return;
+                }
+                var deck = Instantiate(prefab);
+                string leaderartid = leader.CardArtsId;
                 deck.GetComponent<DeckShowInfo>().SetDeckInfo(x.Name, x.IsBasicDeck() || x.IsSpecialDeck() || (x.IsBlacklist() && x.Id == "blacklist"));
                 deck.GetComponent<DeckEditorMiniatures>().SetMiniatureArt(leaderartid);
                 deck.GetComponent<EditorShowDeck>().Id = x.Id;
@@ -454,21 +470,22 @@ public class EditorInfo : MonoBehaviour
     }
     public void SelectSwitchUICard(CardStatus card, bool isOver = true)
     {
-        //悬停在卡牌上,显示卡牌信息...但是目前没有做
-        // Debug.Log($"选中卡牌发生变化:  是否选中?:{isOver},卡牌名称:{card.Name},当前页面:{this.EditorStatus}");
-        if (EditorStatus == EditorStatus.EditorDeck)
-        {
-            EditorArtCard.CurrentCore = card;
-            EditorArtCard.gameObject.SetActive(isOver);
-            LastHoveredCard=card.CardId;
-        }
-        else if (EditorStatus == EditorStatus.ShowCards)
-        {
-            ShowArtCard.CurrentCore = card;
-            ShowArtCard.gameObject.SetActive(isOver);
-            LastHoveredCard=card.CardId;
-        }
-        //Debug.Log("LAST HOVERED: "+LastHoveredCard);
+        // Keep the last meaningful preview when the pointer moves into empty space.
+        if (!isOver || card == null || string.IsNullOrEmpty(card.CardId)) return;
+        var preview = EditorStatus == EditorStatus.EditorDeck ? EditorArtCard :
+            EditorStatus == EditorStatus.ShowCards ? ShowArtCard : null;
+        if (preview == null) return;
+        LastHoveredCard = card.CardId;
+        if (preview.gameObject.activeSelf && preview.CurrentCore?.CardId == card.CardId) return;
+        preview.CurrentCore = card;
+        preview.gameObject.SetActive(true);
+    }
+
+    private void ClearCardPreview()
+    {
+        EditorArtCard.gameObject.SetActive(false);
+        ShowArtCard.gameObject.SetActive(false);
+        LastHoveredCard = null;
     }
     private void Update()
     {
@@ -508,7 +525,8 @@ public class EditorInfo : MonoBehaviour
             IsRightClickMobile = false;
             pressTime = 0;              
 
-            if (EditorArtCard.gameObject.activeSelf || ShowArtCard.gameObject.activeSelf)
+            if ((EditorStatus == EditorStatus.EditorDeck || EditorStatus == EditorStatus.ShowCards) &&
+                (EditorArtCard.gameObject.activeSelf || ShowArtCard.gameObject.activeSelf))
             {
                 RightClickedCardID = LastHoveredCard;
                 Debug.Log("Right Clicked ID: " + RightClickedCardID);
@@ -574,6 +592,7 @@ public class EditorInfo : MonoBehaviour
                 Right y:0 | X: 468 true     X: 1700 false*/
                 break;
             case EditorStatus.ShowCards://展示卡牌阶段,关闭编辑器
+                ClearCardPreview();
                 MainUI.SetActive(true);
                 EditorUI.SetActive(false);
                 EditorStatus = EditorStatus.Close;
@@ -676,6 +695,7 @@ public class EditorInfo : MonoBehaviour
 
     public void ResetEditorCore()
     {//初始化
+        ClearCardPreview();
         EditorSearch.text = "";
         DeckName.text = (_nowEditorDeck.Name == null || _nowEditorDeck.Name == "") ? _translator.GetText("EditorMenu_DefaultDeckname") : _nowEditorDeck.Name;
         if (_nowEditorDeck.Id != "blacklist")

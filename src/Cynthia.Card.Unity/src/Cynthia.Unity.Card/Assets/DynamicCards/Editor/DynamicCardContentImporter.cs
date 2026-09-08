@@ -135,18 +135,20 @@ namespace Assets.Script.DynamicCards.Editor
 
         private static void PrepareFormats()
         {
+            string selectedRoot = Environment.GetEnvironmentVariable("DYNAMIC_PREPARE_ROOT");
+            string formatRoot = string.IsNullOrEmpty(selectedRoot) ? DynamicCardLibrary.ContentRoot : selectedRoot;
             // Queue importer changes together; rescanning the whole client per texture is costly.
             AssetDatabase.StartAssetEditing();
             try
             {
-            foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { DynamicCardLibrary.ContentRoot.TrimEnd('/') }))
+            foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { formatRoot.TrimEnd('/') }))
             {
                 var importer = AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guid)) as TextureImporter;
                 if (importer == null) continue;
                 if (importer.textureCompression != TextureImporterCompression.CompressedHQ)
                 { importer.textureCompression = TextureImporterCompression.CompressedHQ; importer.alphaIsTransparency = true; importer.SaveAndReimport(); }
             }
-            foreach (var guid in AssetDatabase.FindAssets("t:AudioClip", new[] { DynamicCardLibrary.ContentRoot.TrimEnd('/') }))
+            foreach (var guid in AssetDatabase.FindAssets("t:AudioClip", new[] { formatRoot.TrimEnd('/') }))
             {
                 var importer = AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guid)) as AudioImporter;
                 if (importer == null) continue;
@@ -227,7 +229,7 @@ namespace Assets.Script.DynamicCards.Editor
             // Source scene 10720101 has a disabled authoring ref_plane with a null shader.
             // Preserve Unity's null-shader behavior; it is not a missing gameplay shader.
             // Legacy 20154001 also carries an unreferenced Bottle material with a source null shader.
-            if(info.shader=="Hidden/InternalErrorShader" && (info.originalName=="henselt_ref_plane" || info.asset=="Assets/DynamicCards/Content/Legacy2017/Shared/20154001_447704_Bottle.mat"))
+            if(info.shader=="Hidden/InternalErrorShader" && (info.originalName=="henselt_ref_plane" || info.asset.EndsWith("/Legacy2017/Shared/20154001_447704_Bottle.mat", StringComparison.Ordinal)))
             { material.shader=Shader.Find("Hidden/InternalErrorShader");RestoreQueue(material,info);EditorUtility.SetDirty(material);return; }
             if (info.asset.Contains("/Latest/"))
             {

@@ -212,12 +212,12 @@ public class GameEvent : MonoBehaviour
             _selectCard = value;
             if (value == null)
             {
-                ShowCard.gameObject.SetActive(false);
                 return;
             }
-            if (!_selectCard.IsTem)
+            if (!_selectCard.IsTem && !_selectCard.CardShowInfo.CurrentCore.IsCardBack && !_selectCard.CardShowInfo.CurrentCore.Conceal)
             {
-                ShowCard.CurrentCore = _selectCard.CardShowInfo.CurrentCore;
+                if (!ShowCard.gameObject.activeSelf || !ReferenceEquals(ShowCard.CurrentCore, _selectCard.CardShowInfo.CurrentCore))
+                    ShowCard.CurrentCore = _selectCard.CardShowInfo.CurrentCore;
                 ShowCard.gameObject.SetActive(true);
             }
             if (!_selectCard.IsCanSelect || _selectCard.IsOn || _selectCard.IsStay || _selectCard.CardShowInfo.IsDead || _selectCard.IsTem)

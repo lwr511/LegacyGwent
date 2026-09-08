@@ -89,7 +89,7 @@ namespace Assets.Script.DynamicCards
             {
                 var item = queue[i];
                 if (item.View == null || !item.View.IsCurrent(item.Version)) { queue.RemoveAt(i); continue; }
-                if (!item.View.IsPreview && (Time.realtimeSinceStartup < nextLoad || DynamicCardView.HasVisiblePreview || Time.realtimeSinceStartup<interactionUntil)) continue;
+                if (!item.View.IsPreview && (Time.realtimeSinceStartup < nextLoad || Time.realtimeSinceStartup<interactionUntil)) continue;
                 if (Time.frameCount < item.ReadyFrame || Time.realtimeSinceStartup < item.ReadyAt || !item.View.IsVisible()) continue;
                 if (selected == null || ComesFirst(item.View, selected.View)) selected = item;
             }

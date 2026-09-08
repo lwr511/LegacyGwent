@@ -16,10 +16,15 @@ namespace Assets.Script.DynamicCards
         private readonly Dictionary<Renderer,DynamicCardMaterialState> states=new Dictionary<Renderer,DynamicCardMaterialState>();
         private void LateUpdate()
         {
+            ApplyNow();
+        }
+
+        public void ApplyNow()
+        {
             if(Targets==null)return;
             foreach(var target in Targets)
             {
-                if(target==null || Slot<0)continue;
+                if(target==null || Slot<0 || Slot>=target.sharedMaterials.Length)continue;
                 DynamicCardMaterialState state;
                 if(!states.TryGetValue(target,out state)){state=target.GetComponent<DynamicCardMaterialState>();if(state==null)state=target.gameObject.AddComponent<DynamicCardMaterialState>();states.Add(target,state);}
                 state.Apply(this,target);

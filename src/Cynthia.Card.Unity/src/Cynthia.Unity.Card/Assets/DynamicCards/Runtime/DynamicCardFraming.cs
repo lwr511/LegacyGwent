@@ -9,6 +9,18 @@ namespace Assets.Script.DynamicCards
         public const float VerticalArtOffset = .13f;
         private const float SourceSize = 1024f;
 
+        public static Rect ThumbnailRegion(Vector2 displaySize)
+        {
+            // Keep the existing thumbnail focal point, but crop the square render texture
+            // to the actual slot aspect instead of squeezing a wide slice into a thin row.
+            var region = new Rect(.185f, .52f, .633f, .19f);
+            if (displaySize.x <= 0 || displaySize.y <= 0) return region;
+            float aspect = displaySize.x / displaySize.y;
+            float width = Mathf.Min(region.width, region.height * aspect);
+            float height = width / aspect;
+            return new Rect(region.center.x - width * .5f, region.center.y - height * .5f, width, height);
+        }
+
         public static Rect ArtRegion(DynamicCardEntry entry)
         {
             float sideMargin = Mathf.Ceil(entry.topMargin * 648f / 947f * .5f);

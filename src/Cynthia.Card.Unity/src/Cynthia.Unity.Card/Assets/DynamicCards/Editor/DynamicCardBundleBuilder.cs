@@ -48,8 +48,9 @@ namespace Assets.Script.DynamicCards.Editor
         {
             var catalog = JsonUtility.FromJson<DynamicCardCatalog>(File.ReadAllText(DynamicCardLibrary.CatalogAsset));
             var cards = catalog.cards.OrderBy(c => c.prefab, StringComparer.Ordinal).ToArray();
-            if (cards.Any(c => !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Latest/", StringComparison.Ordinal)))
-                throw new BuildFailedException("Only latest GWENT premium scenes belong in this catalog.");
+            if (cards.Any(c => !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Old/Thronebreaker/", StringComparison.Ordinal) &&
+                               !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Old/Legacy2017/", StringComparison.Ordinal)))
+                throw new BuildFailedException("Premium scenes must use old sources under Old/Thronebreaker or Old/Legacy2017.");
             if (cards.GroupBy(c => c.id).Any(g => g.Count() != 1) ||
                 cards.SelectMany(c => c.artIds ?? new string[0]).GroupBy(id => id).Any(g => g.Count() != 1))
                 throw new BuildFailedException("Each premium scene and card art must have one catalog entry.");
@@ -64,17 +65,24 @@ namespace Assets.Script.DynamicCards.Editor
             var parts = new List<DynamicCardBundlePart>();
             var included = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var fileHashes = new Dictionary<string, string>(StringComparer.Ordinal);
-            for (int offset = 0; offset < cards.Length; offset += batchSize)
+            int completed = 0;
+            // Partition each old source independently; newer sources cannot enter this build.
+            foreach (string source in new[] { "Thronebreaker", "Legacy2017" })
             {
-                var group = cards.Skip(offset).Take(batchSize).ToArray();
-                var assets = group.SelectMany(c => new[] { c.prefab, c.audio }).Where(p => !string.IsNullOrEmpty(p)).Distinct().ToArray();
-                foreach (var asset in assets) included.Add(asset);
-                var part = new DynamicCardBundlePart { file = "cards-" + (offset / batchSize).ToString("000") + ".bundle", prefabs = group.Select(c => c.prefab).ToArray() };
-                BuildOne(directory, part.file, assets, part.prefabs, target, fileHashes);
-                parts.Add(part);
-                Debug.Log("DYNAMIC_PART_PROGRESS cards=" + Math.Min(offset + batchSize, cards.Length) + "/" + cards.Length);
+                var cohort = cards.Where(c => c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Old/" + source + "/", StringComparison.Ordinal)).ToArray();
+                for (int offset = 0; offset < cohort.Length; offset += batchSize)
+                {
+                    var group = cohort.Skip(offset).Take(batchSize).ToArray();
+                    var assets = group.SelectMany(c => new[] { c.prefab, c.audio }).Where(p => !string.IsNullOrEmpty(p)).Distinct().ToArray();
+                    foreach (var asset in assets) included.Add(asset);
+                    var part = new DynamicCardBundlePart { file = "cards-" + source.ToLowerInvariant() + "-" + (offset / batchSize).ToString("000") + ".bundle", prefabs = group.Select(c => c.prefab).ToArray() };
+                    BuildOne(directory, part.file, assets, part.prefabs, target, fileHashes);
+                    parts.Add(part);
+                    completed += group.Length;
+                    Debug.Log("DYNAMIC_PART_PROGRESS cards=" + completed + "/" + cards.Length);
+                }
             }
-            var extras = Directory.GetFiles(DynamicCardLibrary.ContentRoot + "Latest", "*", SearchOption.AllDirectories)
+            var extras = Directory.GetFiles(DynamicCardLibrary.ContentRoot + "Old", "*", SearchOption.AllDirectories)
                 .Select(p => p.Replace('\\', '/')).Where(p => (p.EndsWith(".wav") || p.EndsWith(".bytes")) && !included.Contains(p)).OrderBy(p => p).ToArray();
             for (int offset = 0; offset < extras.Length; offset += CardsPerPart)
             {
