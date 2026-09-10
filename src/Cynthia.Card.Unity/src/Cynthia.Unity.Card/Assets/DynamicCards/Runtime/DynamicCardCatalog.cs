@@ -51,6 +51,13 @@ namespace Assets.Script.DynamicCards
         public DynamicCardWiggle[] wiggles;
         public DynamicCardMaterialValue[] materialValues;
         public DynamicCardInitialTransform[] initialTransforms;
+        public string[] nonRenderingPaths;
+        // Additional square-render offset when the source backdrop cannot cover the default portrait.
+        public float verticalFramingCorrection;
+        // Minimum framing offset at the drag boundary; zero uses the standard margin.
+        public float dragFramingCorrection;
+        // Independent correction for the narrow deck-list focal region.
+        public float thumbnailFramingCorrection;
         public float cutTime = -1;
         public string beforeCut, afterCut;
     }

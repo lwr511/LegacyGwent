@@ -10,7 +10,7 @@ namespace Assets.Script.DynamicCards.Editor
     public sealed class DynamicCardEditorCache : AssetPostprocessor
     {
         private const string Bundle="Library/DynamicCardsBundles/StandaloneWindows64/cards.bundle";
-        [Serializable] private class FileEntry {public string path,hash;}
+        [Serializable] private class FileEntry {public string path,hash;public long length,ticks;}
         [Serializable] private class FileManifest {public FileEntry[] files;}
         private static Dictionary<string,string> hashes;
         private static HashSet<string> directories;
@@ -18,12 +18,38 @@ namespace Assets.Script.DynamicCards.Editor
 
         public static void WriteManifest()
         {
+            var previous=new Dictionary<string,FileEntry>(StringComparer.Ordinal);
+            string manifestPath=Bundle+".editor-files.json";
+            if(File.Exists(manifestPath))
+            {
+                try
+                {
+                var manifest=JsonUtility.FromJson<FileManifest>(File.ReadAllText(manifestPath));
+                if(manifest!=null && manifest.files!=null)
+                    foreach(var entry in manifest.files)previous[entry.path]=entry;
+                }
+                catch(Exception exception){Debug.LogWarning("Recalculating dynamic card file manifest: "+exception.Message);previous.Clear();}
+            }
             var files=new[]{"Assets/DynamicCards/Content","Assets/DynamicCards/Shaders"}
                 .SelectMany(root=>Directory.GetFiles(root,"*",SearchOption.AllDirectories))
                 .Where(path=>!path.EndsWith(".meta") || !Directory.Exists(path.Substring(0,path.Length-5)))
-                .Select(path=>new FileEntry{path=path.Replace('\\','/'),hash=Hash(path)}).ToArray();
+                .Select(path=>ManifestEntry(path,previous)).ToArray();
             File.WriteAllText(Bundle+".editor-files.json",JsonUtility.ToJson(new FileManifest{files=files}));
             hashes=null;
+        }
+
+        private static FileEntry ManifestEntry(string path,Dictionary<string,FileEntry> previous)
+        {
+            // Bundle construction has already hashed its dependencies. Reuse only an
+            // entry whose size and modification time still match that verified build.
+            path=path.Replace('\\','/');
+            var file=new FileInfo(path);
+            string hash;
+            FileEntry old;
+            if(!DynamicCardBundleBuilder.TryGetBuildHash(path,out hash))
+                hash=previous.TryGetValue(path,out old) && !string.IsNullOrEmpty(old.hash) && old.length==file.Length && old.ticks==file.LastWriteTimeUtc.Ticks
+                    ? old.hash : Hash(path);
+            return new FileEntry{path=path,hash=hash,length=file.Length,ticks=file.LastWriteTimeUtc.Ticks};
         }
 
         private static string Hash(string path)

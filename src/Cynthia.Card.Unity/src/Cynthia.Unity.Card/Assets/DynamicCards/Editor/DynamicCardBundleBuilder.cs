@@ -44,16 +44,31 @@ namespace Assets.Script.DynamicCards.Editor
             savedSourceHashReads = sourceHashReads;
         }
 
+        internal static bool TryGetBuildHash(string path, out string hash)
+        {
+            hash = null;
+            SourceEntry cached;
+            path = path.Replace('\\', '/');
+            if (sourceCache == null || !sourceCache.TryGetValue(path, out cached)) return false;
+            var file = new FileInfo(path);
+            if (!file.Exists || cached.length != file.Length || cached.ticks != file.LastWriteTimeUtc.Ticks) return false;
+            hash = cached.hash;
+            return true;
+        }
+
         public static string Build(BuildTarget target)
         {
             var catalog = JsonUtility.FromJson<DynamicCardCatalog>(File.ReadAllText(DynamicCardLibrary.CatalogAsset));
             var cards = catalog.cards.OrderBy(c => c.prefab, StringComparer.Ordinal).ToArray();
             if (cards.Any(c => !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Old/Thronebreaker/", StringComparison.Ordinal) &&
-                               !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Old/Legacy2017/", StringComparison.Ordinal)))
-                throw new BuildFailedException("Premium scenes must use old sources under Old/Thronebreaker or Old/Legacy2017.");
+                               !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Old/Legacy2017/", StringComparison.Ordinal) &&
+                               !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Latest/", StringComparison.Ordinal)))
+                throw new BuildFailedException("Premium scenes must use an explicit supported source directory.");
             if (cards.GroupBy(c => c.id).Any(g => g.Count() != 1) ||
                 cards.SelectMany(c => c.artIds ?? new string[0]).GroupBy(id => id).Any(g => g.Count() != 1))
                 throw new BuildFailedException("Each premium scene and card art must have one catalog entry.");
+            DynamicCardMaterialValidation.Validate(cards);
+            DynamicCardSkinValidation.Validate(cards);
             int batchSize;
             if (!int.TryParse(Environment.GetEnvironmentVariable("DYNAMIC_CARDS_PER_PART"), out batchSize)) batchSize = CardsPerPart;
             batchSize = Math.Max(1, Math.Min(CardsPerPart, batchSize));
@@ -66,10 +81,11 @@ namespace Assets.Script.DynamicCards.Editor
             var included = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var fileHashes = new Dictionary<string, string>(StringComparer.Ordinal);
             int completed = 0;
-            // Partition each old source independently; newer sources cannot enter this build.
-            foreach (string source in new[] { "Thronebreaker", "Legacy2017" })
+            // Keep existing source partitions stable when adding missing modern cards.
+            foreach (string source in new[] { "Thronebreaker", "Legacy2017", "Latest" })
             {
-                var cohort = cards.Where(c => c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Old/" + source + "/", StringComparison.Ordinal)).ToArray();
+                string prefix = DynamicCardLibrary.ContentRoot + (source == "Latest" ? "Latest/" : "Old/" + source + "/");
+                var cohort = cards.Where(c => c.prefab.StartsWith(prefix, StringComparison.Ordinal)).ToArray();
                 for (int offset = 0; offset < cohort.Length; offset += batchSize)
                 {
                     var group = cohort.Skip(offset).Take(batchSize).ToArray();

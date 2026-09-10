@@ -81,7 +81,7 @@ namespace Assets.Script.DynamicCards
             averageFrame = Mathf.Lerp(averageFrame, Mathf.Min(Time.unscaledDeltaTime, .1f), .2f);
             if (Input.anyKey || Input.mouseScrollDelta.sqrMagnitude > 0) interactionUntil=Time.realtimeSinceStartup+.2f;
             if (creating || collecting) return;
-            if (!DynamicCardView.HasVisiblePreview && released > 0 && (released >= 12 || Time.realtimeSinceStartup - lastRelease > 2f) && Time.realtimeSinceStartup - lastCollection > 5f)
+            if (released > 0 && (released >= 12 || Time.realtimeSinceStartup - lastRelease > 2f) && Time.realtimeSinceStartup - lastCollection > 5f)
             { StartCoroutine(CollectUnused()); return; }
             if (!DynamicCardSettings.Enabled) return;
             PendingCard selected = null;
@@ -110,14 +110,18 @@ namespace Assets.Script.DynamicCards
         private IEnumerator CollectUnused()
         {
             collecting = true;
-            yield return null; yield return null;
-            if (DynamicCardView.HasVisiblePreview) { collecting = false; yield break; }
-            released = 0;
-            foreach (var part in parts.Values)
-                if (part.Leases == 0 && part.Bundle != null)
-                { part.Prefabs.Clear(); part.Audio.Clear(); part.Bundle.Unload(true); part.Bundle = null; }
-            yield return Resources.UnloadUnusedAssets();
-            lastCollection = Time.realtimeSinceStartup; collecting = false;
+            try
+            {
+                yield return null; yield return null;
+                released = 0;
+                // The preview owns a lease just like a grid card. Its presence must not
+                // retain unrelated packages accumulated while browsing the collection.
+                foreach (var part in parts.Values)
+                    if (part.Leases == 0 && part.Bundle != null)
+                    { part.Prefabs.Clear(); part.Audio.Clear(); part.Bundle.Unload(true); part.Bundle = null; }
+                yield return Resources.UnloadUnusedAssets();
+            }
+            finally { lastCollection = Time.realtimeSinceStartup; collecting = false; }
         }
 
         private IEnumerator CreateOne(PendingCard item)

@@ -11,7 +11,8 @@ namespace Assets.Script.DynamicCards.Editor
 
         public static bool Configure(string path)
         {
-            if (!path.StartsWith(DynamicCardLibrary.ContentRoot + "Old/", StringComparison.Ordinal) ||
+            if ((!path.StartsWith(DynamicCardLibrary.ContentRoot + "Old/", StringComparison.Ordinal) &&
+                 !path.StartsWith(DynamicCardLibrary.ContentRoot + "Latest/", StringComparison.Ordinal)) ||
                 !path.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) return false;
             var importer = AssetImporter.GetAtPath(path) as TextureImporter;
             if (importer == null || importer.textureType != TextureImporterType.Default) return false;
@@ -43,7 +44,7 @@ namespace Assets.Script.DynamicCards.Editor
             AssetDatabase.StartAssetEditing();
             try
             {
-                foreach (var path in Directory.GetFiles(DynamicCardLibrary.ContentRoot + "Old", "*.png", SearchOption.AllDirectories))
+                foreach (var path in Directory.GetFiles(DynamicCardLibrary.ContentRoot, "*.png", SearchOption.AllDirectories))
                     if (Configure(path.Replace('\\', '/'))) count++;
             }
             finally { AssetDatabase.StopAssetEditing(); }

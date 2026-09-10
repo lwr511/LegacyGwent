@@ -24,10 +24,18 @@ public class ListCardShowInfo : MonoBehaviour
     public Sprite SilverStar;
     public Sprite GoldStar;
     public CardStatus CardStatus;
+    private int miniatureRequest;
 
     private void SetCardInfo(int strength, string name, int count = 1, Group group = Group.Gold, string artid = "15230800")
     {
-        Assets.Script.DynamicCards.DynamicCardView.Bind(Miniature, artid, false, false, null, true);
+        var request = ++miniatureRequest;
+        // Deck rows use the original static _slot artwork, even when full cards animate.
+        var animatedView = Miniature.GetComponent<Assets.Script.DynamicCards.DynamicCardView>();
+        if (animatedView != null)
+        {
+            animatedView.enabled = false;
+            Destroy(animatedView);
+        }
         Border.sprite = (group == Group.Gold ? Gold : (group == Group.Silver ? Silver : Copper));
         Strength.text = strength.ToString();
         Name.text = name;
@@ -46,6 +54,7 @@ public class ListCardShowInfo : MonoBehaviour
         {
             Addressables.LoadAssetAsync<Sprite>("15230800").Completed += (obj) =>
             {
+                if (this == null || Miniature == null || request != miniatureRequest || obj.Result == null) return;
                 Miniature.sprite = obj.Result;
             };
         }

@@ -5,6 +5,14 @@ namespace Assets.Script.DynamicCards
 {
     public static class DynamicCardPaths
     {
+        public static string RelativePath(Transform node, Transform root)
+        {
+            if (node == root) return "";
+            string path = node.name;
+            for (var parent = node.parent; parent != null && parent != root; parent = parent.parent)
+                path = parent.name + "/" + path;
+            return path;
+        }
         public static Transform Find(Transform root, string path)
         {
             if (string.IsNullOrEmpty(path)) return null;

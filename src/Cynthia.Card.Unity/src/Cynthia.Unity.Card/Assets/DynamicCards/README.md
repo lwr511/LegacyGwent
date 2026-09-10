@@ -4,15 +4,17 @@
 
 ## 内容与覆盖范围
 
-当前改为仅使用旧版来源：255 个《王权的陨落》场景和 325 个旧 GWENT 场景，共 580 个。671 个项目卡图中有 492 个绑定旧版动态素材，其余 179 个回退静态；不使用新版补齐。映射同时参考已有卡图匹配和旧客户端 ArtDefinition，保留未被项目使用的旧场景；不同形态的卡图不按基础编号强行合并。
+当前使用三个来源：255 个《王权的陨落》场景、325 个旧 GWENT 场景和 158 个新版 GWENT 补缺场景，共 738 个场景。669 个唯一卡图映射中，650 个属于项目现有的 671 个游戏卡图。其余 21 个保留静态：5 个被源 ArtDefinition 明确禁用闪卡，另外 16 个属于自定义卡图或在三个来源中未找到精确对应的动态素材；不以相近编号替代不同画面。
 
-`Content/catalog.json` 保存唯一对应关系。模型、纹理、动画、音频及粒子依赖集中在 `Content/Old/Thronebreaker` 和 `Content/Old/Legacy2017`，`sourceVersion` 记录来源，`sourceId` 保留动画根节点编号。此前新版 Content 和编辑器资源包备份在项目外的 `work/DynamicCards/BeforeOldSources-20260908`。
+`Content/catalog.json` 保存唯一对应关系。素材集中在 `Content/Old/Thronebreaker`、`Content/Old/Legacy2017` 和 `Content/Latest`；`sourceVersion` 记录来源，`sourceId` 保留源动画根节点编号。旧版优先，缺失的卡图从新版备份补回。打包器验证三个来源目录、重复映射、蒙皮骨骼、纹理属性绑定和源文件明确不参与绘制的空材质辅助表面。
 
-打包器拒绝上述两个旧版目录以外的场景和重复卡图映射。两种旧来源分别分包；杰洛特 11210300 使用《王权的陨落》的 10090100 场景。此次文件依赖审计无缺失 GUID、重复 GUID 或重复卡图绑定，记录在 `work/DynamicCards/OldSourcesStage/audit.json`。导入、资源包构建和播放验证是独立步骤，以该目录的最终结果文件为准；下文新版及混合来源数字均为历史记录。
+2026-09-09 当前 Windows 资源包为 25 个内容分包，加目录包和索引共 27 个文件，1,741,039,063 字节（约 1.62 GiB）。保留 DXT5 Crunch 质量 80、原纹理尺寸、alpha 与色彩空间；通过恢复源纹理、骨骼和动画契约修复画面。当前验证记录位于 `work/DynamicCards/MotionIntegrity`；下文带日期的旧范围和体积是历史记录。
+
+本轮修复包括：遗漏卡图映射、图集及共享纹理误绑定、同名不同动画混淆、零长度常量片段、错误循环标记、遗漏 Avatar 骨骼，以及空材质辅助网格误绘制。大卡、收藏小卡和牌组缩略图均保护异步静态图回调，防止对象回收或换卡后写回旧图。
 
 开场双方领袖的 `MyCards` 也接入动态卡，沿用开场 Animator 的翻牌、移动和原有语音。右键详情的独立整卡节点负责动态预览，说明文字保持在外；异步静态图回调只更新最新选中的卡牌。
 
-2026-09-08 已完成全部旧版分包并恢复编辑器异步缓存：580 个场景、20 个内容分包，连同目录包和索引共 22 个交付文件，1,342,622,927 字节（约 1.25 GiB）。此前迁移校验将源文件明确为空的网格或 Animator 节点误判为缺失，阻断构建，导致编辑器回退同步读取；本次保留损坏引用检查并完成重建。
+历史记录（已被上方三来源内容替代）：2026-09-08 完成旧版分包并恢复编辑器异步缓存：580 个场景、20 个内容分包，连同目录包和索引共 22 个交付文件，1,342,622,927 字节（约 1.25 GiB）。此前迁移校验将源文件明确为空的网格或 Animator 节点误判为缺失，阻断构建，导致编辑器回退同步读取；本次保留损坏引用检查并完成重建。
 
 独立 Unity 运行验证使用正式运行脚本与上述完整缓存，从 17 个分包抽取 20 张卡：整页 2.762 秒，加载中打开已就绪小卡的大卡 13.2 毫秒，P95 帧时间 17.4 毫秒，最大 56.0 毫秒（1 帧超过 50 毫秒）。小卡继续播放、后台加载及离页释放通过；这不是完整收藏界面的手工验收，也不保证消除全部冷启动长帧。结果见 `work/DynamicCards/OldSourcesStage/performance-result.txt`、`performance-metrics.txt` 和 `delivery-audit-final.json`；实际详情层级及领袖画像播放验证见 `entry-test-result.txt`。本轮未重建玩家程序。
 
@@ -24,11 +26,13 @@
 
 ## 统一构图
 
-所有动态卡使用统一的垂直构图基准，并扣除已有顶部裁切所带来的上移量，避免重复修正；无逐卡 ID 白名单。首帧、大卡、小卡和拖动回正使用同一规则。`camera_alignment_global_final.log` 通过全部 1,995 个版本的投影参数及缩略图构图一致性检查，并保存了 12 张跨来源、跨阵营卡的首帧和循环对比图（`work/DynamicCards/CameraAlignment/GlobalFinal`）。这不等于逐帧验收全部卡牌。
+2026-09-10 起，完整卡面按三个原客户端共同的 `CardRTRenderer/Card/Appereance` 层级还原：外观节点 Y=2，相机保留源 Z 和 FOV，显示区域由原始静态牌面平面投影计算。大卡、收藏小卡及拖动回正不再叠加此前的经验垂直偏移。三个缺少 CameraValuesChanger 的源场景显式使用原渲染器默认参数。横向牌组条目恢复原始 `_slot` 静态图；底层窄幅动态裁切接口仍保留兼容。
+
+已核对 663 个映射场景、669 个卡图的相机来源，抽查 14 张卡；构图参数检查不等于全部卡牌的视觉验收。旧版 1,995 版本的构图测试属于历史记录，不能证明当前构图正确。最新修复范围、验证边界及本地素材恢复方法见仓库根目录 `work/DynamicCards/REPAIR_NOTES-20260910.md`。
 
 ## 加载与释放
 
-页面先显示普通卡，等待布局稳定后按从上到下、从左到右的顺序串行加载。滚动和交互期间延后普通队列，大卡预览优先。大卡显示期间，可见小卡仍继续动画、粒子和每秒 24 次的错峰重绘，后续小卡继续按帧耗时调节的间隔加载。离屏卡释放实例，返回时重新排队；回收操作避开预览期。每个内容包最多包含 32 个卡牌场景，显示中的卡牌及加载中的请求持有引用；无人使用的包会释放，重新显示时再异步加载。
+页面先显示普通卡，等待布局稳定后按从上到下、从左到右的顺序串行加载。滚动和交互期间延后普通队列，大卡预览优先。大卡显示期间，可见小卡仍继续动画、粒子和每秒 24 次的错峰重绘，后续小卡继续按帧耗时调节的间隔加载。离屏卡释放实例，返回时重新排队；预览持有自己的资源租约，不再阻止无关分包回收。每个内容包最多包含 32 个卡牌场景，显示中的卡牌及加载中的请求持有引用；无人使用的包会释放，重新显示时再异步加载。
 
 编辑器优先使用 `Library/DynamicCardsBundles/StandaloneWindows64` 中的异步包：`cards.bundle` 保存目录，`cards.index.json` 指向 `cards-*.bundle`。只有完整生成后才写入 `cards.bundle.editor-ready`。内容或着色器变动会使标记失效；没有有效缓存时回退 AssetDatabase，首次读取仍可能同步停顿。通过 `Tools > Dynamic Cards > Build Options > 仅构建动态卡资源包` 重建缓存，输入未改变的分包会复用，失败后可继续构建。异步加载不能消除 Unity 原生实例化和 GPU 上传的所有主线程开销。
 
@@ -93,7 +97,7 @@ ArtCard now creates a runtime DynamicCardVisualPivot centred on CardBorder, move
 
 Evidence: work/DynamicCards/PreviewPivot/test.log has PRESENTATION_PASS from isolated PlayMode using installed card bundles: gate, frame/art rotation, stationary description, stable centre and scale, idle/glow, rapid switching, disabled/missing fallbacks and ancestor visibility. Main client's collection page was not visually exercised in this verification. Original hierarchy read from deckbuilder_base: UISidePreviewCard root -> CardTransform -> CardContainerTransform; CardRotationController modifies CardContainerTransform. Original video contact sheet is in PreviewPivot/contact.jpg.
 
-## Desktop source checkpoint and external content
+## 历史记录：2026-09-07 Desktop source checkpoint and external content
 
 The source includes the integration, runtime/editor scripts, shaders and latest-only catalog. Extracted models, textures, animations, audio and particle assets in `Assets/DynamicCards/Content/Latest` are local external content (approximately 43.76 GiB after texture consolidation), excluded from Git. Their existing files and Unity .meta GUIDs must be backed up together. The catalog alone cannot recreate them. The earlier commit a852fc646 documented a three-source, approximately 78 GiB content snapshot.
 
@@ -167,3 +171,21 @@ The unfinished local Android build workspace has been removed and its runtime ex
 最终独立 Unity 2019 进程从实际交付分包核对全部 580 个场景、1,316 个有效动画片段，循环标记和片段长度无差异；卡希尔实播验证刀光结束后的 12 次采样保持末帧，主体动画继续运行。该检查针对播放时序，不替代所有卡面局部视觉细节的逐帧验收。
 
 正式缓存 22 个发布文件合计 1,344,434,418 字节，editor-ready 和内容校验清单已更新；额外复核本次涉及的 220 个资源文件与清单一致。未创建新的游戏安装包。证据与转换工具备份位于 `work/DynamicCards/TimingRepair`，主要结果为 `summary.json`、`contract-result.txt`、`cahir-result.txt`、`schedule-audit.json`，包含完整修改清单及还原用备份。
+
+## 素材交付与重建保护（2026-09-09）
+
+当前 Content 素材与 `.meta` 是配套的本地外部内容，Git 中的目录及源码不能独立重建素材。迁移时复制完整 Content 及 `.meta`，再复制匹配的 Windows 资源包与 `editor-ready` 标记，或在 Unity 中重新构建。不要混用本文历史记录中的旧目录包。转换、审计脚本与测试工程属于本地工具，不属于游戏发布资源。
+
+`conversion.json` 的纹理赋值可显式指定 `texture`，用于源材质自己的纹理及跨卡共享纹理；未指定时使用该卡图集。构建前同时检查空引用和非空但错误的纹理引用。源文件原本没有材质的辅助表面通过 `nonRenderingPaths` 精确匹配，只关闭绘制，保留粒子、变换与动画；同名层级的有效渲染器不受影响。加权蒙皮缺失骨骼会阻止构建。源动画转换按片段身份而非显示名称区分资源，未解析的控制器契约会报错。
+
+本轮边缘复核另发现狄杰斯特拉 12210501 的背景不覆盖默认取景上沿。目录中的 `verticalFramingCorrection` 修正整卡垂直取景，保持原视野角、模型大小和纹理；窄缩略图通过独立的 `thumbnailFramingCorrection` 将取景从头顶移回面部。未配置修正的场景使用默认值 0。四个拖动方向和长时间播放单独复核，避免仅检查静止正面。
+
+## 2026-09-09：长列表与大小卡取景收尾
+
+长列表在大卡预览可见时也回收零引用分包，保留正在显示的卡所持有的引用。爱丽丝的同伴（卡图 `20008300`）使用新版完整场景 `13860101`。整卡取消统一向上偏移，大卡与小卡使用相同的源相机取景，并按卡框宽度的 2% 对齐顶部边距；窄牌组缩略条保留独立取景。背景不足的 112 个来源场景使用各自的整卡修正，覆盖 114 个卡图。
+
+`dragFramingCorrection` 指定拖动边界所需的最小垂直取景修正，仅卡图 `20011300` 和 `202283` 配置了此值。运行时从静止取景平滑过渡，松手回到原来的 `verticalFramingCorrection`；不改变默认相机位置、视野角、模型或动画。其余卡使用原有拖动余量。
+
+本地复核与截图位于 `work/DynamicCards/MotionIntegrity/ResumeFraming-20260909`。测试必须同步实际资源包，并校验加载的目录参数和交付文件哈希；只复制运行时代码而沿用旧测试包，不能证明当前版本的取景结果。
+
+最终实际包回归完成：118 张卡、354 个显示用例、772 张静止与拖动截图，顶部覆盖阈值异常为 0；自然播放、重新启用、松手回位与目录参数检查通过。四张重点卡在真实收藏 UI 中复核了大小卡相机、投影及顶部边距一致，爱丽丝同伴大小卡均有画面变化。全部 27 个交付文件哈希匹配，清理临时编辑器探针后的编译通过。详细范围、阈值和上一轮长列表记录见上述目录的 `RESULTS.md`。

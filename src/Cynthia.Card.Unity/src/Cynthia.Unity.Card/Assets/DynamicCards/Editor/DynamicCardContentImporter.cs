@@ -10,7 +10,7 @@ namespace Assets.Script.DynamicCards.Editor
     public static class DynamicCardContentImporter
     {
         [Serializable] private class MaterialInfo { public string asset, originalName, shader, portableShader, renderType; public bool hasState; public float srcBlend,dstBlend,zWrite,cull; public int queue; }
-        [Serializable] private class Assignment { public string material; public string[] properties; }
+        [Serializable] private class Assignment { public string material, texture; public string[] properties; }
         [Serializable] private class VertexInfo { public string path, data; public int samples, vertices; }
         [Serializable] private class CandleInfo { public string path, texture; public float size; }
         [Serializable] private class CurveKey { public float time, value, inSlope, outSlope; }
@@ -40,16 +40,7 @@ namespace Assets.Script.DynamicCards.Editor
                     var material = AssetDatabase.LoadAssetAtPath<Material>(info.asset);
                     if (material == null) throw new InvalidOperationException("Missing dynamic material: " + info.asset);
                     ConvertMaterial(material, info, shader);
-                    if (conversion.textureAssignments != null && !string.IsNullOrEmpty(conversion.atlas))
-                    {
-                        var assignment = conversion.textureAssignments.FirstOrDefault(a => a.material == info.originalName);
-                        if (assignment != null)
-                        {
-                            var atlas = AssetDatabase.LoadAssetAtPath<Texture2D>(conversion.atlas);
-                            foreach (var property in assignment.properties)
-                                if (material.HasProperty(property)) material.SetTexture(property, atlas);
-                        }
-                    }
+                    ApplyTextureAssignments(material, info.originalName, conversion);
                 }
                 string prefabPath = Path.GetDirectoryName(path).Replace('\\', '/') + "/Card.prefab";
                 var root = PrefabUtility.LoadPrefabContents(prefabPath);
@@ -106,17 +97,26 @@ namespace Assets.Script.DynamicCards.Editor
                     var material=AssetDatabase.LoadAssetAtPath<Material>(info.asset);
                     if(material==null)throw new InvalidOperationException("Missing material "+info.asset);
                     ConvertMaterial(material,info,shader);
-                    if(conversion.textureAssignments!=null && !string.IsNullOrEmpty(conversion.atlas))
-                    {
-                        var assignment=conversion.textureAssignments.FirstOrDefault(a=>a.material==info.originalName);
-                        if(assignment!=null)
-                            foreach(var property in assignment.properties)
-                                if(material.HasProperty(property))material.SetTexture(property,AssetDatabase.LoadAssetAtPath<Texture2D>(conversion.atlas));
-                    }
+                    ApplyTextureAssignments(material, info.originalName, conversion);
                     count++;
                 }
             }
             AssetDatabase.SaveAssets();Debug.Log("DYNAMIC_MATERIALS_READY "+count);
+        }
+
+        private static void ApplyTextureAssignments(Material material, string originalName, Conversion conversion)
+        {
+            if (conversion.textureAssignments == null) return;
+            // One material can have separate atlas, light-mask and shared-texture bindings.
+            foreach (var assignment in conversion.textureAssignments.Where(a => a.material == originalName))
+            foreach (var property in assignment.properties ?? new string[0])
+            {
+                if (!material.HasProperty(property)) continue;
+                string path = string.IsNullOrEmpty(assignment.texture) ? conversion.atlas : assignment.texture;
+                var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                if (texture == null) throw new InvalidOperationException("Missing source texture for " + originalName + " " + property + ": " + path);
+                material.SetTexture(property, texture);
+            }
         }
 
         public static void NormalizeRootClips()

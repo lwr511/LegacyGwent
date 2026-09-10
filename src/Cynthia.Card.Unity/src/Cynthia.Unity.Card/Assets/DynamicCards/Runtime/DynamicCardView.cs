@@ -26,6 +26,7 @@ namespace Assets.Script.DynamicCards
         private DynamicCardSourceControllers sourceControllers;
         private Transform pivot;
         private RectTransform frame;
+        private RectTransform portraitFrame;
         private DynamicCardDragHandle dragHandle;
         private Quaternion frameRest, pivotRest;
         private Vector2 dragOrigin, dragStart, target, current;
@@ -119,7 +120,7 @@ namespace Assets.Script.DynamicCards
             return null;
         }
 
-        public static void Bind(Image image, string id, bool concealed = false, bool largePreview = false, RectTransform wholeCard = null, bool listThumbnail = false, bool playPreviewAudio = true, RectTransform presentationRoot = null)
+        public static void Bind(Image image, string id, bool concealed = false, bool largePreview = false, RectTransform wholeCard = null, bool listThumbnail = false, bool playPreviewAudio = true, RectTransform presentationRoot = null, RectTransform portraitBorder = null)
         {
             if (image == null) return;
             var view = image.GetComponent<DynamicCardView>();
@@ -128,6 +129,7 @@ namespace Assets.Script.DynamicCards
             bool changed = view.artId != id || view.hidden != concealed || view.preview != largePreview || view.miniature != listThumbnail || view.previewAudio != playPreviewAudio;
             view.artId = id; view.hidden = concealed; view.preview = largePreview; view.miniature = listThumbnail;
             view.previewAudio = playPreviewAudio;
+            view.portraitFrame = portraitBorder;
             var root = presentationRoot != null ? presentationRoot : wholeCard;
             if (largePreview && root != null && (view.presentation == null || view.presentation.transform != root))
             {
@@ -177,7 +179,21 @@ namespace Assets.Script.DynamicCards
             var stagingRoot = new GameObject("Card placement");
             SceneManager.MoveGameObjectToScene(stagingRoot, stage);
             stagingRoot.transform.position = new Vector3(10000 + (cell % 32) * 1024, 10000 + (cell / 32) * 1024, 0);
-            model = Instantiate(prefab, stagingRoot.transform, false);
+            var appearanceRoot = new GameObject("Source appearance anchor");
+            appearanceRoot.transform.SetParent(stagingRoot.transform, false);
+            appearanceRoot.transform.localPosition = DynamicCardFraming.AppearanceOffset;
+            model = Instantiate(prefab, appearanceRoot.transform, false);
+            // Source scenes retain unassigned authoring surfaces (including emitter
+            // meshes). Keep their transforms, animation and emission, but do not draw
+            // Unity's pink missing-material fallback for these explicit source paths.
+            if (entry.nonRenderingPaths != null && entry.nonRenderingPaths.Length > 0)
+            {
+                var paths = new HashSet<string>(entry.nonRenderingPaths);
+                foreach (var renderer in model.GetComponentsInChildren<Renderer>(true))
+                    if (paths.Contains(DynamicCardPaths.RelativePath(renderer.transform, model.transform)) &&
+                        !System.Array.Exists(renderer.sharedMaterials, material => material != null))
+                        renderer.forceRenderingOff = true;
+            }
             RestoreSceneFacing();
             model.SetActive(true);
             // Premium meshes retain their source skinning even when the game's global quality uses one bone.
@@ -189,7 +205,8 @@ namespace Assets.Script.DynamicCards
             if (!IsCurrent(version)) yield break;
             var cameraObject = new GameObject("Card camera");
             SceneManager.MoveGameObjectToScene(cameraObject, stage);
-            cameraObject.transform.position = model.transform.position + new Vector3(0, 0, entry.cameraDistance);
+            cameraObject.transform.position = stagingRoot.transform.position + new Vector3(0, 0, DynamicCardFraming.CameraDistance(entry, miniature))
+                + (miniature ? DynamicCardFraming.AppearanceOffset : Vector3.zero);
             renderCamera = cameraObject.AddComponent<Camera>();
             renderCamera.enabled = false;
             renderCamera.fieldOfView = entry.fieldOfView;
@@ -202,7 +219,7 @@ namespace Assets.Script.DynamicCards
             // Source cameras render a square; the card art is a portrait region inside that square.
             texture = new RenderTexture(preview ? 1024 : 384, preview ? 1024 : 384, 24, RenderTextureFormat.ARGB32);
             texture.Create(); renderCamera.targetTexture = texture;
-            DynamicCardFraming.Apply(renderCamera, entry);
+            DynamicCardFraming.Apply(renderCamera, entry, miniature);
             pivot = string.IsNullOrEmpty(entry.pivot) ? null : model.transform.Find(entry.pivot);
             if (pivot != null) pivotRest = pivot.localRotation;
             var overlay = new GameObject("Dynamic art", typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage));
@@ -220,6 +237,7 @@ namespace Assets.Script.DynamicCards
             surface.rectTransform.offsetMin = Vector2.zero; surface.rectTransform.offsetMax = Vector2.zero;
             surface.texture = texture;
             surface.uvRect = DynamicCardFraming.ArtRegion(entry);
+            AlignPreviewPortrait();
             if (miniature)
             {
                 surface.rectTransform.anchorMin = Vector2.zero; surface.rectTransform.anchorMax = Vector2.one;
@@ -244,6 +262,17 @@ namespace Assets.Script.DynamicCards
             renderCamera.Render();
             surface.enabled = true;
             if (presentation != null) presentation.Reveal(true);
+        }
+
+        private void AlignPreviewPortrait()
+        {
+            if (!preview || miniature || surface == null || portraitFrame == null) return;
+            // The collection card's 100-wide frame has a 2-unit top inset. The detail
+            // prefab uses different padding; align the visible art without changing its camera.
+            surface.rectTransform.GetWorldCorners(corners);
+            float top = portraitFrame.InverseTransformPoint(corners[1]).y;
+            float desired = portraitFrame.rect.yMax - portraitFrame.rect.width * .02f;
+            surface.rectTransform.position += portraitFrame.TransformVector(new Vector3(0, desired - top, 0));
         }
 
         private void UpdateThumbnailFraming()
@@ -288,6 +317,7 @@ namespace Assets.Script.DynamicCards
             ApplyCut();
             if (effects != null) effects.Tick(age);
             if (presentation != null) presentation.Tick();
+            AlignPreviewPortrait();
             if(sourceControllers!=null)sourceControllers.Tick(age,Time.unscaledDeltaTime,pitch,yaw);
             surface.color = art.color;
             // Thumbnail textures need fewer redraws; each card has its own phase to spread camera work.
