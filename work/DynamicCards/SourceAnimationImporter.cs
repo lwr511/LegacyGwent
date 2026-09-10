@@ -20,7 +20,7 @@ public static class SourceAnimationImporter
     [Serializable] class Clip { public string name,file; public float duration; public int frames,columns; public Track[] tracks; public PointerTrack[] pointerTracks; }
     [Serializable] class PointerTrack {public string path;public int slot;public PointerKey[] keys;}
     [Serializable] class PointerKey {public float time;public string asset;}
-    [Serializable] class Track { public string path; public uint attribute; public int offset,dimension,typeId; public bool optional; }
+    [Serializable] class Track { public string path; public uint attribute; public int offset,dimension,typeId,rotationOrder; public bool optional,hasRotationOrder; }
     [Serializable] class Conversion { public string id;public int particles;public MaterialInfo[] materials;public AnimationInfo[] animations; }
     [Serializable] class MaterialInfo { public string asset,originalName,shader; }
     [Serializable] class AnimationInfo {public string path,intro,loop; public float introDuration;}
@@ -34,7 +34,7 @@ public static class SourceAnimationImporter
         AssetDatabase.StartAssetEditing();
         try
         {
-        foreach(var group in doc.animators.GroupBy(r=>r.id))
+        foreach(var group in doc.animators.GroupBy(r=>new { r.id, r.path }).Select(records=>records.Last()).GroupBy(r=>r.id))
         {
             var args=Environment.GetCommandLineArgs();int filter=Array.IndexOf(args,"-repairCards");
             if(filter>=0 && !args[filter+1].Split(',').Contains(group.Key))continue;
@@ -90,17 +90,27 @@ public static class SourceAnimationImporter
                     var imported=new Dictionary<string,AnimationClip>();
                     foreach(var clip in record.clips)
                     {
-                        if(clip.duration<=0)continue;
-                        if(Environment.GetCommandLineArgs().Contains("-controllersOnly"))
+                        if(clip.duration<0)throw new InvalidOperationException(record.id+": negative source clip duration");
+                        if(Environment.GetCommandLineArgs().Contains("-controllersOnly") || Environment.GetEnvironmentVariable("DYNAMIC_ANIMATION_CONTROLLERS_ONLY")=="1")
                         {
                             var saved=AssetDatabase.LoadAssetAtPath<AnimationClip>(folder+"/"+controllerName+"_"+Safe(clip.name)+".anim");
                             if(saved!=null){imported[clip.name]=saved;continue;}
                         }
                         var bytes=File.ReadAllBytes(data+"/"+clip.file);var values=new float[bytes.Length/4];Buffer.BlockCopy(bytes,0,values,0,bytes.Length);
-                        var animation=new AnimationClip{name=clip.name,frameRate=(clip.frames-1)/clip.duration};
+                        var animation=new AnimationClip{name=clip.name,frameRate=clip.duration>0?(clip.frames-1)/clip.duration:30};
                         EditorCurveBinding lastBinding=default(EditorCurveBinding);AnimationCurve lastCurve=null;
                         foreach(var track in clip.tracks)
                         {
+                            // Avatar paths can omit a wrapper retained by the scene exporter.
+                            // Restore only an unambiguous complete hierarchy suffix, including
+                            // optional avatar bones; their presence must not discard animation.
+                            if(track.path!="" && anchor.Find(track.path)==null)
+                            {
+                                var suffix=anchor.GetComponentsInChildren<Transform>(true)
+                                    .Where(t=>AnimationUtility.CalculateTransformPath(t,anchor).EndsWith("/"+track.path,StringComparison.Ordinal))
+                                    .Where(t=>t.GetComponentsInParent<Animator>(true).All(a=>a.transform==anchor || !a.transform.IsChildOf(anchor))).ToArray();
+                                if(suffix.Length==1)track.path=AnimationUtility.CalculateTransformPath(suffix[0],anchor);
+                            }
                             if(track.path!="" && anchor.Find(track.path)==null && !track.optional)
                             {
                                 string leaf=track.path.Split('/').Last();
@@ -128,12 +138,12 @@ public static class SourceAnimationImporter
                             for(int component=0;component<track.dimension;component++)
                             {
                                 var keys=new List<Keyframe>();
-                                for(int i=0;i<clip.frames;i++)
+                                for(int i=0;i<(clip.duration>0?clip.frames:1);i++)
                                 {
                                     float value=values[i*clip.columns+track.offset+component];
                                     float before=values[Math.Max(0,i-1)*clip.columns+track.offset+component],after=values[Math.Min(clip.frames-1,i+1)*clip.columns+track.offset+component];
                                     if(i>0 && i<clip.frames-1 && Mathf.Abs(value-before)<.000001f && Mathf.Abs(value-after)<.000001f)continue;
-                                    float step=clip.duration/(clip.frames-1);
+                                    float step=clip.duration>0?clip.duration/(clip.frames-1):1;
                                     keys.Add(new Keyframe(i*step,value,(value-before)/step,(after-value)/step));
                                 }
                                 lastBinding=EditorCurveBinding.FloatCurve(track.path,curveType,track.typeId==0?property+"."+"xyzw"[component]:property);lastCurve=Compact(keys,track.attribute==2?.00005f:.0001f);
@@ -144,9 +154,12 @@ public static class SourceAnimationImporter
                         }
                         if(lastCurve==null)
                         {
+                            if(clip.tracks.Any(t=>t.optional && t.typeId==0 && t.path!="" && !t.path.StartsWith("InfoHolderRoot",StringComparison.Ordinal)) &&
+                               anchor.GetComponentsInChildren<SkinnedMeshRenderer>(true).Any(skin=>skin.sharedMesh!=null && skin.sharedMesh.bindposes.Length>0))
+                                throw new InvalidOperationException(record.id+": source bone tracks did not bind to the skinned actor. Restore its source Avatar hierarchy before importing "+clip.name);
                             var clock=anchor.Find("__SourceClipClock");if(clock==null){clock=new GameObject("__SourceClipClock").transform;clock.SetParent(anchor,false);}
                             lastBinding=EditorCurveBinding.FloatCurve("__SourceClipClock",typeof(Transform),"m_LocalPosition.x");
-                            lastCurve=AnimationCurve.Constant(0,clip.duration,0);
+                            lastCurve=clip.duration>0?AnimationCurve.Constant(0,clip.duration,0):new AnimationCurve(new Keyframe(0,0));
                         }
                         AnimationUtility.SetEditorCurve(animation,lastBinding,lastCurve);
                         foreach(var pointer in clip.pointerTracks ?? new PointerTrack[0])
@@ -158,6 +171,7 @@ public static class SourceAnimationImporter
                             if(keys.Any(k=>k.value==null))throw new InvalidOperationException(record.id+": missing animated material");
                             AnimationUtility.SetObjectReferenceCurve(animation,EditorCurveBinding.PPtrCurve(pointer.path,renderer.GetType(),"m_Materials.Array.data["+pointer.slot+"]"),keys);
                         }
+                        PreserveSourceEulerOrders(animation,clip);
                         animation.EnsureQuaternionContinuity();
                         // Quaternion continuity can smooth the vector tangents across a held pose.
                         // Restore per-component linear interpolation after continuity so sparse
@@ -337,5 +351,21 @@ public static class SourceAnimationImporter
         }
         return new AnimationCurve(compact);
     }
+    private static void PreserveSourceEulerOrders(AnimationClip animation, Clip source)
+    {
+        var serialized = new SerializedObject(animation);
+        var curves = serialized.FindProperty("m_EulerCurves");
+        for (int i = 0; i < curves.arraySize; i++)
+        {
+            var curve = curves.GetArrayElementAtIndex(i);
+            string path = curve.FindPropertyRelative("path").stringValue;
+            var track = source.tracks.LastOrDefault(t => t.typeId == 0 && t.attribute == 4 && t.path == path);
+            if (track == null || !track.hasRotationOrder || track.rotationOrder < 0 || track.rotationOrder > 5)
+                throw new InvalidOperationException(source.name + ": missing source Euler rotation order for " + path + ". Decode the source animation again before importing.");
+            curve.FindPropertyRelative("curve.m_RotationOrder").intValue = track.rotationOrder;
+        }
+        serialized.ApplyModifiedPropertiesWithoutUndo();
+    }
+
     private static string Safe(string name){return new string(name.Select(c=>char.IsLetterOrDigit(c)||c=='_'||c=='-'?c:'_').ToArray());}
 }

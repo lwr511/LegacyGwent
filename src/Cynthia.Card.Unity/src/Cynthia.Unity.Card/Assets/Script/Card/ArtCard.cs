@@ -69,7 +69,7 @@ public class ArtCard : MonoBehaviour
         // This is the hover/detail portrait, not a card in the progressively loaded grid.
         Assets.Script.DynamicCards.DynamicCardView.Bind(CardImg, CurrentCore.CardArtsId,
             CurrentCore.IsCardBack || CurrentCore.Conceal, largePreview: true, playPreviewAudio: false,
-            presentationRoot: (RectTransform)transform);
+            presentationRoot: (RectTransform)transform, portraitBorder: CardBorder.rectTransform);
         Content.gameObject.SetActive(!(_currentCore.IsCardBack || _currentCore.Conceal));
         var iconCount = 0;
         var use = this.GetComponent<CardMoveInfo>();
@@ -77,8 +77,12 @@ public class ArtCard : MonoBehaviour
             use.CardUseInfo = CardInfo.CardUseInfo;
         if (CurrentCore.CardArtsId != null)
         {
-            Addressables.LoadAssetAsync<Sprite>(CurrentCore.CardArtsId).Completed += (obj) =>
+            var requestedArt = CurrentCore.CardArtsId;
+            Addressables.LoadAssetAsync<Sprite>(requestedArt).Completed += (obj) =>
             {
+                // A hover request can finish after another card was selected or this page closed.
+                if (this == null || CardImg == null || _currentCore == null ||
+                    _currentCore.CardArtsId != requestedArt || obj.Result == null) return;
                 CardImg.sprite = obj.Result;
             };
             // CardImg.sprite = Addressables.LoadAssetAsync<Sprite>(CurrentCore.CardArtsId).WaitForCompletion();

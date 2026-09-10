@@ -42,7 +42,9 @@ for obj in objects():
  for ref in c['m_AnimationClips']:
   sourceClip=PPtr(m_FileID=ref['m_FileID'],m_PathID=ref['m_PathID'],assetsfile=co.assets_file).deref() if ref['m_PathID'] else None
   name=sourceClip.read().m_Name if sourceClip else ''
-  candidate=next((v for v in r['clips'] if sourceClip and v['file']==r['id']+'_'+str(sourceClip.path_id)+'.bin'),None)
+  candidates=[v for v in r['clips'] if sourceClip and Path(v['file']).stem.rsplit('_',1)[-1]==str(sourceClip.path_id)]
+  if sourceClip and len(candidates)!=1:raise RuntimeError('Unresolved source clip identity: '+r['id']+' '+r['path']+' '+str(sourceClip.path_id))
+  candidate=candidates[0] if candidates else None
   clips.append(candidate['name'] if candidate else '')
  r['layers']=[]
  for index,layer in enumerate(c['m_Controller']['m_LayerArray']):

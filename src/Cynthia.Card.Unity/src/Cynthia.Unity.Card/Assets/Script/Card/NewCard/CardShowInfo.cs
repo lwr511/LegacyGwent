@@ -126,8 +126,12 @@ public class CardShowInfo : MonoBehaviour
         {
             if (asyncLoadAsset)
             {
-                Addressables.LoadAssetAsync<Sprite>(CurrentCore.CardArtsId).Completed += (obj) =>
+                var requestedArt = CurrentCore.CardArtsId;
+                Addressables.LoadAssetAsync<Sprite>(requestedArt).Completed += (obj) =>
                 {
+                    // Scroll/filter replacement can destroy or rebind this card before loading ends.
+                    if (this == null || CardImg == null || _currentCore == null ||
+                        _currentCore.CardArtsId != requestedArt || obj.Result == null) return;
                     CardImg.sprite = obj.Result;
                 };
             }
