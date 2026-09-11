@@ -14439,7 +14439,9 @@
     },
     {
       "id": "16580100",
-      "artIds": [],
+      "artIds": [
+        "c10000100"
+      ],
       "prefab": "Assets/DynamicCards/Content/Old/Thronebreaker/16580100/Card.prefab",
       "audio": "Assets/DynamicCards/Content/Old/Thronebreaker/Audio/744918561.wav",
       "pivot": "16580100/Pivot",
@@ -14807,9 +14809,7 @@
     },
     {
       "id": "11210701",
-      "artIds": [
-        "11210700"
-      ],
+      "artIds": [],
       "prefab": "Assets/DynamicCards/Content/Old/Legacy2017/11210701/Card.prefab",
       "audio": "Assets/DynamicCards/Content/Old/Legacy2017/Audio/182187197.wav",
       "pivot": "11210701/Pivot",
@@ -16216,9 +16216,7 @@
     },
     {
       "id": "11310101",
-      "artIds": [
-        "11310100"
-      ],
+      "artIds": [],
       "prefab": "Assets/DynamicCards/Content/Old/Legacy2017/11310101/Card.prefab",
       "audio": "Assets/DynamicCards/Content/Old/Legacy2017/Audio/152867968.wav",
       "pivot": "11310101/Pivot",
@@ -38731,6 +38729,82 @@
       "jiggles": [],
       "sourceVersion": "Latest",
       "sourceId": "56180101"
+    },
+    {
+      "id": "10400101",
+      "artIds": [
+        "11310100"
+      ],
+      "prefab": "Assets/DynamicCards/Content/Latest/10400101/Card.prefab",
+      "audio": "Assets/DynamicCards/Content/Latest/Audio/715479366.wav",
+      "pivot": "10400101/Pivot",
+      "fieldOfView": 24.999996185302734,
+      "cameraDistance": -23.0,
+      "nearClip": 1.0,
+      "farClip": 250.0,
+      "xStart": -6.0,
+      "xEnd": 6.0,
+      "yStart": -2.0,
+      "yEnd": 2.0,
+      "introDuration": 0,
+      "loopDuration": 9.566666603088379,
+      "cutTime": -1,
+      "particleEvents": [],
+      "uvMotions": [],
+      "topMargin": 0,
+      "transformPairs": [
+        {
+          "source": "10400101/Pivot/model/RaghNarRogg_Rig_RaghNarRogg_Wrist_AuxSHJnt",
+          "target": "10400101/Pivot/VFX/VFX_Bones/bone_RaghNarRogg_Rig_RaghNarRogg_Wrist_AuxSHJnt"
+        }
+      ],
+      "viewMotions": [],
+      "jiggles": [],
+      "sourceVersion": "Latest",
+      "sourceId": "10400101"
+    },
+    {
+      "id": "10130101",
+      "artIds": [
+        "11210700"
+      ],
+      "prefab": "Assets/DynamicCards/Content/Latest/10130101/Card.prefab",
+      "audio": "Assets/DynamicCards/Content/Latest/Audio/935749902.wav",
+      "pivot": "10130101/Pivot",
+      "fieldOfView": 25.600000381469727,
+      "cameraDistance": -30.899999618530273,
+      "nearClip": 10.0,
+      "farClip": 150.0,
+      "xStart": -6.0,
+      "xEnd": 6.0,
+      "yStart": -2.0,
+      "yEnd": 2.0,
+      "introDuration": 0,
+      "loopDuration": 9.166666984558105,
+      "cutTime": -1,
+      "particleEvents": [],
+      "uvMotions": [],
+      "topMargin": 0,
+      "transformPairs": [],
+      "viewMotions": [
+        {
+          "path": "10130101/Pivot/VFX/VFX_Main/Lens Post FX",
+          "property": "_Mask",
+          "materialIndex": 0,
+          "kind": 0,
+          "xRange": {
+            "x": -0.15000000596046448,
+            "y": 0.15000000596046448
+          },
+          "yRange": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        }
+      ],
+      "jiggles": [],
+      "sourceVersion": "Latest",
+      "sourceId": "10130101"
     }
   ]
 }

@@ -209,6 +209,9 @@ namespace Assets.Script.DynamicCards
                 + (miniature ? DynamicCardFraming.AppearanceOffset : Vector3.zero);
             renderCamera = cameraObject.AddComponent<Camera>();
             renderCamera.enabled = false;
+            var originalPostEffects = model.GetComponentsInChildren<DynamicCardPostEffect>(true);
+            if (originalPostEffects.Length != 0)
+                cameraObject.AddComponent<DynamicCardPostProcessRenderer>().Effects = originalPostEffects;
             renderCamera.fieldOfView = entry.fieldOfView;
             renderCamera.nearClipPlane = entry.nearClip;
             renderCamera.farClipPlane = entry.farClip;

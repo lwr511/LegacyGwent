@@ -1,0 +1,1 @@
+using System.Linq;using UnityEngine;public static class MotionWork { public static void Run(){var e=Resources.FindObjectsOfTypeAll<EditorInfo>().First(x=>x.gameObject.scene.IsValid());e.LeftSwitchMenu.anchoredPosition=new Vector2(-1700,0);e.RightSwitchMenu.anchoredPosition=new Vector2(1700,0);} }
