@@ -18,7 +18,7 @@ namespace Assets.Script.DynamicCards.Editor
             public Assignment[] textureAssignments;
         }
         [Serializable] private class SourceMaterial { public string asset, originalName; }
-        [Serializable] private class Assignment { public string material, texture; public string[] properties; }
+        [Serializable] private class Assignment { public string material, materialAsset, texture; public string[] properties; }
 
         // A material name is not unique: source scenes often contain several instances.
         // Validate every live instance against the recorded source texture assignments.
@@ -45,7 +45,8 @@ namespace Assets.Script.DynamicCards.Editor
                 if (source == null || string.IsNullOrEmpty(source.atlas) || source.materials == null || source.textureAssignments == null) continue;
                 HashSet<string> dependencies = null;
                 foreach (var assignment in source.textureAssignments)
-                foreach (var item in source.materials.Where(m => m.originalName == assignment.material && File.Exists(m.asset)))
+                foreach (var item in source.materials.Where(m => m.originalName == assignment.material &&
+                    (string.IsNullOrEmpty(assignment.materialAsset) || assignment.materialAsset == m.asset) && File.Exists(m.asset)))
                 {
                     // Most bindings can be checked without loading their large textures.
                     string yaml = File.ReadAllText(item.asset);

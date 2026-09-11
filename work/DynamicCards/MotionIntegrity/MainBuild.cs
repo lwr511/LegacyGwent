@@ -1,0 +1,2 @@
+using System;using System.IO;using UnityEditor;using Assets.Script.DynamicCards.Editor;
+public static class MotionWork { public static void Run() { try { var result=DynamicCardBuild.BuildBundle(BuildTarget.StandaloneWindows64);File.WriteAllText(@"C:/UnityProjects/LegacyGwent/work/DynamicCards/MotionIntegrity/main-build-result.txt", "OK "+result); } catch(Exception e) {File.WriteAllText(@"C:/UnityProjects/LegacyGwent/work/DynamicCards/MotionIntegrity/main-build-result.txt",e.ToString());throw;} } }

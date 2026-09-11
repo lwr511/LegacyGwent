@@ -6,6 +6,21 @@ project.lock.json
 .DS_Store
 *.pyc
 
+# Generated files from opening the repository root as a Unity project.
+/Library/
+/Logs/
+/Temp/
+/Builds/
+/Packages/
+/ProjectSettings/
+/assets/*.meta
+
+# Generated player payload and Addressables build state (retain locally for migration).
+/src/Cynthia.Card.Unity/src/Cynthia.Unity.Card/Assets/StreamingAssets/
+/src/Cynthia.Card.Unity/src/Cynthia.Unity.Card/Assets/StreamingAssets.meta
+/src/Cynthia.Card.Unity/src/Cynthia.Unity.Card/Assets/AddressableAssetsData/Windows/
+/src/Cynthia.Card.Unity/src/Cynthia.Unity.Card/Assets/AddressableAssetsData/Windows.meta
+
 # User-specific files
 *.suo
 *.user

@@ -1,0 +1,15 @@
+using System;using System.IO;using System.Linq;using System.Reflection;using System.Collections.Generic;using UnityEditor;using UnityEngine;using Assets.Script.DynamicCards;using Assets.Script.DynamicCards.Editor;
+[InitializeOnLoad]public static class AdditionalTimingRunner {
+ const string Work="C:/UnityProjects/LegacyGwent/work/DynamicCards/TimingRepair/";static bool busy;
+ static AdditionalTimingRunner(){EditorApplication.update+=Tick;}
+ static void Tick(){if(busy||EditorApplication.isCompiling||EditorApplication.isUpdating||File.Exists(Work+"additional-delivery-result.txt"))return;if(EditorApplication.isPlaying){EditorApplication.isPlaying=false;return;}busy=true;
+ try{File.WriteAllText(Work+"additional-progress.txt","IMPORT "+DateTime.UtcNow);AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+ foreach(var kind in new[]{"Native","Legacy"}){Environment.SetEnvironmentVariable("DYNAMIC_ANIMATION_DATA",Work+"Additional"+kind);Environment.SetEnvironmentVariable("DYNAMIC_ANIMATION_CONTENT","Assets/DynamicCards/Content/Old/"+(kind=="Native"?"Thronebreaker":"Legacy2017"));SourceAnimationImporter.Run();}
+ AssetDatabase.SaveAssets();File.WriteAllText(Work+"additional-progress.txt","BUILD "+DateTime.UtcNow);string dir="Library/DynamicCardsBundles/StandaloneWindows64";var type=typeof(DynamicCardBundleBuilder);type.GetMethod("LoadSourceCache",BindingFlags.NonPublic|BindingFlags.Static).Invoke(null,new object[]{dir});var hashes=new Dictionary<string,string>();
+ var index=JsonUtility.FromJson<DynamicCardBundleIndex>(File.ReadAllText(dir+"/cards.index.json"));var catalog=JsonUtility.FromJson<DynamicCardCatalog>(File.ReadAllText(DynamicCardLibrary.CatalogAsset));
+ foreach(var part in index.parts.Where(part=>part.prefabs.Any(path=>path.Contains("/15660100/")||path.Contains("/13221601/")))){var assets=part.prefabs.Select(path=>catalog.cards.Single(c=>c.prefab==path)).SelectMany(c=>new[]{c.prefab,c.audio}).Where(s=>!string.IsNullOrEmpty(s)).Distinct().ToArray();type.GetMethod("BuildOne",BindingFlags.NonPublic|BindingFlags.Static).Invoke(null,new object[]{dir,part.file,assets,part.prefabs,BuildTarget.StandaloneWindows64,hashes});}
+ File.WriteAllText(dir+"/content.hash",(string)typeof(DynamicCardBuild).GetMethod("ContentHash",BindingFlags.Static|BindingFlags.NonPublic).Invoke(null,null));File.WriteAllText(Work+"additional-progress.txt","MANIFEST "+DateTime.UtcNow);
+ using(var proc=System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("C:/Program Files/Python312/python.exe","\""+Work+"write_manifest.py\""){UseShellExecute=false,CreateNoWindow=true,WorkingDirectory=Directory.GetCurrentDirectory()})){proc.WaitForExit();if(proc.ExitCode!=0)throw new Exception("manifest failed");}
+ File.WriteAllText(dir+"/cards.bundle.editor-ready",DateTime.UtcNow.ToString("O"));File.WriteAllText(Work+"additional-delivery-result.txt","PASS "+DateTime.UtcNow);
+ }catch(Exception e){File.WriteAllText(Work+"additional-delivery-result.txt","FAIL "+e);Debug.LogException(e);}finally{Environment.SetEnvironmentVariable("DYNAMIC_ANIMATION_DATA",null);Environment.SetEnvironmentVariable("DYNAMIC_ANIMATION_CONTENT",null);}}
+}
