@@ -1,0 +1,28 @@
+{
+  "complete": true,
+  "exitCode": 0,
+  "checkedUtc": "2026-09-12T09:45:30.630905+00:00",
+  "method": "Unity-bundled Roslyn compilation against Unity 2019.4 and current project assemblies; no Unity UI input",
+  "files": [
+    {
+      "path": "C:\\UnityProjects\\LegacyGwent\\src\\Cynthia.Card.Unity\\src\\Cynthia.Unity.Card\\Assets\\Editor\\CompleteMotionGameUiAudit.cs",
+      "sha256": "d75db7bccce5d293330bb1e57bace25b2a1b70e4224759f45cd71350e8e63d4b"
+    },
+    {
+      "path": "C:\\UnityProjects\\LegacyGwent\\src\\Cynthia.Card.Unity\\src\\Cynthia.Unity.Card\\Assets\\Editor\\LandsknechtMotionProbe.cs",
+      "sha256": "51bf89009d6809518a9ed2306baa4f67707114db0dafd019bda34700a2b7bee7"
+    },
+    {
+      "path": "C:\\UnityProjects\\LegacyGwent\\src\\Cynthia.Card.Unity\\src\\Cynthia.Unity.Card\\Assets\\Editor\\RotationRepairDelivery.cs",
+      "sha256": "67650783b0b5b2fd545defeb129ee2516758f946261d2ee663ba6b5b61de7a05"
+    },
+    {
+      "path": "C:\\UnityProjects\\LegacyGwent\\work\\DynamicCards\\SourceAnimationImporter.cs",
+      "sha256": "64db591b32ec4a9cf09ed8e1ffc45dbc0f03e7b46b8f48d6f3530f2532c90428"
+    },
+    {
+      "path": "C:\\UnityProjects\\LegacyGwent\\work\\DynamicCards\\LandsknechtAcceptance-20260912\\BatchRotationRepair.cs",
+      "sha256": "3b22b5b907d2120325199e11d61a64fb6c244f334c460d8b61afdd7746f90b04"
+    }
+  ]
+}

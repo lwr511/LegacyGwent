@@ -405,3 +405,4 @@
 !/LocalServer/global.json
 !/path-extract.ps1
 !/DynamicCards/.gitignore
+!/DynamicCards/LandsknechtAcceptance-20260912/

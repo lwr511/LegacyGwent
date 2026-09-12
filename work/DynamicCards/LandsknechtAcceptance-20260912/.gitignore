@@ -1,0 +1,13 @@
+# Keep this round's source tools and compact evidence; large local assets stay ignored.
+*
+!.gitignore
+!*.py
+!BatchRotationRepair.cs
+!RotationBundleSmoke.cs
+!RESULTS.md
+!闪卡旋转修复离线验收记录-20260912.md
+!rotation-repair-ready-manifest.json
+!post-rotation-delivery-verification.json
+!staged-rotation-verification.json
+!lyrian-actual-source-pose-comparison.json
+!closeout-compile-verification.json
