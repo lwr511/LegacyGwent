@@ -6,7 +6,8 @@ namespace Assets.Script.DynamicCards
     [Serializable]
     public sealed class DynamicCardBundleIndex
     {
-        public int version = 1;
+        public const int CurrentVersion = 2;
+        public int version = CurrentVersion;
         public DynamicCardBundlePart[] parts;
     }
 
@@ -15,6 +16,7 @@ namespace Assets.Script.DynamicCards
     {
         public string file;
         public string[] prefabs;
+        public int animationControllers;
     }
 
     [Serializable]

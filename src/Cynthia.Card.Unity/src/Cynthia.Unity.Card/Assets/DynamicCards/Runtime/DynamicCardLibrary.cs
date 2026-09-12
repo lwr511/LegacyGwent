@@ -13,6 +13,15 @@ namespace Assets.Script.DynamicCards
         public const string CatalogAsset = ContentRoot + "catalog.json";
         public const string BundleFile = "cards.bundle";
         public const string BundleIndexFile = "cards.index.json";
+#if UNITY_EDITOR
+        // Source prefabs can stall Unity's main thread for seconds. Keep that path
+        // available for content authoring, but never enter it implicitly in the game UI.
+        public static bool AllowEditorSourceLoading
+        {
+            get { return UnityEditor.EditorPrefs.GetBool("LegacyGwent.DynamicCards.SourceLoading." + Application.dataPath, false); }
+            set { UnityEditor.EditorPrefs.SetBool("LegacyGwent.DynamicCards.SourceLoading." + Application.dataPath, value); }
+        }
+#endif
         private static DynamicCardLibrary instance;
         private readonly Dictionary<string, DynamicCardEntry> entries = new Dictionary<string, DynamicCardEntry>();
         private AssetBundle bundle;
@@ -22,6 +31,10 @@ namespace Assets.Script.DynamicCards
             public string File;
             public AssetBundle Bundle;
             public int Leases;
+            public int ExpectedControllers;
+            public bool Opening;
+            public RuntimeAnimatorController[] Controllers;
+            public AnimationClip[] Clips;
             public readonly Dictionary<string, GameObject> Prefabs = new Dictionary<string, GameObject>();
             public readonly Dictionary<string, AudioClip> Audio = new Dictionary<string, AudioClip>();
         }
@@ -118,7 +131,7 @@ namespace Assets.Script.DynamicCards
                 // retain unrelated packages accumulated while browsing the collection.
                 foreach (var part in parts.Values)
                     if (part.Leases == 0 && part.Bundle != null)
-                    { part.Prefabs.Clear(); part.Audio.Clear(); part.Bundle.Unload(true); part.Bundle = null; }
+                    { part.Prefabs.Clear(); part.Audio.Clear(); part.Controllers = null; part.Clips = null; part.Bundle.Unload(true); part.Bundle = null; }
                 yield return Resources.UnloadUnusedAssets();
             }
             finally { lastCollection = Time.realtimeSinceStartup; collecting = false; }
@@ -163,8 +176,7 @@ namespace Assets.Script.DynamicCards
             {
                 if(bundle!=null)
                 {
-                    if (part != null && part.Bundle == null)
-                        yield return OpenBundle(part.File, loadedBundle => part.Bundle = loadedBundle);
+                    if (part != null) yield return OpenPart(part);
                     var owner = part == null ? bundle : part.Bundle;
                     if (owner != null)
                     {
@@ -226,9 +238,14 @@ namespace Assets.Script.DynamicCards
             }
             if (bundle == null)
             {
-                Debug.LogWarning("Dynamic cards are loading directly from editor assets because the verified package cache is unavailable. Rebuild packages through Tools > Dynamic Cards > Build Options to restore asynchronous page loading.");
-                var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(CatalogAsset);
-                if (asset != null) json = asset.text;
+                if (AllowEditorSourceLoading)
+                {
+                    Debug.LogWarning("Dynamic cards: source asset loading was explicitly enabled for content development. Synchronous reads may stall the editor. Rebuild packages through Tools > Dynamic Cards > Build Options for asynchronous page loading.");
+                    var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(CatalogAsset);
+                    if (asset != null) json = asset.text;
+                }
+                else
+                    Debug.LogWarning("Dynamic card package cache is missing or outdated; static art remains active to avoid synchronous editor stalls. Rebuild through Tools > Dynamic Cards > Build Options > 仅构建动态卡资源包, then restart Play Mode.");
                 yield return null;
             }
 #else
@@ -257,12 +274,13 @@ namespace Assets.Script.DynamicCards
                 if (!string.IsNullOrEmpty(indexJson))
                 {
                     var index = JsonUtility.FromJson<DynamicCardBundleIndex>(indexJson);
-                    if (index == null || index.version != 1 || index.parts == null) throw new InvalidDataException("Invalid dynamic card bundle index.");
+                    if (index == null || index.version != DynamicCardBundleIndex.CurrentVersion || index.parts == null)
+                        throw new InvalidDataException("Dynamic card packages need rebuilding with animation dependencies (index v2).");
                     foreach (var item in index.parts)
                     {
                         if (Path.GetFileName(item.file) != item.file || !item.file.StartsWith("cards-") || !item.file.EndsWith(".bundle"))
                             throw new InvalidDataException("Invalid dynamic card part filename.");
-                        var part = new Part { File = item.file }; parts.Add(item.file, part);
+                        var part = new Part { File = item.file, ExpectedControllers = item.animationControllers }; parts.Add(item.file, part);
                         foreach (var prefab in item.prefabs) prefabParts.Add(prefab, part);
                     }
                 }
@@ -278,6 +296,42 @@ namespace Assets.Script.DynamicCards
             failed = !loaded;
             loading = false;
             if (failed) Debug.LogWarning("Dynamic card content is unavailable; static card art remains active.");
+        }
+
+        private IEnumerator OpenPart(Part part)
+        {
+            while (part.Opening) yield return null;
+            if (part.Bundle != null) yield break;
+            part.Opening = true;
+            try
+            {
+                yield return OpenBundle(part.File, result => part.Bundle = result);
+                if (part.Bundle == null) yield break;
+                // Unity 2019 can lose the state graphs of deferred controller dependencies
+                // after an asset refresh. Load the explicitly indexed animation roots before
+                // the first prefab, and retain them for the same lifetime as their package.
+                // Models, textures and audio still load only when a card requests them.
+                var request = part.Bundle.LoadAllAssetsAsync<RuntimeAnimatorController>();
+                yield return request;
+                var controllers = new List<RuntimeAnimatorController>();
+                var clips = new HashSet<AnimationClip>();
+                foreach (var asset in request.allAssets)
+                {
+                    var controller = asset as RuntimeAnimatorController;
+                    if (controller == null) continue;
+                    controllers.Add(controller);
+                    foreach (var clip in controller.animationClips) if (clip != null) clips.Add(clip);
+                }
+                if (controllers.Count != part.ExpectedControllers)
+                {
+                    Debug.LogError("Dynamic card package animation dependencies are incomplete: " + part.File + ". Rebuild the packages.");
+                    part.Bundle.Unload(true); part.Bundle = null;
+                    yield break;
+                }
+                part.Controllers = controllers.ToArray();
+                part.Clips = new AnimationClip[clips.Count]; clips.CopyTo(part.Clips);
+            }
+            finally { part.Opening = false; }
         }
 
         private IEnumerator OpenBundle(string file, Action<AssetBundle> complete)

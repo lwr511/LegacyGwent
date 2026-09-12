@@ -4,7 +4,7 @@
 
 ## 内容与覆盖范围
 
-当前使用三个来源：255 个《王权的陨落》场景、325 个旧 GWENT 场景和 158 个新版 GWENT 补缺场景，共 738 个场景。669 个唯一卡图映射中，650 个属于项目现有的 671 个游戏卡图。其余 21 个保留静态：5 个被源 ArtDefinition 明确禁用闪卡，另外 16 个属于自定义卡图或在三个来源中未找到精确对应的动态素材；不以相近编号替代不同画面。
+2026-09-12 当前素材目录共 740 个场景（Thronebreaker 255、Legacy2017 324、Latest 161），670 个唯一卡图映射中，651 个属于现有的 671 个游戏卡图。其余 20 个保持静态，具体范围见 `work/DynamicCards/RuntimeStability-20260912/static-card-scope.csv`。
 
 `Content/catalog.json` 保存唯一对应关系。素材集中在 `Content/Old/Thronebreaker`、`Content/Old/Legacy2017` 和 `Content/Latest`；`sourceVersion` 记录来源，`sourceId` 保留源动画根节点编号。旧版优先，缺失的卡图从新版备份补回。打包器验证三个来源目录、重复映射、蒙皮骨骼、纹理属性绑定和源文件明确不参与绘制的空材质辅助表面。
 
@@ -19,6 +19,12 @@
 独立 Unity 运行验证使用正式运行脚本与上述完整缓存，从 17 个分包抽取 20 张卡：整页 2.762 秒，加载中打开已就绪小卡的大卡 13.2 毫秒，P95 帧时间 17.4 毫秒，最大 56.0 毫秒（1 帧超过 50 毫秒）。小卡继续播放、后台加载及离页释放通过；这不是完整收藏界面的手工验收，也不保证消除全部冷启动长帧。结果见 `work/DynamicCards/OldSourcesStage/performance-result.txt`、`performance-metrics.txt` 和 `delivery-audit-final.json`；实际详情层级及领袖画像播放验证见 `entry-test-result.txt`。本轮未重建玩家程序。
 
 ## 动画与画面
+
+2026-09-13 后续纠正：单独关闭 Tempest 的 `water_front` 会连该表面的流动水纹一起移除，独立浪花覆盖范围不足，导致底部黑洞。当前保持这块固定前景浪形关闭，同时将后方海面的 54 个下部顶点及相应纹理坐标向下延展；`TempestSeaCoverage` 在原图集的有效水域内连续取样，避免直接拉长水纹或采到图集空白。独立 `FoamSplash` 及其边缘渐隐继续播放，船只和其他网格部分保留。换机后依次运行 `python work/DynamicCards/repair_tempest_edges.py --apply`、`python work/DynamicCards/repair_tempest_water_coverage.py --apply`，再重建动态卡资源包。分层证据及验证记录见 `work/DynamicCards/TempestWaterCoverage-20260913`；此前 `TempestWaterOff-20260913` 的黑洞版本已被此修正取代。
+
+2026-09-13：Tempest（70093 / 202203）的前景浪花使用 `TempestFoam`，按 `SheenQuad` 的菱形 UV 边界提前渐隐，避免流动纹理到达斜边时被突然截断。前景水面使用 `TempestWaterSurface`，固定表面透明遮罩并保护无效流动采样；19 个前景顶点的透明度形成柔和上沿，水面和浪花按 3100 / 3101 的顺序合成。这是针对原素材硬边的局部显示调整。换机或重新转换素材后，可运行仓库根目录 `python work/DynamicCards/repair_tempest_edges.py --apply` 备份并应用，再重建动态卡资源包。连续帧对照、正式资源与运行验证记录见 `work/DynamicCards/TempestEdge-20260913`。
+
+2026-09-13：莫斯萨克（Ermion，62004 / 15210300）的三个蒙皮网格恢复 2017 原素材的 `updateWhenOffscreen=false`。此前统一开启该选项会重算包围盒，使透明面部与躯干在部分姿势下交换绘制顺序，表现为脸和胡子被衣服遮住。原始骨骼、动画曲线、材质和包围盒数值均保留。换机后运行仓库根目录 `python work/DynamicCards/repair_ermion_skin_bounds.py --apply` 可备份并恢复这三项设置，然后重建动态卡资源包。诊断与实际画面记录位于 `work/DynamicCards/ErmionTempest-20260912`。
 
 2026-09-11：亨赛特与布罗瓦尔·霍格的背景火焰使用预乘透明混合。四张共享火焰序列图必须关闭 TextureImporter 的 `alphaIsTransparency`，保留 PNG 透明区域的原始 RGB；开启该选项会扩散颜色，使粒子出现细条和矩形色块。贴图名称 `fire_13x5` 的实际内容是 10×10，不能据文件名修改粒子分帧。原图、粒子尺寸/朝向和 DXT5 Crunch 质量 80 均保留。
 
@@ -38,7 +44,7 @@
 
 页面先显示普通卡，等待布局稳定后按从上到下、从左到右的顺序串行加载。滚动和交互期间延后普通队列，大卡预览优先。大卡显示期间，可见小卡仍继续动画、粒子和每秒 24 次的错峰重绘，后续小卡继续按帧耗时调节的间隔加载。离屏卡释放实例，返回时重新排队；预览持有自己的资源租约，不再阻止无关分包回收。每个内容包最多包含 32 个卡牌场景，显示中的卡牌及加载中的请求持有引用；无人使用的包会释放，重新显示时再异步加载。
 
-编辑器优先使用 `Library/DynamicCardsBundles/StandaloneWindows64` 中的异步包：`cards.bundle` 保存目录，`cards.index.json` 指向 `cards-*.bundle`。只有完整生成后才写入 `cards.bundle.editor-ready`。内容或着色器变动会使标记失效；没有有效缓存时回退 AssetDatabase，首次读取仍可能同步停顿。通过 `Tools > Dynamic Cards > Build Options > 仅构建动态卡资源包` 重建缓存，输入未改变的分包会复用，失败后可继续构建。异步加载不能消除 Unity 原生实例化和 GPU 上传的所有主线程开销。
+编辑器优先使用 `Library/DynamicCardsBundles/StandaloneWindows64` 中的异步包：`cards.bundle` 保存目录，`cards.index.json` 指向 `cards-*.bundle`。只有完整生成后才写入 `cards.bundle.editor-ready`。内容或着色器变动会使标记失效，包括资源包生成后的空白字符整理。没有有效缓存时默认保留静态卡，并在 Console 提示重建，避免自动进入会阻塞主线程的 AssetDatabase 加载。通过 `Tools > Dynamic Cards > Build Options > 仅构建动态卡资源包` 重建缓存后重新进入 Play Mode；输入未改变的分包会复用，失败后可继续构建。素材调试时可在同一窗口主动开启“开发用：允许同步读取原资源”，该选项按本机项目保存，默认关闭。异步加载不能消除 Unity 原生实例化和 GPU 上传的所有主线程开销。
 
 ## 可选构建
 
@@ -209,3 +215,9 @@ The unfinished local Android build workspace has been removed and its runtime ex
 维伦特雷坦梅斯（金龙）`11210700` 恢复此前使用的完整 `Latest/10130101` 场景，包括骨骼动画、森林、地面特效与源相机。旧版地面出现大片白色过亮区域；原先新版包的对照播放保留了火焰和地面细节。旧 `11210701` 场景保留为未映射条目，避免改变旧版分包分组。恢复闭包为 38 个缺失资产，现存依赖复用；备份、参考画面与验证位于 `work/DynamicCards/TrissVillenFire-20260911`。
 
 正式缓存构建通过。独立 Unity 2019 进程直接读取主工程新包，完成两卡大小预览 20 次采样、超过 18 秒播放及重新启用验证；骨骼动画正常。特莉丝新包火焰贴图的 1,048,576 个 GPU 像素与正确导入参考完全一致。80 个相关源文件及元数据与缓存清单匹配，28 个交付文件合计 1,745,510,084 字节；未涉及分包的哈希保持不变。详见上述目录 `RESULTS.md` 与 `delivery-audit.json`。
+
+## 2026-09-12：运行时动画依赖稳定性
+
+修复资源刷新后同包中尚未使用的卡牌可能出现控制器片段归零、主体停止而粒子继续的问题。分包显式包含控制器资源，首次打开时异步加载并保留控制器和动画片段，随分包租约一起释放；模型、纹理和声音继续按需加载。索引升级为 v2，旧包需要通过现有构建入口重建。
+
+全量运行覆盖 651 个动态卡图；594 个检测到骨骼运动，其余 57 个检测到画面变化。25 个内容分包加载途中刷新通过；筛选、滚动、卡组编辑、匹配房间、本地实际战场、调度、牌库、己方墓地、详情和关联卡入口通过。相同运行脚本的独立 Windows 程序完成 29 个卡图、57 项检查。完整 Windows 游戏已重建，28 个包文件与验收缓存逐个核对 SHA-256。证据、静态范围及验证边界见 `work/DynamicCards/RuntimeStability-20260912/运行稳定性验收.md`。

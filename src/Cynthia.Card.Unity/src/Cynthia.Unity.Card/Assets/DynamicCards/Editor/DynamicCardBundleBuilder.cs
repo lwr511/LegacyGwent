@@ -90,8 +90,16 @@ namespace Assets.Script.DynamicCards.Editor
                 {
                     var group = cohort.Skip(offset).Take(batchSize).ToArray();
                     var assets = group.SelectMany(c => new[] { c.prefab, c.audio }).Where(p => !string.IsNullOrEmpty(p)).Distinct().ToArray();
+                    // Implicit dependencies cannot be loaded by type from an AssetBundle.
+                    // Explicit roots let the runtime initialize all animation graphs without
+                    // loading the other cards' renderers and textures in this partition.
+                    var controllers = AssetDatabase.GetDependencies(assets, true)
+                        .Where(p => p.EndsWith(".controller", StringComparison.OrdinalIgnoreCase) || p.EndsWith(".overrideController", StringComparison.OrdinalIgnoreCase))
+                        .Distinct().OrderBy(p => p, StringComparer.Ordinal).ToArray();
+                    assets = assets.Concat(controllers).Distinct().ToArray();
                     foreach (var asset in assets) included.Add(asset);
                     var part = new DynamicCardBundlePart { file = "cards-" + source.ToLowerInvariant() + "-" + (offset / batchSize).ToString("000") + ".bundle", prefabs = group.Select(c => c.prefab).ToArray() };
+                    part.animationControllers = controllers.Length;
                     BuildOne(directory, part.file, assets, part.prefabs, target, fileHashes);
                     parts.Add(part);
                     completed += group.Length;
@@ -160,6 +168,8 @@ namespace Assets.Script.DynamicCards.Editor
             {
                 var actual = new HashSet<string>(bundle.GetAllAssetNames().Where(p => p.EndsWith("/card.prefab")), StringComparer.OrdinalIgnoreCase);
                 if (!actual.SetEquals(prefabs)) throw new BuildFailedException("Dynamic card part has incorrect scenes: " + file);
+                var animationRoots = new HashSet<string>(bundle.GetAllAssetNames().Where(IsAnimationController), StringComparer.OrdinalIgnoreCase);
+                if (!animationRoots.SetEquals(assets.Where(IsAnimationController))) throw new BuildFailedException("Dynamic card part has incorrect animation roots: " + file);
             }
             finally { bundle.Unload(true); }
             File.WriteAllText(stamp, hash + ":" + new FileInfo(path).Length);
@@ -169,6 +179,9 @@ namespace Assets.Script.DynamicCards.Editor
             GC.Collect();
         }
 
+        private static bool IsAnimationController(string path)
+        { return path.EndsWith(".controller", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".overrideController", StringComparison.OrdinalIgnoreCase); }
+
         public static string[] PayloadFiles(string directory)
         {
             var names = new List<string> { DynamicCardLibrary.BundleFile };
@@ -176,7 +189,7 @@ namespace Assets.Script.DynamicCards.Editor
             if (File.Exists(indexPath))
             {
                 var index = JsonUtility.FromJson<DynamicCardBundleIndex>(File.ReadAllText(indexPath));
-                if (index == null || index.version != 1 || index.parts == null) throw new BuildFailedException("Invalid dynamic card bundle index.");
+                if (index == null || index.version != DynamicCardBundleIndex.CurrentVersion || index.parts == null) throw new BuildFailedException("Dynamic card packages need rebuilding with animation dependencies (index v2).");
                 names.Add(DynamicCardLibrary.BundleIndexFile);
                 foreach (var part in index.parts)
                 {

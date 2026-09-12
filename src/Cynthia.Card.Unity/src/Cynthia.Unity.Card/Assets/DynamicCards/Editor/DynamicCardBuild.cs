@@ -107,7 +107,7 @@ namespace Assets.Script.DynamicCards.Editor
         {
             var paths = Directory.GetFiles(DynamicCardLibrary.ContentRoot, "*", SearchOption.AllDirectories)
                 .Where(p => !p.EndsWith(".meta")).Select(p => p.Replace('\\', '/')).OrderBy(p => p);
-            var text = string.Join("\n", paths.Select(p => p + ":" + AssetDatabase.GetAssetDependencyHash(p)));
+            var text = "bundle-index-v" + DynamicCardBundleIndex.CurrentVersion + "\n" + string.Join("\n", paths.Select(p => p + ":" + AssetDatabase.GetAssetDependencyHash(p)));
             using (var sha = SHA256.Create()) return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(text)));
         }
 
@@ -165,6 +165,11 @@ namespace Assets.Script.DynamicCards.Editor
                 var path = DynamicCardBuild.BuildBundle(EditorUserBuildSettings.activeBuildTarget);
                 Debug.Log("Dynamic card bundle: " + Path.GetFullPath(path));
             }
+            EditorGUILayout.Space();
+            bool sourceLoading = EditorGUILayout.Toggle("开发用：允许同步读取原资源", DynamicCardLibrary.AllowEditorSourceLoading);
+            if (sourceLoading != DynamicCardLibrary.AllowEditorSourceLoading) DynamicCardLibrary.AllowEditorSourceLoading = sourceLoading;
+            if (sourceLoading)
+                EditorGUILayout.HelpBox("仅用于素材调试：缓存不可用时直接读取工程资源，可能导致收藏界面长时间停顿。修改后重新进入 Play Mode 生效。", MessageType.Warning);
         }
     }
 }
