@@ -4,6 +4,9 @@
 !/.gitignore
 !/DynamicCards/
 /DynamicCards/*
+!/DynamicCards/repair_ermion_skin_bounds.py
+!/DynamicCards/repair_tempest_edges.py
+!/DynamicCards/repair_tempest_water_coverage.py
 !/LocalServer/
 /LocalServer/*
 !/DynamicCards/AguaraRepair-20260911/
