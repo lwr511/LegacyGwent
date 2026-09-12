@@ -1,0 +1,231 @@
+{
+  "complete": true,
+  "sourceAnimation": "NativeAnimationData/15210100_24.bin",
+  "sourceDurationSeconds": 8.0,
+  "recordedFrames": 431,
+  "matchedSourceBoneTracks": 43,
+  "unmatchedBones": [],
+  "sharedClockOffsetSeconds": -1e-06,
+  "clockOffsetSearchBoundSeconds": 0.12,
+  "maxErrorDegrees": 0.009714221992725126,
+  "rmsErrorDegrees": 0.0018662326458861172,
+  "zeroClockOffsetMaxErrorDegrees": 0.009710022895716404,
+  "actualSourcePoseWithinPointOneDegree": true,
+  "bones": [
+    {
+      "bone": "LyrianLandsknechts_Rig_man5_forearmRGT_SHJnt",
+      "maxErrorDegrees": 0.009714221992725126,
+      "rmsErrorDegrees": 0.0039227581150304645
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_clavLFT_SHJnt",
+      "maxErrorDegrees": 0.009151181661435671,
+      "rmsErrorDegrees": 0.003173320424290271
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_clavRGT_SHJnt",
+      "maxErrorDegrees": 0.008130375577213751,
+      "rmsErrorDegrees": 0.0028775466368228175
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man4_forearmRGT_SHJnt",
+      "maxErrorDegrees": 0.007982638770827338,
+      "rmsErrorDegrees": 0.0037926391552361555
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man5_upArmRGT_SHJnt",
+      "maxErrorDegrees": 0.007438044255469399,
+      "rmsErrorDegrees": 0.002680599550583228
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man4_clavRGT_SHJnt",
+      "maxErrorDegrees": 0.0072369383704253745,
+      "rmsErrorDegrees": 0.002592708803174303
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_flag1_SHJnt",
+      "maxErrorDegrees": 0.007131380896610694,
+      "rmsErrorDegrees": 0.001918118989011016
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_forearmLFT_SHJnt",
+      "maxErrorDegrees": 0.006632257004885189,
+      "rmsErrorDegrees": 0.002852091924787115
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man1_spine1_SHJnt",
+      "maxErrorDegrees": 0.006391565066358287,
+      "rmsErrorDegrees": 0.003054474582679564
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_neck1_SHJnt",
+      "maxErrorDegrees": 0.006324534809970794,
+      "rmsErrorDegrees": 0.0038035831599827876
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_fur_SHJnt",
+      "maxErrorDegrees": 0.006229233627772013,
+      "rmsErrorDegrees": 0.0017022508499480843
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_wristRGT_SHJnt",
+      "maxErrorDegrees": 0.006219232068784677,
+      "rmsErrorDegrees": 0.0020799059244164617
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_forearmRGT_SHJnt",
+      "maxErrorDegrees": 0.006168981050835947,
+      "rmsErrorDegrees": 0.0018277699848952315
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_head1_SHJnt",
+      "maxErrorDegrees": 0.006027548341824174,
+      "rmsErrorDegrees": 0.0023502955622485074
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_ring1RGT_SHJnt",
+      "maxErrorDegrees": 0.005970070081227973,
+      "rmsErrorDegrees": 0.0009012847445855079
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man4_upArmRGT_SHJnt",
+      "maxErrorDegrees": 0.005937922976486005,
+      "rmsErrorDegrees": 0.0021004015365695874
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man5_spine1_SHJnt",
+      "maxErrorDegrees": 0.005899933210087378,
+      "rmsErrorDegrees": 0.0021280341816098006
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man5_head1_SHJnt",
+      "maxErrorDegrees": 0.005862003638397298,
+      "rmsErrorDegrees": 0.0017206634212919671
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man4_spine1_SHJnt",
+      "maxErrorDegrees": 0.0057864452036062095,
+      "rmsErrorDegrees": 0.0020010711631534756
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man5_clavRGT_SHJnt",
+      "maxErrorDegrees": 0.005726733303557197,
+      "rmsErrorDegrees": 0.0013668955751058615
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_jaw_SHJnt",
+      "maxErrorDegrees": 0.005678377084719767,
+      "rmsErrorDegrees": 0.0012825666307854939
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_middle2RGT_SHJnt",
+      "maxErrorDegrees": 0.005510046097642811,
+      "rmsErrorDegrees": 0.001150619829444755
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man1_spine4_SHJnt",
+      "maxErrorDegrees": 0.005362953725561879,
+      "rmsErrorDegrees": 0.001811838327075016
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_pinky1RGT_SHJnt",
+      "maxErrorDegrees": 0.005223461408878515,
+      "rmsErrorDegrees": 0.0010012430912486536
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_index2RGT_SHJnt",
+      "maxErrorDegrees": 0.005070439418581343,
+      "rmsErrorDegrees": 0.002701956649435632
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_index3RGT_SHJnt",
+      "maxErrorDegrees": 0.004775589434949942,
+      "rmsErrorDegrees": 0.0005401955414897666
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_middle3RGT_SHJnt",
+      "maxErrorDegrees": 0.004775589434949942,
+      "rmsErrorDegrees": 0.0005401955414897666
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_ring3RGT_SHJnt",
+      "maxErrorDegrees": 0.004775589434949942,
+      "rmsErrorDegrees": 0.0005401955414897666
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_pinky3RGT_SHJnt",
+      "maxErrorDegrees": 0.004775589434949942,
+      "rmsErrorDegrees": 0.0005401955414897666
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_middle1RGT_SHJnt",
+      "maxErrorDegrees": 0.004757865971965662,
+      "rmsErrorDegrees": 0.000867502133383909
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_index1RGT_SHJnt",
+      "maxErrorDegrees": 0.004568165500298432,
+      "rmsErrorDegrees": 0.0006135753883302641
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_ring2RGT_SHJnt",
+      "maxErrorDegrees": 0.004007381038451939,
+      "rmsErrorDegrees": 0.0003070930326557478
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_pinky2RGT_SHJnt",
+      "maxErrorDegrees": 0.0034057367848960556,
+      "rmsErrorDegrees": 0.0002778577913572154
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_MustacheLFT_SHJnt",
+      "maxErrorDegrees": 0.003370498530235647,
+      "rmsErrorDegrees": 0.000546604624639079
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_MustacheRGT_SHJnt",
+      "maxErrorDegrees": 0.003209452218643599,
+      "rmsErrorDegrees": 0.00035329492495667856
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_nose_SHJnt",
+      "maxErrorDegrees": 1.0386604689550568e-05,
+      "rmsErrorDegrees": 1.0386604689550567e-05
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_eyeLFT_SHJnt",
+      "maxErrorDegrees": 1.0386604689550568e-05,
+      "rmsErrorDegrees": 1.0386604689550567e-05
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_eyeRGT_SHJnt",
+      "maxErrorDegrees": 1.0386604689550568e-05,
+      "rmsErrorDegrees": 1.0386604689550567e-05
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man5_body_SHJnt",
+      "maxErrorDegrees": 3.4150945850063755e-06,
+      "rmsErrorDegrees": 3.4150945850063746e-06
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man5_spine4_SHJnt",
+      "maxErrorDegrees": 1.7075472925031877e-06,
+      "rmsErrorDegrees": 1.7075472925031873e-06
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_ROOT_SHJnt",
+      "maxErrorDegrees": 0.0,
+      "rmsErrorDegrees": 0.0
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man4_spine4_SHJnt",
+      "maxErrorDegrees": 0.0,
+      "rmsErrorDegrees": 0.0
+    },
+    {
+      "bone": "LyrianLandsknechts_Rig_man2_spine4_SHJnt",
+      "maxErrorDegrees": 0.0,
+      "rmsErrorDegrees": 0.0
+    }
+  ]
+}

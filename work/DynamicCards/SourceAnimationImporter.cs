@@ -171,7 +171,6 @@ public static class SourceAnimationImporter
                             if(keys.Any(k=>k.value==null))throw new InvalidOperationException(record.id+": missing animated material");
                             AnimationUtility.SetObjectReferenceCurve(animation,EditorCurveBinding.PPtrCurve(pointer.path,renderer.GetType(),"m_Materials.Array.data["+pointer.slot+"]"),keys);
                         }
-                        PreserveSourceEulerOrders(animation,clip);
                         animation.EnsureQuaternionContinuity();
                         // Quaternion continuity can smooth the vector tangents across a held pose.
                         // Restore per-component linear interpolation after continuity so sparse
@@ -188,6 +187,9 @@ public static class SourceAnimationImporter
                             }
                             AnimationUtility.SetEditorCurve(animation,binding,curve);
                         }
+                        // Rebuilding quaternion curves also rebuilds Euler serialization.
+                        // Restore source rotation orders after the last curve write.
+                        PreserveSourceEulerOrders(animation,clip);
                         var settings=AnimationUtility.GetAnimationClipSettings(animation);settings.loopTime=clip.name.IndexOf("loop",StringComparison.OrdinalIgnoreCase)>=0;AnimationUtility.SetAnimationClipSettings(animation,settings);
                         string clipPath=folder+"/"+controllerName+"_"+Safe(clip.name)+".anim";
                         var existing=AssetDatabase.LoadAssetAtPath<AnimationClip>(clipPath);

@@ -35,7 +35,7 @@ public class CompleteMotionGameUiRecorder : MonoBehaviour
     [Serializable] class Skin { public string path; public int vertices; public float maxDelta; }
     [Serializable] class Row
     {
-        public string card, art, uiPath, prefab, bundleRoot, hash, screen;
+        public string card, art, uiPath, prefab, bundleRoot, hash, screen, artFrame;
         public int sample, frame, pixelChanges;
         public bool enabled, visible, surfaceEnabled, modelActive;
         public float age, timeScale;
@@ -43,7 +43,14 @@ public class CompleteMotionGameUiRecorder : MonoBehaviour
         public string[] sourceBehaviors, unsupportedShaders;
         public Skin[] skins;
     }
-    [Serializable] class CardResult { public string card, art, status; public List<Row> rows = new List<Row>(); }
+    [Serializable] class CardResult
+    {
+        public string card, art, status, detail;
+        public int attempt, modelInstance;
+        public List<Row> rows = new List<Row>();
+        public List<Row> interruptedRows = new List<Row>();
+    }
+    sealed class PreviewChangedException : Exception { public PreviewChangedException(string detail) : base(detail) {} }
     [Serializable] class Report { public bool complete; public string startedUtc, finishedUtc; public List<CardResult> cards = new List<CardResult>(); }
     [Serializable] class MapRow { public string card, art, name; public bool mapped; }
     [Serializable] class MapReport { public List<MapRow> cards = new List<MapRow>(); }
@@ -84,41 +91,75 @@ public class CompleteMotionGameUiRecorder : MonoBehaviour
             if (File.Exists(CompleteMotionGameUiAudit.Work + "stop.txt")) break;
             var core = new CardStatus(id);
             var result = new CardResult { card = id, art = core.CardArtsId, status = "loading" };
-            report.cards.Add(result); priorPixels = null; firstVertices.Clear();
-            // The actual production hover path and the existing on-screen ArtCard are used.
-            // Do not set DynamicCardSettings, construct an alternative Canvas, or call Camera.Render.
-            editor.SelectSwitchUICard(core);
-            float started = Time.realtimeSinceStartup;
-            DynamicCardView view = null;
-            while (true)
+            report.cards.Add(result);
+            for (int attempt = 0; attempt < 3; attempt++)
             {
-                view = editor.ShowArtCard.CardImg.GetComponent<DynamicCardView>();
-                var raw = view == null ? null : Field(view, "surface") as RawImage;
-                if (raw != null && raw.enabled && Field(view, "model") != null) break;
-                if (!mapped.Contains(core.CardArtsId)) { result.status = "no-source-mapping"; break; }
-                if (!DynamicCardSettings.Enabled) { result.status = "dynamic-disabled"; break; }
-                if (Time.realtimeSinceStartup - started > 35) { result.status = "ui-load-timeout"; break; }
-                yield return null;
-            }
-            if (result.status == "loading")
-            {
-                result.status = "sampled";
-                for (int i = 0; i < waits.Length; i++)
+                result.attempt = attempt; result.modelInstance = 0;
+                result.status = "loading"; result.detail = null;
+                priorPixels = null; firstVertices.Clear();
+                Save();
+                if (attempt > 0)
                 {
-                    yield return new WaitForSecondsRealtime(waits[i]);
-                    yield return new WaitForEndOfFrame();
-                    Sample(view, result, i, request.screenshots && (request.reopen || i == 0 || i == waits.Length - 1));
-                }
-                if (request.reopen)
-                {
+                    // Preserve interrupted evidence and give the user time to finish changing windows.
+                    yield return new WaitForSecondsRealtime(15);
+                    while (editor.EditorStatus != EditorStatus.ShowCards) yield return null;
                     editor.ShowArtCard.gameObject.SetActive(false);
-                    yield return new WaitForSecondsRealtime(.3f);
-                    editor.SelectSwitchUICard(core);
-                    yield return new WaitForSecondsRealtime(2f);
-                    yield return new WaitForEndOfFrame();
-                    Sample(editor.ShowArtCard.CardImg.GetComponent<DynamicCardView>(), result, waits.Length, request.screenshots);
                 }
-                if (result.rows.Skip(1).Take(waits.Length - 1).All(r => r.pixelChanges == 0)) result.status = "surface-not-changing";
+                // The actual production hover path and the existing on-screen ArtCard are used.
+                // Do not set DynamicCardSettings, construct an alternative Canvas, or call Camera.Render.
+                editor.SelectSwitchUICard(core);
+                float started = Time.realtimeSinceStartup;
+                float lastWaitingStatus = started - 5;
+                DynamicCardView view = null;
+                while (true)
+                {
+                    view = editor.ShowArtCard.CardImg.GetComponent<DynamicCardView>();
+                    var raw = view == null ? null : Field(view, "surface") as RawImage;
+                    var loaded = view == null ? null : Field(view, "entry") as DynamicCardEntry;
+                    bool visible = view != null && (bool)typeof(DynamicCardView).GetMethod("IsVisible", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(view, null);
+                    if (raw != null && raw.enabled && Field(view, "model") != null &&
+                        loaded != null && loaded.artIds != null && loaded.artIds.Contains(core.CardArtsId) && visible)
+                    {
+                        result.modelInstance = ((GameObject)Field(view, "model")).GetInstanceID();
+                        break;
+                    }
+                    if (!mapped.Contains(core.CardArtsId)) { result.status = "no-source-mapping"; break; }
+                    if (!DynamicCardSettings.Enabled) { result.status = "dynamic-disabled"; break; }
+                    // An occluded or minimized Game view can release its model. Wait for the actual
+                    // UI to be visible again; hidden-window time is not a card-load failure.
+                    if (!visible) started = Time.realtimeSinceStartup;
+                    if (Time.realtimeSinceStartup-lastWaitingStatus > 5)
+                    {
+                        lastWaitingStatus=Time.realtimeSinceStartup;
+                        File.WriteAllText(output+"progress.txt", (report.cards.Count-1)+"/"+cards.Length+" pending "+id+" "+(visible?"loading":"waiting-for-visible-ui")+" "+DateTime.UtcNow.ToString("O"));
+                    }
+                    if (File.Exists(CompleteMotionGameUiAudit.Work+"stop.txt")) { result.status="stopped"; break; }
+                    if (Time.realtimeSinceStartup - started > 35) { result.status = "ui-load-timeout"; break; }
+                    yield return null;
+                }
+                if (result.status == "loading")
+                {
+                    result.status = "sampled";
+                    for (int i = 0; i < waits.Length; i++)
+                    {
+                        yield return new WaitForSecondsRealtime(waits[i]);
+                        yield return new WaitForEndOfFrame();
+                        if (!TrySample(view, result, i, request.screenshots && (request.reopen || i == 0 || i == waits.Length - 1))) break;
+                    }
+                    if (request.reopen && result.status == "sampled")
+                    {
+                        editor.ShowArtCard.gameObject.SetActive(false);
+                        yield return new WaitForSecondsRealtime(.3f);
+                        editor.SelectSwitchUICard(core);
+                        yield return new WaitForSecondsRealtime(2f);
+                        yield return new WaitForEndOfFrame();
+                        result.modelInstance = 0;
+                        TrySample(editor.ShowArtCard.CardImg.GetComponent<DynamicCardView>(), result, waits.Length, request.screenshots);
+                    }
+                    if (result.status == "sampled" && result.rows.Skip(1).Take(waits.Length - 1).All(r => r.pixelChanges == 0)) result.status = "surface-not-changing";
+                }
+                if (result.status != "preview-interrupted" || attempt == 2) break;
+                result.interruptedRows.AddRange(result.rows); result.rows.Clear(); Save();
             }
             Save();
             File.WriteAllText(output + "progress.txt", report.cards.Count + "/" + cards.Length + " " + id + " " + result.status + " " + DateTime.UtcNow.ToString("O"));
@@ -128,12 +169,28 @@ public class CompleteMotionGameUiRecorder : MonoBehaviour
         File.WriteAllText(output + "finished.txt", report.complete ? "COMPLETE" : "STOPPED");
         Destroy(gameObject);
     }
+    bool TrySample(DynamicCardView view, CardResult result, int sample, bool screenshot)
+    {
+        try { Sample(view, result, sample, screenshot); return true; }
+        catch (PreviewChangedException e) { result.status = "preview-interrupted"; result.detail = e.Message; }
+        catch (Exception e) { result.status = "sample-error"; result.detail = e.ToString(); File.AppendAllText(output + "errors.txt", e + "\n"); }
+        Save(); return false;
+    }
     void Sample(DynamicCardView view, CardResult result, int sample, bool screenshot)
     {
-        if (view == null) throw new Exception("Actual ArtCard lost DynamicCardView");
+        if (view == null) throw new PreviewChangedException("Actual ArtCard lost DynamicCardView");
         var raw = Field(view, "surface") as RawImage;
         var model = Field(view, "model") as GameObject;
         var entry = Field(view, "entry") as DynamicCardEntry;
+        if (entry == null || entry.artIds == null || !entry.artIds.Contains(result.art) || model == null)
+            throw new PreviewChangedException("Requested " + result.card + "/" + result.art + "; current resource " +
+                (entry == null ? "released" : entry.prefab) + "; model present=" + (model != null));
+        if (result.modelInstance != 0 && result.modelInstance != model.GetInstanceID())
+            throw new PreviewChangedException("The same card was reloaded during sampling: " + result.card);
+        if (raw == null || !raw.enabled || !(bool)typeof(DynamicCardView).GetMethod("IsVisible", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(view, null))
+            throw new PreviewChangedException("Actual card preview became hidden during sampling: " + result.card);
+        result.modelInstance = model.GetInstanceID();
+        string evidenceName = result.card + (result.attempt == 0 ? "" : "-attempt" + result.attempt);
         var row = new Row { card = result.card, art = result.art, sample = sample, frame = Time.frameCount,
             enabled = DynamicCardSettings.Enabled, timeScale = Time.timeScale, age = (float)Field(view, "age"),
             uiPath = PathOf(view.transform), surfaceEnabled = raw != null && raw.enabled,
@@ -151,6 +208,10 @@ public class CompleteMotionGameUiRecorder : MonoBehaviour
                 for (int i = 0; i < pixels.Length; i++)
                     if (Math.Abs(pixels[i].r-priorPixels[i].r)>2 || Math.Abs(pixels[i].g-priorPixels[i].g)>2 || Math.Abs(pixels[i].b-priorPixels[i].b)>2 || Math.Abs(pixels[i].a-priorPixels[i].a)>2) row.pixelChanges++;
             using (var sha = SHA256.Create()) row.hash = Convert.ToBase64String(sha.ComputeHash(image.GetRawTextureData()));
+            // Preserve the actual production ArtCard render surface at every sample.
+            // This allows visual inspection of foreground motion alongside the numeric checks.
+            row.artFrame = evidenceName + "-art-" + sample + ".jpg";
+            File.WriteAllBytes(output + row.artFrame, image.EncodeToJPG(90));
             priorPixels = pixels; Destroy(image);
         }
         var skins = new List<Skin>();
@@ -175,7 +236,7 @@ public class CompleteMotionGameUiRecorder : MonoBehaviour
         row.skins = skins.ToArray();
         if (screenshot)
         {
-            row.screen = result.card + "-" + sample + ".png";
+            row.screen = evidenceName + "-" + sample + ".png";
             ScreenCapture.CaptureScreenshot(output + row.screen);
         }
         result.rows.Add(row); Save();
