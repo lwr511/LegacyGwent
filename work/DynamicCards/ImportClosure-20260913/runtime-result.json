@@ -1,0 +1,14 @@
+{
+    "status": "PASS",
+    "bundleRoot": "Library\\DynamicCardsBundles\\StandaloneWindows64",
+    "cards": 623,
+    "firstPage": 30,
+    "secondPage": 90,
+    "artMappings": 670,
+    "normalAll": true,
+    "normalFaction": true,
+    "search": true,
+    "animatedCards": true,
+    "preferenceRestored": true,
+    "noDebugTypes": true
+}

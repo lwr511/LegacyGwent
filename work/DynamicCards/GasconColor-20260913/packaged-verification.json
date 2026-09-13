@@ -1,0 +1,103 @@
+{
+  "part": "cards-thronebreaker-004.bundle",
+  "materials": [
+    {
+      "renderer": "_1_horsemen",
+      "material": "15280100_192588__201326_GasconsLightCavalry_horsemen",
+      "textures": {
+        "_Light": "15280100_192608__201326_GasconsLightCavalry_light_CutOff",
+        "_LightMask": "15280100_192616__201326_GasconsLightCavalry_lightMask",
+        "_MainTex": "15280100_23360_15280100",
+        "_Turbulence": "13190100_70492_Noise3D_Directional"
+      }
+    },
+    {
+      "renderer": "_2_cavalry",
+      "material": "15280100_192586__201326_GasconsLightCavalry_cavalry",
+      "textures": {
+        "_Light": "15280100_192608__201326_GasconsLightCavalry_light_CutOff",
+        "_LightMask": "15280100_192616__201326_GasconsLightCavalry_lightMask",
+        "_MainTex": "15280100_23360_15280100",
+        "_Turbulence": "13190100_70492_Noise3D_Directional"
+      }
+    },
+    {
+      "renderer": "_3_hoseHair1",
+      "material": "15280100_192590__201326_GasconsLightCavalry_hoseHair1",
+      "textures": {
+        "_MainTex": "15280100_23360_15280100",
+        "_Offsettexturebluechannel": "15280100_192608__201326_GasconsLightCavalry_light_CutOff"
+      }
+    },
+    {
+      "renderer": "_4_HorseHair2",
+      "material": "15280100_192592__201326_GasconsLightCavalry_hoseHair2",
+      "textures": {
+        "_MainTex": "15280100_23360_15280100",
+        "_Offsettexturebluechannel": "15280100_192608__201326_GasconsLightCavalry_light_CutOff"
+      }
+    },
+    {
+      "renderer": "_5_whip",
+      "material": "15280100_192594__201326_GasconsLightCavalry_whip",
+      "textures": {
+        "_MainTex": "d20b6cc8871d792e7a3e8bdf83023628",
+        "_Offsettexturebluechannel": "15280100_192612_whip_cutOff"
+      }
+    },
+    {
+      "renderer": "_6_bg",
+      "material": "15280100_192584__201326_GasconsLightCavalry_bg",
+      "textures": {
+        "_MainTex": "15280100_23360_15280100",
+        "_Offsettexturebluechannel": "15280100_192608__201326_GasconsLightCavalry_light_CutOff"
+      }
+    },
+    {
+      "renderer": "scrap_FG",
+      "material": "15280100_192598_scrap",
+      "textures": {
+        "_MainTex": "15280100_192614_scrap"
+      }
+    },
+    {
+      "renderer": "dust_wheel_front_01",
+      "material": "15280100_192596_dust",
+      "textures": {
+        "_MainTex": "15280100_192606_dust"
+      }
+    },
+    {
+      "renderer": "wind_1",
+      "material": "15280100_192602_wind",
+      "textures": {
+        "_MainTex": "15280100_192604_wind"
+      }
+    },
+    {
+      "renderer": "speedLine_001",
+      "material": "15280100_192600_speedline",
+      "textures": {
+        "_MainTex": "13080100_49346_Default-Particle"
+      }
+    }
+  ],
+  "materialParametersMatchSource": true,
+  "scripts": [],
+  "textureComparisons": [
+    {
+      "texture": "15280100_23360_15280100",
+      "maxAbsDifference": 52.0,
+      "meanRgbBias": [
+        0.16945637611923037,
+        0.26356810799870206,
+        0.13186919100567687
+      ],
+      "meanAbsRgbError": [
+        0.6657505068061415,
+        0.6526249506044728,
+        0.8521860934322422
+      ]
+    }
+  ]
+}

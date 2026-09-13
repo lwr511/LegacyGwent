@@ -1,0 +1,200 @@
+{
+  "textures": [
+    {
+      "source": "premium-high-15280100.png",
+      "target": "C:\\UnityProjects\\LegacyGwent\\src\\Cynthia.Card.Unity\\src\\Cynthia.Unity.Card\\Assets\\DynamicCards\\Content\\Old\\Thronebreaker\\Shared\\15280100_23360_15280100.png",
+      "maxChannelDifference": 5,
+      "sourcePixelsSha256": "b4031918b11f180cb7de842bcdd8c5a45ec75eea0bd12258e94a3d2476cf12dc",
+      "importedPixelsSha256": "c6c715b477b4c4177955700610101a74841ffb59ed84e1a6c74b125282072c98"
+    },
+    {
+      "source": "standard-high-15280000.png",
+      "target": "C:\\UnityProjects\\LegacyGwent\\src\\Cynthia.Card.Unity\\src\\Cynthia.Unity.Card\\Assets\\StreamingAssets\\CollectionDebug\\Thronebreaker_15280100.png",
+      "maxChannelDifference": 0,
+      "sourcePixelsSha256": "fdbe6534c3ad46f2d6ad9b0c9138621c63da1d11862b0e706837d5383cee6b67",
+      "importedPixelsSha256": "fdbe6534c3ad46f2d6ad9b0c9138621c63da1d11862b0e706837d5383cee6b67"
+    }
+  ],
+  "sourceMaterials": [
+    {
+      "name": "[201326]GasconsLightCavalry_bg",
+      "file": "BuildPlayer-15280100.sharedAssets",
+      "pathID": 2,
+      "floats": {
+        "_AlphaCutoff": 1.0,
+        "_Cutoff": 0.5,
+        "_Offsetamount": 0.05000000074505806,
+        "_Timemultiplier": 1.0,
+        "_Timeoffset": 0.0,
+        "_UseUorV": 1.0,
+        "_VerticalHorizontalmovement": 1.0,
+        "_Wavelength": 1.0
+      },
+      "colors": {}
+    },
+    {
+      "name": "[201326]GasconsLightCavalry_cavalry",
+      "file": "BuildPlayer-15280100.sharedAssets",
+      "pathID": 3,
+      "floats": {
+        "_Cutoff": 0.5,
+        "_LightIntensity": 2.0,
+        "_Speed": 1.0,
+        "_TimeOffset": 50.0
+      },
+      "colors": {
+        "_TintColor": {
+          "r": 0.6039215922355652,
+          "g": 0.44705885648727417,
+          "b": 0.2980392277240753,
+          "a": 1.0
+        },
+        "_TintMainTex": {
+          "r": 0.5,
+          "g": 0.5,
+          "b": 0.5,
+          "a": 1.0
+        }
+      }
+    },
+    {
+      "name": "[201326]GasconsLightCavalry_horsemen",
+      "file": "BuildPlayer-15280100.sharedAssets",
+      "pathID": 4,
+      "floats": {
+        "_Cutoff": 0.746999979019165,
+        "_LightIntensity": 2.0,
+        "_Speed": 3.0,
+        "_TimeOffset": 20.0
+      },
+      "colors": {
+        "_TintColor": {
+          "r": 0.6039215922355652,
+          "g": 0.44705885648727417,
+          "b": 0.2980392277240753,
+          "a": 1.0
+        },
+        "_TintMainTex": {
+          "r": 0.5,
+          "g": 0.5,
+          "b": 0.5,
+          "a": 1.0
+        }
+      }
+    },
+    {
+      "name": "[201326]GasconsLightCavalry_hoseHair1",
+      "file": "BuildPlayer-15280100.sharedAssets",
+      "pathID": 5,
+      "floats": {
+        "_AlphaCutoff": 1.0,
+        "_Cutoff": 0.5,
+        "_Offsetamount": 0.10000000149011612,
+        "_Timemultiplier": 1.0,
+        "_Timeoffset": 50.0,
+        "_UseUorV": 1.0,
+        "_VerticalHorizontalmovement": 1.0,
+        "_Wavelength": 10.0
+      },
+      "colors": {}
+    },
+    {
+      "name": "[201326]GasconsLightCavalry_hoseHair2",
+      "file": "BuildPlayer-15280100.sharedAssets",
+      "pathID": 6,
+      "floats": {
+        "_AlphaCutoff": 1.0,
+        "_Cutoff": 0.5,
+        "_Offsetamount": 0.5,
+        "_Timemultiplier": 1.0,
+        "_Timeoffset": 50.0,
+        "_UseUorV": 1.0,
+        "_VerticalHorizontalmovement": 1.0,
+        "_Wavelength": 30.0
+      },
+      "colors": {}
+    },
+    {
+      "name": "[201326]GasconsLightCavalry_whip",
+      "file": "BuildPlayer-15280100.sharedAssets",
+      "pathID": 7,
+      "floats": {
+        "_AlphaCutoff": 1.0,
+        "_Cutoff": 0.5,
+        "_Offsetamount": 0.5,
+        "_Timemultiplier": 1.0,
+        "_Timeoffset": 0.0,
+        "_UseUorV": 1.0,
+        "_VerticalHorizontalmovement": 0.0,
+        "_Wavelength": 10.0
+      },
+      "colors": {}
+    },
+    {
+      "name": "dust",
+      "file": "BuildPlayer-15280100.sharedAssets",
+      "pathID": 8,
+      "floats": {
+        "_InvFade": 1.0
+      },
+      "colors": {
+        "_TintColor": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        }
+      }
+    },
+    {
+      "name": "scrap",
+      "file": "BuildPlayer-15280100.sharedAssets",
+      "pathID": 9,
+      "floats": {
+        "_Cutoff": 0.5
+      },
+      "colors": {
+        "_TintColor": {
+          "r": 0.5,
+          "g": 0.5,
+          "b": 0.5,
+          "a": 1.0
+        }
+      }
+    },
+    {
+      "name": "speedline",
+      "file": "BuildPlayer-15280100.sharedAssets",
+      "pathID": 10,
+      "floats": {
+        "_InvFade": 1.0
+      },
+      "colors": {
+        "_TintColor": {
+          "r": 0.18166090548038483,
+          "g": 0.25735294818878174,
+          "b": 0.18844708800315857,
+          "a": 0.5
+        }
+      }
+    },
+    {
+      "name": "wind",
+      "file": "BuildPlayer-15280100.sharedAssets",
+      "pathID": 11,
+      "floats": {
+        "_Cutoff": 0.5,
+        "_Multi": 0.5199999809265137,
+        "_SemiAlphaForMeshParticles": 1.0
+      },
+      "colors": {
+        "_TintColor": {
+          "r": 0.5,
+          "g": 0.5,
+          "b": 0.5,
+          "a": 1.0
+        }
+      }
+    }
+  ]
+}

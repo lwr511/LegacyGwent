@@ -1,0 +1,635 @@
+{
+  "artAliases": 670,
+  "duplicates": [
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/11320100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/13210301/Card.prefab",
+      "sourceName": "Woodland Spirit SP",
+      "canonicalName": "林妖",
+      "canonicalArt": "13210300",
+      "mse": 8.42090739752166e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/11390100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/13220201/Card.prefab",
+      "sourceName": "Grave Hag SP",
+      "canonicalName": "莫恩塔特",
+      "canonicalArt": "13220200",
+      "mse": 7.012861897237599e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/11400100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/13220301/Card.prefab",
+      "sourceName": "Water Hag SP",
+      "canonicalName": "阿巴亚",
+      "canonicalArt": "13220300",
+      "mse": 7.750424992991611e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/11480100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/13221101/Card.prefab",
+      "sourceName": "Nekker Warrior SP",
+      "canonicalName": "孽鬼战士",
+      "canonicalArt": "13221100",
+      "mse": 9.314660564996302e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/11580100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/13230101/Card.prefab",
+      "sourceName": "Tutorial Foglet",
+      "canonicalName": "小雾妖",
+      "canonicalArt": "13230100",
+      "mse": 4.4070256990380585e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/11590100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/13230201/Card.prefab",
+      "sourceName": "Ancient Foglet SP",
+      "canonicalName": "远古小雾妖",
+      "canonicalArt": "13230200",
+      "mse": 6.621385546168312e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/11630100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/13230601/Card.prefab",
+      "sourceName": "Tutorial Ghoul",
+      "canonicalName": "食尸鬼",
+      "canonicalArt": "13230600",
+      "mse": 9.418453555554152e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/11720100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/13231401/Card.prefab",
+      "sourceName": "Drowner SP",
+      "canonicalName": "水鬼",
+      "canonicalArt": "13231400",
+      "mse": 0.00010049219417851418,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/11790100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/13240601/Card.prefab",
+      "sourceName": "Shadow SP",
+      "canonicalName": "无骨者",
+      "canonicalArt": "13240600",
+      "mse": 7.857222226448357e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/11840100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/13330201/Card.prefab",
+      "sourceName": "Monster Nest nr301_3_boros_reach",
+      "canonicalName": "怪物巢穴",
+      "canonicalArt": "13330200",
+      "mse": 1.9353536117705517e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/12490100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/15221001/Card.prefab",
+      "sourceName": "Savage Bear SP",
+      "canonicalName": "恶熊",
+      "canonicalArt": "15221000",
+      "mse": 0.00011818370694527403,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/14070100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20010401/Card.prefab",
+      "sourceName": "Ulfhedinn SP",
+      "canonicalName": "乌弗海登",
+      "canonicalArt": "20010400",
+      "mse": 7.790474046487361e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/14890100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20029501/Card.prefab",
+      "sourceName": "Tutorial Rotfiend",
+      "canonicalName": "腐食魔",
+      "canonicalArt": "20029500",
+      "mse": 6.158489850349724e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15110100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20048201/Card.prefab",
+      "sourceName": "She-Troll PZL SP",
+      "canonicalName": "维尔金的女巨魔",
+      "canonicalArt": "20048200",
+      "mse": 8.740295743336901e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15120100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Latest/15120101/Card.prefab",
+      "sourceName": "Ice Troll SP",
+      "canonicalName": "冰巨魔",
+      "canonicalArt": "20050200",
+      "mse": 2.1272535377647728e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/16340100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Latest/16340101/Card.prefab",
+      "sourceName": "Tutorial Alghoul",
+      "canonicalName": "欧兹瑞尔",
+      "canonicalArt": "20169800",
+      "mse": 4.557541979011148e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Legacy2017/11210701/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Latest/10130101/Card.prefab",
+      "sourceName": "Villentretenmerth",
+      "canonicalName": "维伦特瑞坦梅斯",
+      "canonicalArt": "11210700",
+      "mse": 0.0,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Legacy2017/11310101/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Latest/10400101/Card.prefab",
+      "sourceName": "Ragh nar Roog",
+      "canonicalName": "终末之战",
+      "canonicalArt": "11310100",
+      "mse": 0.0,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/10040100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Latest/10040101/Card.prefab",
+      "sourceName": "Hack nr500_3_Puzzle_Battle",
+      "canonicalName": "迪兰",
+      "canonicalArt": "6010400",
+      "mse": 9.686112753115594e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/10280100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/11220901/Card.prefab",
+      "sourceName": "Prize Winning Cow PZL SP",
+      "canonicalName": "获奖奶牛",
+      "canonicalArt": "11220900",
+      "mse": 7.789472147123888e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/10530100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/11330301/Card.prefab",
+      "sourceName": "Check Pair nr500_3_Puzzle_Battle",
+      "canonicalName": "破晓",
+      "canonicalArt": "11330300",
+      "mse": 8.341143256984651e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/10570100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/11330801/Card.prefab",
+      "sourceName": "Epidemic SP",
+      "canonicalName": "瘟疫",
+      "canonicalArt": "11330800",
+      "mse": 1.5675728718633763e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/10580100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/11330901/Card.prefab",
+      "sourceName": "Scorch SP",
+      "canonicalName": "烧灼",
+      "canonicalArt": "11330900",
+      "mse": 7.311892113648355e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/10690100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/11340401/Card.prefab",
+      "sourceName": "Mushrooms:Skull SP",
+      "canonicalName": "致命菌菇",
+      "canonicalArt": "11340400",
+      "mse": 8.775671449257061e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/12800100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/15320101/Card.prefab",
+      "sourceName": "Undying Soldiers nr211_2_renegades_fort",
+      "canonicalName": "回复",
+      "canonicalArt": "15320100",
+      "mse": 9.681773371994495e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/12810100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/15330101/Card.prefab",
+      "sourceName": "Lacerate SP",
+      "canonicalName": "撕裂",
+      "canonicalArt": "15330100",
+      "mse": 7.863896462367848e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/14590100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20017101/Card.prefab",
+      "sourceName": "Gerwin's Mercenary nr411_1_heart_of_darkness",
+      "canonicalName": "崔丹姆步兵",
+      "canonicalArt": "20017100",
+      "mse": 0.00012026625336147845,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/14670100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20022301/Card.prefab",
+      "sourceName": "Mandrake SP",
+      "canonicalName": "曼德拉草",
+      "canonicalArt": "20022300",
+      "mse": 0.00010311206278856844,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/14690100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20022501/Card.prefab",
+      "sourceName": "Muzzle SP",
+      "canonicalName": "嘴套",
+      "canonicalArt": "20022500",
+      "mse": 1.5669054846512154e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/14700100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20022601/Card.prefab",
+      "sourceName": "Wolfsbane SP",
+      "canonicalName": "附子草",
+      "canonicalArt": "20022600",
+      "mse": 8.735289884498343e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/14840100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20027501/Card.prefab",
+      "sourceName": "Shupe the Troll nr106_1_meet_shop",
+      "canonicalName": "店店的大冒险",
+      "canonicalArt": "20027500",
+      "mse": 5.129571036377456e-06,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15430100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Thronebreaker/15180100/Card.prefab",
+      "sourceName": "Closed Gate SP",
+      "canonicalName": "尼弗迦德大门",
+      "canonicalArt": "20055600",
+      "mse": 0.005291291046887636,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15980100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Latest/15980101/Card.prefab",
+      "sourceName": "Runestone Ice SP",
+      "canonicalName": "佐里亚符文石",
+      "canonicalArt": "20158200",
+      "mse": 6.274296538322233e-06,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15990100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Latest/15990101/Card.prefab",
+      "sourceName": "Runestone Fire SP",
+      "canonicalName": "达兹伯格符文石",
+      "canonicalArt": "20158300",
+      "mse": 6.935099918337073e-06,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/16010100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Latest/16010101/Card.prefab",
+      "sourceName": "Runestone Earth SP",
+      "canonicalName": "莫拉纳符文石",
+      "canonicalArt": "20158500",
+      "mse": 5.960582711850293e-06,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/16280100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Latest/16280101/Card.prefab",
+      "sourceName": "Wall SP",
+      "canonicalName": "哨卫",
+      "canonicalArt": "20166100",
+      "mse": 6.140800905996002e-06,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/12860100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/16210201/Card.prefab",
+      "sourceName": "Menno Coehorn nr201_4_vengerberg",
+      "canonicalName": "门诺·库霍恩",
+      "canonicalArt": "16210200",
+      "mse": 7.95801097410731e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/12880100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/16210401/Card.prefab",
+      "sourceName": "Cahir SP nr401_4_battle_for_the_bridge",
+      "canonicalName": "卡西尔·迪弗林",
+      "canonicalArt": "16210400",
+      "mse": 0.01068051066249609,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15290100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20133701/Card.prefab",
+      "sourceName": "Slave Hunter SP",
+      "canonicalName": "奴隶猎人",
+      "canonicalArt": "20133700",
+      "mse": 3.105109135503881e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15300100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20136501/Card.prefab",
+      "sourceName": "Slave Infantry SP",
+      "canonicalName": "奴隶步兵",
+      "canonicalArt": "20136500",
+      "mse": 5.0394614845572505e-06,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15580100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20149401/Card.prefab",
+      "sourceName": "Catapult SP",
+      "canonicalName": "弗尔泰斯特之傲",
+      "canonicalArt": "20149400",
+      "mse": 4.909303697786527e-06,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/11130100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/12231201/Card.prefab",
+      "sourceName": "Field Medic SP",
+      "canonicalName": "战地医师",
+      "canonicalArt": "12231200",
+      "mse": 9.891028457786888e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15390100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20143901/Card.prefab",
+      "sourceName": "Crushing Trap SP",
+      "canonicalName": "碎骨陷阱",
+      "canonicalArt": "20143900",
+      "mse": 5.199656243348727e-06,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15550100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20149001/Card.prefab",
+      "sourceName": "Pitfall Trap SP",
+      "canonicalName": "陷坑",
+      "canonicalArt": "20149000",
+      "mse": 5.86713485972723e-06,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15790100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20153201/Card.prefab",
+      "sourceName": "Manticore Trophy SP",
+      "canonicalName": "豪猎而归",
+      "canonicalArt": "20153200",
+      "mse": 0.0011640755692496896,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15810100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20153401/Card.prefab",
+      "sourceName": "Gernichora Trophy SP",
+      "canonicalName": "寄生虫",
+      "canonicalArt": "20153400",
+      "mse": 6.667107663815841e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/16210100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20163401/Card.prefab",
+      "sourceName": "Angren Trophy SP",
+      "canonicalName": "贝克尔的岩崩术",
+      "canonicalArt": "20163400",
+      "mse": 1.666693242441397e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/16290100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Latest/16290101/Card.prefab",
+      "sourceName": "Mauler SP",
+      "canonicalName": "亚甸槌击者",
+      "canonicalArt": "20167500",
+      "mse": 5.372533269110136e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/16300100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Latest/16300101/Card.prefab",
+      "sourceName": "Bandit Archer SP",
+      "canonicalName": "帕扶科“舅舅”盖尔",
+      "canonicalArt": "20167600",
+      "mse": 4.855904990108684e-06,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/16470100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20177601/Card.prefab",
+      "sourceName": "Dandelion nr401_4_battle_for_the_bridge",
+      "canonicalName": "丹德里恩：传奇诗人",
+      "canonicalArt": "20177600",
+      "mse": 2.0301355107221752e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/12140100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/14230501/Card.prefab",
+      "sourceName": "Mahakam Slayer",
+      "canonicalName": "矮人好斗分子",
+      "canonicalArt": "14230500",
+      "mse": 0.0001981175591936335,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/12180100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/14230901/Card.prefab",
+      "sourceName": "Vrihedd Vanguard SP",
+      "canonicalName": "维里赫德旅先锋",
+      "canonicalArt": "14230900",
+      "mse": 0.00016623882402200252,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/14410100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20013601/Card.prefab",
+      "sourceName": "Farseer SP",
+      "canonicalName": "先知",
+      "canonicalArt": "20013600",
+      "mse": 0.00024476100225001574,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15930100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20156401/Card.prefab",
+      "sourceName": "Elven Swordmaster SP",
+      "canonicalName": "精灵剑术大师",
+      "canonicalArt": "20156400",
+      "mse": 7.61659539421089e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/12580100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/15230601/Card.prefab",
+      "sourceName": "Pirate Captain Character SP",
+      "canonicalName": "迪门家族海盗船长",
+      "canonicalArt": "15230600",
+      "mse": 0.00010502438817638904,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/13400100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20003601/Card.prefab",
+      "sourceName": "Drummond Warmonger SP",
+      "canonicalName": "德拉蒙家族好战分子",
+      "canonicalArt": "20003600",
+      "mse": 2.4009197659324855e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/14080100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20010501/Card.prefab",
+      "sourceName": "Dimun Warship SP",
+      "canonicalName": "迪门家族战船",
+      "canonicalArt": "20010500",
+      "mse": 6.996842421358451e-05,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/15940100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20157801/Card.prefab",
+      "sourceName": "Clan Marauder SP",
+      "canonicalName": "奎特家族劫掠者",
+      "canonicalArt": "20157800",
+      "mse": 0.009365382604300976,
+      "proof": "Original portraits reviewed side by side",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Legacy2017/13231601/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Thronebreaker/11740100/Card.prefab",
+      "sourceName": "鹰身女妖蛋",
+      "canonicalName": "Harpy Egg SP",
+      "proof": "Same original artwork across source versions; retain Thronebreaker scene",
+      "transferredArtIds": [
+        "13231600"
+      ]
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Legacy2017/16240201/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Thronebreaker/13250100/Card.prefab",
+      "sourceName": "牛尸",
+      "canonicalName": "Cow Carcass SP",
+      "proof": "Same original artwork across source versions; retain Thronebreaker scene",
+      "transferredArtIds": [
+        "16240200"
+      ]
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Legacy2017/15240501/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Thronebreaker/12780100/Card.prefab",
+      "sourceName": "狂暴的熊",
+      "canonicalName": "Bear Trinket SP",
+      "proof": "Same original artwork across source versions; retain Thronebreaker scene",
+      "transferredArtIds": [
+        "15240500"
+      ]
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/14440100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/20013901/Card.prefab",
+      "sourceName": "Panther SP",
+      "canonicalName": "黑豹",
+      "canonicalArt": "20013900",
+      "mse": 0.024815209209918976,
+      "proof": "Same original artwork with different horizontal crop; visually reviewed",
+      "transferredArtIds": []
+    },
+    {
+      "remove": "Assets/DynamicCards/Content/Old/Thronebreaker/10050100/Card.prefab",
+      "keep": "Assets/DynamicCards/Content/Old/Legacy2017/11340201/Card.prefab",
+      "sourceName": "Field Scout SP ",
+      "canonicalName": "侦察",
+      "canonicalArt": "11340200",
+      "mse": 0.02531713992357254,
+      "proof": "Same original artwork with different horizontal crop; visually reviewed",
+      "transferredArtIds": []
+    }
+  ]
+}
