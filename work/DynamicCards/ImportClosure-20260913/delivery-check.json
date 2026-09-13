@@ -1,0 +1,142 @@
+{
+  "status": "PASS",
+  "scenes": 677,
+  "artMappings": 670,
+  "retiredDuplicates": 63,
+  "debugReferenceFiles": 0,
+  "payloadFiles": 26,
+  "payloadBytes": 1452290778,
+  "playerAssemblySha256": "D1B672394DB0FD6F7CA542ECFB2A1DDE31685C0B7344321807E30B8F896D3D3E",
+  "files": [
+    {
+      "file": "cards-extra-000.bundle",
+      "bytes": 924979,
+      "sha256": "8f6dc693a8429313c96ca4fd0aaf6bad5f4d87bcc276ae4227c13638b553da09"
+    },
+    {
+      "file": "cards-latest-000.bundle",
+      "bytes": 76747019,
+      "sha256": "aa8e63792fe95fc8c8aa4ec6f36cb243139fcdfaa4d25a8d5f1a68a4154dfc43"
+    },
+    {
+      "file": "cards-latest-001.bundle",
+      "bytes": 57031503,
+      "sha256": "f8222eb64e33821c97b57a48da4f783abcaca9a01c168112ad4f7cc5b9b30e87"
+    },
+    {
+      "file": "cards-latest-002.bundle",
+      "bytes": 67483055,
+      "sha256": "f769786fbcdd0dbea115be16064f58e3789f2c5afa0897aacf67e4c2c40c4afb"
+    },
+    {
+      "file": "cards-latest-003.bundle",
+      "bytes": 74448767,
+      "sha256": "c01b3c096c4a3433579b8dd269cfd496716e913475649fd2a5bcf939f1308446"
+    },
+    {
+      "file": "cards-latest-004.bundle",
+      "bytes": 69848329,
+      "sha256": "e4f88fdab0628d7b2448e6213f6c41ebd12420cc1efe2863e5d3c10c9c7e510f"
+    },
+    {
+      "file": "cards-latest-005.bundle",
+      "bytes": 11867661,
+      "sha256": "1078fc4f07b19e112264464cef696544ec8a612ef12363c5dbe9af15d896a5a8"
+    },
+    {
+      "file": "cards-legacy2017-000.bundle",
+      "bytes": 72297797,
+      "sha256": "e2af056c3316971717cbac3a9d246b8273b963279d8fdc622b97d25ed8786ce2"
+    },
+    {
+      "file": "cards-legacy2017-001.bundle",
+      "bytes": 64666589,
+      "sha256": "3a70cb764f2452842f2a6a84c4f54f241385fc3c68b474dfb59f2ed489393e9f"
+    },
+    {
+      "file": "cards-legacy2017-002.bundle",
+      "bytes": 79484979,
+      "sha256": "f1280934ad1cf901d37387d5b941881fa2d600642adc31e3d2f1509e0961a886"
+    },
+    {
+      "file": "cards-legacy2017-003.bundle",
+      "bytes": 81265733,
+      "sha256": "0ec2fb966d82a6219f12a50fa297d2392762bc12192703d122bdeb366b15ad32"
+    },
+    {
+      "file": "cards-legacy2017-004.bundle",
+      "bytes": 74778678,
+      "sha256": "faec6a3bbf32c4ea0773e32e7a14b118d8f9033a9d435ecdae5fe6af9828c0b6"
+    },
+    {
+      "file": "cards-legacy2017-005.bundle",
+      "bytes": 73393077,
+      "sha256": "7083af133d230727ee9d659cdcaea900e70c8e6e7791a75e03577445f84e9b2b"
+    },
+    {
+      "file": "cards-legacy2017-006.bundle",
+      "bytes": 70250876,
+      "sha256": "18537abb5b2c70a89612779bfdc0691e5727cb81f2cc1c5f035b3668e486dc06"
+    },
+    {
+      "file": "cards-legacy2017-007.bundle",
+      "bytes": 75523443,
+      "sha256": "81eba4015199716e50c68bafb2b0b81dfd0fc8c31515c7425a504c86e766af2a"
+    },
+    {
+      "file": "cards-legacy2017-008.bundle",
+      "bytes": 65858425,
+      "sha256": "837df08480dde3ad80ad64f893899de3cfd1a2f51bb8de81c22aec67d24feb88"
+    },
+    {
+      "file": "cards-legacy2017-009.bundle",
+      "bytes": 58783590,
+      "sha256": "a93d4ab4f27e39a2fb438a8dfaae69e5a23f9b963df689e0c1c109d8025c1dae"
+    },
+    {
+      "file": "cards-thronebreaker-000.bundle",
+      "bytes": 53878832,
+      "sha256": "3c99c93fe9ca47f52950bf46dceda389ef43af77d498193ceb53dd2e62cc17d3"
+    },
+    {
+      "file": "cards-thronebreaker-001.bundle",
+      "bytes": 66605065,
+      "sha256": "1eb43ef9f865d55e1d41277cd12da2154a734e7b83380319807d74697c2eeb73"
+    },
+    {
+      "file": "cards-thronebreaker-002.bundle",
+      "bytes": 56897378,
+      "sha256": "6000cf3759687791932a6f6d4a11b75833912f604a43283bcd30bb69318edcaf"
+    },
+    {
+      "file": "cards-thronebreaker-003.bundle",
+      "bytes": 67843921,
+      "sha256": "083ab676aa813832e4926eaab657efecbf6b6e2fb7733240de21974d3ca1c3db"
+    },
+    {
+      "file": "cards-thronebreaker-004.bundle",
+      "bytes": 75843764,
+      "sha256": "5828194b2c052595582950ca612591e8673a57dddf311d8b7f0bca111d8a7055"
+    },
+    {
+      "file": "cards-thronebreaker-005.bundle",
+      "bytes": 49315569,
+      "sha256": "bf1001868ef317c8b9b162cffd03e2dfd1d0df1a111729807a7e0da043e91864"
+    },
+    {
+      "file": "cards-thronebreaker-006.bundle",
+      "bytes": 7090332,
+      "sha256": "96f3eae230ff499fdc73708bf8140a2f8db21e077050b5a709f78ffb039a112a"
+    },
+    {
+      "file": "cards.bundle",
+      "bytes": 102305,
+      "sha256": "e32de7180cfddc6ba71b85c510e3741415c7e7b07cc080e919da79e310a95dd2"
+    },
+    {
+      "file": "cards.index.json",
+      "bytes": 59112,
+      "sha256": "12bf1a9c853caac7e889bb937b8eae0ee7b609c118af9cd56a991aa2c0fe8ae9"
+    }
+  ]
+}

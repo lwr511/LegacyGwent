@@ -1,0 +1,34 @@
+{
+  "importDevelopment": "closed",
+  "debugCollectionRemoved": true,
+  "referenceDirectoryExists": false,
+  "catalogSha256": "1791553846ed09b77fbffabb2d7f3a845cc665aa17b1b3212baa76664f017ea6",
+  "deletedDuplicateFiles": 3982,
+  "duplicateFilesRemaining": [],
+  "repairedIgnoredAssets": [
+    {
+      "path": "Assets/DynamicCards/Content/Latest/Shared/21870101_709854__21870300_AuberonMuircetachTierIIIConqueror-Sky.mat",
+      "bytes": 3004,
+      "sha256": "aa9ee9175cf31e5d0373d11f45625c3a70e799882fb4439159d34ea95d72f1c6"
+    },
+    {
+      "path": "Assets/DynamicCards/Content/Latest/21870101/conversion.json",
+      "bytes": 6276,
+      "sha256": "7e6745d18282576fed423235c5891b71e04a70b077f287beda294910b386fac0"
+    },
+    {
+      "path": "Assets/DynamicCards/Content/Old/Thronebreaker/13870100/Card.prefab",
+      "bytes": 1757245,
+      "sha256": "b180a36d46f5c4d38dd895510bd9183d440a537f5824bd9234af874e325a8c08"
+    },
+    {
+      "path": "Assets/DynamicCards/Content/Old/Thronebreaker/Shared/14830100_149640__14830300_EyckOfDensele_mat_10_1.mat",
+      "bytes": 829,
+      "sha256": "8a957aeece3384e5e11d08440026d11a5c1a4543dba407a26e0fcc36cc45e441"
+    }
+  ],
+  "temporaryVerificationBridgeRemoved": true,
+  "finalRuntimeOrCompileErrors": [],
+  "editorStopped": true,
+  "localTestServicesStopped": true
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "group": "standard/high",
+    "name": "15280000",
+    "pathID": -148676884350028364,
+    "file": "CAB-a922d156da6c2f0a532cf1e521eb0779",
+    "output": "standard-high-15280000.png",
+    "width": 512,
+    "height": 1024
+  },
+  {
+    "group": "premium/high",
+    "name": "15280100",
+    "pathID": 7945010298217961476,
+    "file": "CAB-c1ad1f867bb1a03e1c730d48b4ae0607",
+    "output": "premium-high-15280100.png",
+    "width": 1024,
+    "height": 1024
+  },
+  {
+    "group": "premium/uber",
+    "name": "15280100",
+    "pathID": -9065918615703094182,
+    "file": "CAB-54adc6b94f75648008a9006b4d087e17",
+    "output": "premium-uber-15280100.png",
+    "width": 2048,
+    "height": 2048
+  }
+]
