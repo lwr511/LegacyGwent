@@ -69,7 +69,9 @@ public class ArtCard : MonoBehaviour
         // This is the hover/detail portrait, not a card in the progressively loaded grid.
         Assets.Script.DynamicCards.DynamicCardView.Bind(CardImg, CurrentCore.CardArtsId,
             CurrentCore.IsCardBack || CurrentCore.Conceal, largePreview: true, playPreviewAudio: false,
-            presentationRoot: (RectTransform)transform, portraitBorder: CardBorder.rectTransform);
+            presentationRoot: (RectTransform)transform, portraitBorder: CardBorder.rectTransform,
+            premium: Assets.Script.DynamicCards.PremiumCollectionClient.Show(CurrentCore));
+        Assets.Script.DynamicCards.PremiumCardAppearance.Apply(CardImg, CurrentCore, CardBorder, FactionIcon);
         Content.gameObject.SetActive(!(_currentCore.IsCardBack || _currentCore.Conceal));
         var iconCount = 0;
         var use = this.GetComponent<CardMoveInfo>();

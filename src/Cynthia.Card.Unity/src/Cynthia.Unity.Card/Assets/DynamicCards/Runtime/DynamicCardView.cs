@@ -15,6 +15,11 @@ namespace Assets.Script.DynamicCards
         private Material surfaceMaterial;
         private string artId;
         private bool hidden, preview, dragging, miniature;
+        private bool premiumAllowed;
+        private bool preparing;
+        private CardShowInfo collectionCard;
+        internal bool IsPresentationReady { get { return !preparing; } }
+        internal bool KeepStaticDuringUpgrade { get; private set; }
         private bool previewAudio = true;
         private DynamicCardPresentation presentation;
         private int generation;
@@ -30,6 +35,7 @@ namespace Assets.Script.DynamicCards
         private DynamicCardDragHandle dragHandle;
         private Quaternion frameRest, pivotRest;
         private Vector2 dragOrigin, dragStart, target, current;
+        private float releasedAt = -10;
         private DynamicCardEntry entry;
         private float age;
         private Scene stage;
@@ -60,13 +66,15 @@ namespace Assets.Script.DynamicCards
         }
         internal bool IsPreview { get { return preview; } }
         internal bool IsCurrent(int version)
-        { return this != null && version == generation && isActiveAndEnabled && !hidden && DynamicCardSettings.Enabled; }
+        { return this != null && version == generation && isActiveAndEnabled && !hidden && premiumAllowed && DynamicCardSettings.Enabled; }
 
         internal bool IsVisible()
         {
             if (art == null || !art.isActiveAndEnabled || art.color.a <= .001f || art.canvas == null || !art.canvas.isActiveAndEnabled) return false;
             if (presentation != null && presentation.Waiting)
             { if (!presentation.AncestorsVisible(art.transform)) return false; }
+            else if (collectionCard != null && collectionCard.WaitingForCollectionArt)
+            { if (!collectionCard.CollectionAncestorsVisible(art.transform)) return false; }
             else if (art.canvasRenderer.cull || art.canvasRenderer.GetInheritedAlpha() <= .001f) return false;
             var canvas = art.canvas;
             var camera = DisplayCamera(canvas);
@@ -120,13 +128,18 @@ namespace Assets.Script.DynamicCards
             return null;
         }
 
-        public static void Bind(Image image, string id, bool concealed = false, bool largePreview = false, RectTransform wholeCard = null, bool listThumbnail = false, bool playPreviewAudio = true, RectTransform presentationRoot = null, RectTransform portraitBorder = null)
+        public static void Bind(Image image, string id, bool concealed = false, bool largePreview = false, RectTransform wholeCard = null, bool listThumbnail = false, bool playPreviewAudio = true, RectTransform presentationRoot = null, RectTransform portraitBorder = null, bool premium = false)
         {
             if (image == null) return;
             var view = image.GetComponent<DynamicCardView>();
             if (view == null) view = image.gameObject.AddComponent<DynamicCardView>();
             view.art = image;
-            bool changed = view.artId != id || view.hidden != concealed || view.preview != largePreview || view.miniature != listThumbnail || view.previewAudio != playPreviewAudio;
+            view.collectionCard = image.GetComponentInParent<CardShowInfo>();
+            bool changed = view.artId != id || view.hidden != concealed || view.preview != largePreview || view.miniature != listThumbnail || view.previewAudio != playPreviewAudio || view.premiumAllowed != premium;
+            if (changed)
+                view.KeepStaticDuringUpgrade = view.artId == id && !view.premiumAllowed && premium &&
+                    image.GetComponent<PremiumCardAppearance>() != null && image.GetComponent<PremiumCardAppearance>().IsLocked;
+            view.premiumAllowed = premium;
             view.artId = id; view.hidden = concealed; view.preview = largePreview; view.miniature = listThumbnail;
             view.previewAudio = playPreviewAudio;
             view.portraitFrame = portraitBorder;
@@ -156,8 +169,10 @@ namespace Assets.Script.DynamicCards
         private void Refresh()
         {
             Clear();
-            if (!isActiveAndEnabled || hidden || !DynamicCardSettings.Enabled || string.IsNullOrEmpty(artId)) return;
-            if (preview && presentation != null) presentation.Begin();
+            if (!isActiveAndEnabled || hidden || !premiumAllowed || !DynamicCardSettings.Enabled || string.IsNullOrEmpty(artId)) return;
+            preparing = true;
+            if (collectionCard != null) collectionCard.UpdateCollectionVisibility();
+            if (preview && presentation != null && !KeepStaticDuringUpgrade) presentation.Begin();
             DynamicCardLibrary.Instance.Enqueue(this, generation);
         }
 
@@ -168,7 +183,14 @@ namespace Assets.Script.DynamicCards
             yield return DynamicCardLibrary.Instance.Load(artId, preview && previewAudio, (d, p, a) => { data = d; prefab = p; clip = a; });
             if (!preview) yield return null;
             if (prefab == null)
-            { if (IsCurrent(version) && presentation != null) presentation.Reveal(false); yield break; }
+            {
+                if (IsCurrent(version))
+                {
+                    preparing = false;
+                    if (presentation != null) presentation.Reveal(false);
+                }
+                yield break;
+            }
             if (!CanCreate(version)) { DynamicCardLibrary.Released(data); yield break; }
             entry = data;
             // An isolated scene plus a unique distant cell prevents card lights/cameras touching gameplay.
@@ -233,6 +255,7 @@ namespace Assets.Script.DynamicCards
             surface.material = surfaceMaterial;
             surface.enabled = false;
             surface.raycastTarget = false;
+            if (presentation != null) presentation.RegisterGraphic(surface);
             // Legacy art sprites contain padding on the right/bottom. Match their content region,
             // not the entire padded texture, so the original portrait mask and frame stay aligned.
             surface.rectTransform.anchorMin = new Vector2(0, 1 - 713f / 1024);
@@ -264,7 +287,13 @@ namespace Assets.Script.DynamicCards
                 if (property.isActiveAndEnabled) property.ApplyNow();
             renderCamera.Render();
             surface.enabled = true;
-            if (presentation != null) presentation.Reveal(true);
+            preparing = false;
+            if (presentation != null)
+            {
+                if (KeepStaticDuringUpgrade) presentation.RevealInPlace();
+                else presentation.Reveal(true);
+            }
+            KeepStaticDuringUpgrade = false;
         }
 
         private void AlignPreviewPortrait()
@@ -307,19 +336,26 @@ namespace Assets.Script.DynamicCards
             if (!running) return;
             NormalizeStageRoot();
             age += Time.unscaledDeltaTime;
+            if (preview && !dragging)
+            {
+                // Return to neutral first; then resume the old client's gentle carousel motion.
+                float idleTime = Mathf.Min(age - 1, Time.unscaledTime - releasedAt - 2);
+                float blend = Mathf.SmoothStep(0, 1, Mathf.Clamp01(idleTime));
+                target = idleTime > 0 ? new Vector2(Mathf.Sin(idleTime * .47f), Mathf.Sin(idleTime * .73f)) * blend : Vector2.zero;
+            }
             current = Vector2.Lerp(current, target, 1 - Mathf.Exp(-(dragging ? 18 : 12) * Time.unscaledDeltaTime));
-            float pitch = Mathf.Lerp(entry.xStart, entry.xEnd, (current.y * .5f + 1) * .5f);
+            float pitch = Mathf.Lerp(entry.xStart, entry.xEnd, (current.y + 1) * .5f);
             float yaw = Mathf.Lerp(entry.yStart, entry.yEnd, (current.x + 1) * .5f);
             if (pivot != null)
             {
-                // Half the source vertical travel. Inner viewpoint and outer card have opposite pitch.
+                // CardPerspectiveHandler: normalized Y = outer pitch / 1.5, X = outer yaw / 7.
                 pivot.localRotation = pivotRest * Quaternion.Euler(pitch, yaw, 0);
-                if (frame != null) frame.localRotation = frameRest * Quaternion.Euler(-pitch + (entry.xStart + entry.xEnd) * .5f, yaw - (entry.yStart + entry.yEnd) * .5f, 0);
             }
             if (sound != null) sound.volume = PlayerPrefs.GetInt("isCloseSound", 1) == 0 ? 0 : PlayerPrefs.GetInt("effectVolum", 7) / 10f;
             ApplyCut();
             if (effects != null) effects.Tick(age);
-            if (presentation != null) presentation.Tick();
+            if (presentation != null) presentation.Tick(current);
+            else if (frame != null) frame.localRotation = frameRest * Quaternion.Euler(current.y * DynamicCardPresentation.MaxPitch, current.x * DynamicCardPresentation.MaxYaw, 0);
             AlignPreviewPortrait();
             if(sourceControllers!=null)sourceControllers.Tick(age,Time.unscaledDeltaTime,pitch,yaw);
             surface.color = art.color;
@@ -379,19 +415,26 @@ namespace Assets.Script.DynamicCards
         }
 
         public void OnBeginDrag(PointerEventData data)
-        { if (!preview || model == null) return; if (presentation != null) presentation.Restore(); dragging = true; dragOrigin = data.position; dragStart = target; }
+        {
+            if (!preview || model == null || data.button != PointerEventData.InputButton.Left || dragging) return;
+            if (presentation != null) presentation.InterruptEntrance();
+            dragging = true; dragOrigin = data.position; dragStart = current;
+        }
         public void OnDrag(PointerEventData data)
         {
             if (!dragging) return;
             var delta = data.position - dragOrigin;
-            target = dragStart + new Vector2(-delta.x / 200, delta.y / 260);
+            // Screen-relative travel keeps the same feel at different window sizes.
+            float referenceScale = Mathf.Max(1, Screen.height) / 900f;
+            target = dragStart + new Vector2(-delta.x / (150 * referenceScale), delta.y / (120 * referenceScale));
             target = new Vector2(Mathf.Clamp(target.x, -1, 1), Mathf.Clamp(target.y, -1, 1));
         }
         public void OnEndDrag(PointerEventData data) { ReturnToCenter(); }
-        private void ReturnToCenter() { dragging = false; target = Vector2.zero; }
+        internal void ReturnToCenter() { if (dragging) releasedAt = Time.unscaledTime; dragging = false; target = Vector2.zero; }
 
         private void Clear()
         {
+            preparing = false;
             if (presentation != null) presentation.Restore();
             if (entry != null) DynamicCardLibrary.Released(entry);
             invisibleSince = -1;
@@ -410,7 +453,7 @@ namespace Assets.Script.DynamicCards
             if (frame != null) frame.localRotation = frameRest;
             model = null; renderCamera = null; texture = null; surface = null; sound = null; pivot = null;
             effects = null; sourceControllers = null; entry = null;
-            target = current = Vector2.zero; dragging = false; age = 0;
+            target = current = Vector2.zero; dragging = false; age = 0; releasedAt = -10;
         }
     }
 }

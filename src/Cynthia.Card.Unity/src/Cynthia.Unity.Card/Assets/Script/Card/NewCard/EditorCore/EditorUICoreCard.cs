@@ -21,7 +21,7 @@ public class EditorUICoreCard : MonoBehaviour, IPointerEnterHandler, IPointerExi
             _count = value;
             Gray.SetActive(false);
             CountIcon.SetActive(false);
-            if (_count > 1)
+            if (_count > 1 && cardShowInfo.CurrentCore?.IsPremium != true)
             {   //如果数量大于1,设定并显示数量
                 CountIcon.SetActive(true);
                 CountText.text = $"X{value}";
@@ -41,7 +41,8 @@ public class EditorUICoreCard : MonoBehaviour, IPointerEnterHandler, IPointerExi
     //鼠标点击
     public void OnPointerClick(PointerEventData eventData)
     {
-        _mainCodeService.ClickEditorUICoreCard(gameObject.GetComponent<CardShowInfo>().CurrentCore);
+        if (eventData.button == PointerEventData.InputButton.Left)
+            _mainCodeService.ClickEditorUICoreCard(gameObject.GetComponent<CardShowInfo>().CurrentCore);
     }
     //鼠标进入
     public void OnPointerEnter(PointerEventData eventData)

@@ -12,6 +12,8 @@ namespace Cynthia.Card.Server
     public class GwentServerGame : IGwentServerGame
     {
         public Action<GameResult> GameResultEvent { get; set; }
+        public Func<int, string, DateTimeOffset, Task> RoundWon { get; set; }
+        private readonly string dailyMatchId = Guid.NewGuid().ToString("N");
         public GameResult TempGameResult { get; set; } = new GameResult();
         public int[] RedCoin { get; private set; } = new int[3];
         public Pipeline OperactionList { get; private set; } = new Pipeline();
@@ -190,6 +192,23 @@ namespace Cynthia.Card.Server
             _setGameEnd.SetResult(winPlayerIndex);
         }
 
+        private async Task TryAwardDailyRound(int winner, string roundId, DateTimeOffset settledUtc)
+        {
+            var award = RoundWon;
+            for (int attempt = 1; attempt <= 3; attempt++)
+            {
+                try { await award(winner, roundId, settledUtc); return; }
+                catch (Exception e)
+                {
+                    if (attempt == 3)
+                        NLog.LogManager.GetCurrentClassLogger().Error(e,
+                            "Daily reward retries exhausted; game continues. Player={0}, Round={1}, SettledUtc={2:O}",
+                            Players[winner].PlayerName, roundId, settledUtc);
+                    else await Task.Delay(100 * attempt);
+                }
+            }
+        }
+
         public async Task BigRoundEnd()//小局结束,进行收场
         {
             await ClientDelay(500);
@@ -219,6 +238,9 @@ namespace Cynthia.Card.Server
                 PlayersWinCount[Player1Index]++;
                 PlayersWinCount[Player2Index]++;
             }
+            if (RoundWon != null && player1PlacePoint != player2PlacePoint)
+                await TryAwardDailyRound(player1PlacePoint > player2PlacePoint ? Player1Index : Player2Index,
+                    dailyMatchId + ":" + CurrentRoundCount, DateTimeOffset.UtcNow);
             RoundCount++;//有效回合的总数
             CurrentRoundCount++;//当前回合
             if (CurrentRoundCount <= 2)
@@ -667,6 +689,9 @@ namespace Cynthia.Card.Server
         }
         public async Task<IList<int>> GetSelectMenuCards(int playerIndex, MenuSelectCardInfo info)
         {
+            foreach (var card in info.SelectList)
+                if (!card.IsCardBack && !card.Conceal && card.IsPremium == null)
+                    card.IsPremium = Players[playerIndex].PremiumCards.Contains(card.CardId);
             if (info.SelectList.Count == 0)
             {
                 return new List<int>();
@@ -1688,6 +1713,10 @@ namespace Cynthia.Card.Server
                     ), cardId)
             )
             .Mess(RNG).ToList();
+            foreach (var card in PlayersLeader[Player1Index].Concat(PlayersDeck[Player1Index]))
+                card.Status.IsPremium = player1.PremiumCards.Contains(card.Status.CardId);
+            foreach (var card in PlayersLeader[Player2Index].Concat(PlayersDeck[Player2Index]))
+                card.Status.IsPremium = player2.PremiumCards.Contains(card.Status.CardId);
         }
         public async Task SendBigRoundEndToCemetery()
         {
@@ -1747,6 +1776,7 @@ namespace Cynthia.Card.Server
             //创造对应的卡
             var creatCard = new GameCard(this, playerIndex, new CardStatus(cardId, PlayersFaction[playerIndex], RowPosition.None), cardId);
             setting?.Invoke(creatCard.Status);
+            creatCard.Status.IsPremium = Players[playerIndex].PremiumCards.Contains(creatCard.Status.CardId);
             //将创造的卡以不显示的方式移动到目标位置!
             await LogicCardMove(creatCard, row, position.CardIndex);
             //发送信息,显示创造的卡

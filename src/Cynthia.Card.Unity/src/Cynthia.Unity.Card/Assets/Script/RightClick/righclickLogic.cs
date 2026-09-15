@@ -21,6 +21,7 @@ public class righclickLogic : MonoBehaviour
     private int SoundCount;
     private int cardRequest;
     private RectTransform dynamicCardRoot;
+    private Assets.Script.DynamicCards.LegacyCardDetailsLayout detailsLayout;
 
     //fields
     public GameObject LinkedCard;
@@ -65,6 +66,8 @@ public class righclickLogic : MonoBehaviour
     void Start()
     {
         translator = DependencyResolver.Container.Resolve<LocalizationService>();
+        detailsLayout = CardImg.canvas.gameObject.AddComponent<Assets.Script.DynamicCards.LegacyCardDetailsLayout>();
+        detailsLayout.Initialize(this);
         ExitButtonText.text=translator.GetText("LoginMenu_ExitButton");
         BackButtonText.text=translator.GetText("RegisterMenu_BackButton");
         History = new List<string>();
@@ -104,7 +107,10 @@ public class righclickLogic : MonoBehaviour
             presentation.Configure(CardBorder.rectTransform, null);
         }
         Assets.Script.DynamicCards.DynamicCardView.Bind(CardImg, CardInfo.CardArtsId, false, true,
-            dynamicCardRoot);
+            dynamicCardRoot, portraitBorder: CardBorder.rectTransform, premium: SceneManager.GetSceneByName("GamePlay").isLoaded ?
+                CardId == GameEvent.RightClickedCardID && GameEvent.RightClickedPremium :
+                Assets.Script.DynamicCards.PremiumCollectionClient.Owns(CardId) &&
+                (detailsLayout.PremiumFor(CardId) ?? (CardId == EditorInfo.RightClickedCardID ? EditorInfo.RightClickedPremium : Assets.Script.DynamicCards.PremiumCollectionClient.Selected(CardId))));
 
         SoundIndex=0;
         SoundCount=AudioManager.Instance.GetVoiceLineCount(CardInfo.CardArtsId);
@@ -214,6 +220,7 @@ public class righclickLogic : MonoBehaviour
         {
             AddLinked(ID);
         }
+        detailsLayout.Refresh();
     }
     public void AddLinked(string ID)
     {
@@ -221,12 +228,16 @@ public class righclickLogic : MonoBehaviour
         LinkedCard linkedCardScript = instance.GetComponent<LinkedCard>();
         linkedCardScript.myRightClickLogic = this;
         linkedCardScript.ID = ID;
+        detailsLayout.StyleLinked(linkedCardScript);
         linkedCardScript.UpdateSelfContent(); 
     }
     public void Closerightclick()
     {
-        GameEvent.RighClickActive=false;
-        SceneManager.UnloadSceneAsync("RightClick");
+        detailsLayout.Close(() =>
+        {
+            GameEvent.RighClickActive=false;
+            SceneManager.UnloadSceneAsync("RightClick");
+        });
     }
     public void BackButton()
     {
@@ -236,6 +247,7 @@ public class righclickLogic : MonoBehaviour
             DisplayID=History[History.Count - 1];
             UpdateCard(DisplayID);
             History.RemoveAt(History.Count - 1);
+            detailsLayout.Refresh();
         }
         else
         {

@@ -1,0 +1,60 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Autofac;
+using Cynthia.Card;
+using Cynthia.Card.Client;
+using Microsoft.AspNetCore.SignalR.Client;
+
+namespace Assets.Script.DynamicCards
+{
+    public static class PremiumCollectionClient
+    {
+        public static event Action Changed;
+        public static PremiumCollection Account { get; private set; }
+        public static Dictionary<string, int> Costs { get; private set; } = new Dictionary<string, int>();
+        public static bool Ready { get; private set; }
+        private static int session;
+        private static GwentClientService Client => DependencyResolver.Container.Resolve<GwentClientService>();
+        public static bool Owns(string card) => Ready && card != null && Account.OwnedCards.Contains(card);
+        public static bool Selected(string card) => Owns(card) && Account.SelectedCards.Contains(card);
+        public static bool Show(CardStatus card) => card != null && !card.IsCardBack && !card.Conceal &&
+            (UnityEngine.SceneManagement.SceneManager.GetSceneByName("GamePlay").isLoaded ? card.IsPremium == true :
+                Owns(card.CardId) && (card.IsPremium ?? Selected(card.CardId)));
+
+        public static void Reset()
+        {
+            DailyQuestClient.Reset();
+            session++;
+            Ready = false; Account = null; Costs = new Dictionary<string, int>();
+            Changed?.Invoke();
+        }
+
+        public static async Task<PremiumCollectionResult> Refresh() => await Request("GetPremiumCollection");
+        public static async Task<PremiumCollectionResult> Craft(string card) => await Request("CraftPremium", card);
+        public static async Task<PremiumCollectionResult> Select(string card, bool premium) => await Request("SelectPremium", card, premium ? 1 : 0);
+
+        private static async Task<PremiumCollectionResult> Request(string method, params object[] args)
+        {
+            int generation = session;
+            var userId = Client.User?.Id;
+            if (userId == null) return new PremiumCollectionResult { Status = "unauthenticated" };
+            var result = await Client.HubConnection.InvokeCoreAsync<PremiumCollectionResult>(method, args);
+            if (generation != session || userId != Client.User?.Id) return new PremiumCollectionResult { Status = "session_changed" };
+            Accept(result,userId);
+            return result;
+        }
+
+        public static void Accept(PremiumCollectionResult result, string userId)
+        {
+            if (result != null && result.Collection != null && result.Collection.Id == userId && userId == Client.User?.Id &&
+                (Account == null || result.Collection.Revision >= Account.Revision))
+            {
+                Account = result.Collection;
+                Costs = result.Costs ?? new Dictionary<string, int>();
+                Ready = true;
+                Changed?.Invoke();
+            }
+        }
+    }
+}

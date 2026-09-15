@@ -16,6 +16,7 @@ public class GameEvent : MonoBehaviour
     private LocalizationService translator;
     static public bool RighClickActive;
     public static string RightClickedCardID;
+    public static bool RightClickedPremium;
     public ArtCard ShowCard;
     public float ArrowsZ = -6f;
     //可被拖上(6排,以及我方墓地)
@@ -476,6 +477,7 @@ public class GameEvent : MonoBehaviour
                         Debug.Log("卡牌On?:" + card.GetComponent<CardMoveInfo>().IsOn);
 #if !UNITY_ANDROID && !UNITY_IOS                           
                             RightClickedCardID = card.GetComponent<CardShowInfo>().CurrentCore.CardId;
+                            RightClickedPremium = card.GetComponent<CardShowInfo>().CurrentCore.IsPremium == true;
                             if (!string.IsNullOrEmpty(RightClickedCardID))
                             {
                                 RighClickActive = true;
@@ -485,6 +487,7 @@ public class GameEvent : MonoBehaviour
                         if(IsRightClickMobile)
                         {            
                             RightClickedCardID = card.GetComponent<CardShowInfo>().CurrentCore.CardId;
+                            RightClickedPremium = card.GetComponent<CardShowInfo>().CurrentCore.IsPremium == true;
                             if (!string.IsNullOrEmpty(RightClickedCardID))
                             {
                                 DragCard = null;

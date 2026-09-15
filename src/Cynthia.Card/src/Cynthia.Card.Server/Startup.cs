@@ -19,15 +19,20 @@ namespace Cynthia.Card.Server
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(options =>
+                options.JsonSerializerOptions.Converters.Add(new DailyQuestProgressJsonConverter()));
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSignalR().AddHubOptions<GwentHub>(options =>
+            services.AddSignalR().AddJsonProtocol(options =>
+                options.PayloadSerializerOptions.Converters.Add(new DailyQuestProgressJsonConverter()))
+                .AddHubOptions<GwentHub>(options =>
             {
                 options.ClientTimeoutInterval = TimeSpan.FromSeconds(90);
             });
             services.AddSingleton<GwentServerService>();
             services.AddSingleton<GwentDatabaseService>();
+            services.AddSingleton(InitialPowderOptions.Load());
+            services.AddHostedService<InitialPowderGrantService>();
             services.AddSingleton<GwentCardDataService>();
             services.AddSingleton<GwentLocalizationService>();
             services.AddSingleton<CounterService>();

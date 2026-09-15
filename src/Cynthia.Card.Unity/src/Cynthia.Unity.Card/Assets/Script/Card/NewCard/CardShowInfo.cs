@@ -77,6 +77,53 @@ public class CardShowInfo : MonoBehaviour
     public Image SelectMargin;
     public GameObject SelectIcon;
     private string _oldCardArtsId = null; // prevent repeated load
+    private string _loadedCardArtsId;
+    private int _artLoadVersion;
+    private CanvasGroup _collectionGroup;
+    private float _collectionAlpha;
+    private bool _collectionRaycasts, _collectionInteractable;
+    internal bool WaitingForCollectionArt { get; private set; }
+
+    // Keep the layout slot alive, but hide the entire card (including badges) until
+    // its own artwork and, when requested, the first premium frame are ready.
+    public void PrepareCollectionDisplay(GameObject wholeCard)
+    {
+        if (_collectionGroup != null) return;
+        _collectionGroup = wholeCard.GetComponent<CanvasGroup>();
+        if (_collectionGroup == null) _collectionGroup = wholeCard.AddComponent<CanvasGroup>();
+        _collectionAlpha = _collectionGroup.alpha;
+        _collectionRaycasts = _collectionGroup.blocksRaycasts;
+        _collectionInteractable = _collectionGroup.interactable;
+        UpdateCollectionVisibility();
+    }
+
+    internal void UpdateCollectionVisibility()
+    {
+        if (_collectionGroup == null) return;
+        var dynamicView = CardImg == null ? null : CardImg.GetComponent<Assets.Script.DynamicCards.DynamicCardView>();
+        bool ready = _currentCore != null && (_currentCore.IsCardBack ||
+            (CardImg != null && CardImg.sprite != null && _loadedCardArtsId == _currentCore.CardArtsId &&
+             (dynamicView == null || dynamicView.IsPresentationReady || dynamicView.KeepStaticDuringUpgrade)));
+        WaitingForCollectionArt = !ready;
+        _collectionGroup.alpha = ready ? _collectionAlpha : 0;
+        _collectionGroup.blocksRaycasts = ready && _collectionRaycasts;
+        _collectionGroup.interactable = ready && _collectionInteractable;
+    }
+
+    internal bool CollectionAncestorsVisible(Transform artwork)
+    {
+        // The loading queue must ignore only our temporary hiding. Page visibility,
+        // scroll clipping and other parent CanvasGroups still apply.
+        for (var current = artwork; current != null; current = current.parent)
+            foreach (var group in current.GetComponents<CanvasGroup>())
+            {
+                if ((group == _collectionGroup ? _collectionAlpha : group.alpha) <= .001f) return false;
+                if (group.ignoreParentGroups) return true;
+            }
+        return true;
+    }
+
+    private void LateUpdate() { UpdateCollectionVisibility(); }
     //目前被CurrentCore属性取代
     //public CardShowInfo(CardStatus card) => CurrentCore = card;
 
@@ -115,7 +162,10 @@ public class CardShowInfo : MonoBehaviour
     //根据CurrentCore来刷新卡面
     public void SetCard(bool asyncLoadAsset = true)
     {
-        Assets.Script.DynamicCards.DynamicCardView.Bind(CardImg, CurrentCore.CardArtsId, CurrentCore.IsCardBack || CurrentCore.Conceal);
+        UpdateCollectionVisibility();
+        Assets.Script.DynamicCards.DynamicCardView.Bind(CardImg, CurrentCore.CardArtsId, CurrentCore.IsCardBack || CurrentCore.Conceal,
+            premium: Assets.Script.DynamicCards.PremiumCollectionClient.Show(CurrentCore));
+        Assets.Script.DynamicCards.PremiumCardAppearance.Apply(CardImg, CurrentCore, CardBorder, FactionIcon);
         // Debug.Log("刷新了卡牌设置");
         // Debug.Log($"卡牌名称是:{CurrentCore.Name},生命状态是:{CurrentCore.HealthStatus}");
         var iconCount = 0;
@@ -124,6 +174,7 @@ public class CardShowInfo : MonoBehaviour
             use.CardUseInfo = CardInfo.CardUseInfo;
         if (CurrentCore.CardArtsId != null && _oldCardArtsId != CurrentCore.CardArtsId)
         {
+            int requestVersion = ++_artLoadVersion;
             if (asyncLoadAsset)
             {
                 var requestedArt = CurrentCore.CardArtsId;
@@ -131,13 +182,15 @@ public class CardShowInfo : MonoBehaviour
                 {
                     // Scroll/filter replacement can destroy or rebind this card before loading ends.
                     if (this == null || CardImg == null || _currentCore == null ||
-                        _currentCore.CardArtsId != requestedArt || obj.Result == null) return;
+                        requestVersion != _artLoadVersion || _currentCore.CardArtsId != requestedArt || obj.Result == null) return;
                     CardImg.sprite = obj.Result;
+                    _loadedCardArtsId = requestedArt;
                 };
             }
             else
             {
                 CardImg.sprite = Addressables.LoadAssetAsync<Sprite>(CurrentCore.CardArtsId).WaitForCompletion();
+                _loadedCardArtsId = CardImg.sprite != null ? CurrentCore.CardArtsId : null;
             }
             _oldCardArtsId = CurrentCore.CardArtsId;
         }

@@ -114,14 +114,17 @@ namespace Cynthia.Card.Client
             });
             hubConnection.On("RepeatLogin", async () =>
             {
+                Assets.Script.DynamicCards.PremiumCollectionClient.Reset();
                 SceneManager.LoadScene("LoginScene");
                 ClientState = ClientState.Standby;
                 await DependencyResolver.Container.Resolve<GlobalUIService>().YNMessageBox(
                     _translator.GetText("PopupWindow_LoggedOutTitle"),
                     _translator.GetText("PopupWindow_LoggedOutDesc"));
             });
+            hubConnection.On("DailyQuestsChanged", () => { _ = Assets.Script.DynamicCards.DailyQuestClient.Refresh(true); });
             hubConnection.Closed += (async x =>
             {
+                Assets.Script.DynamicCards.PremiumCollectionClient.Reset();
                 (sender, receiver) = Tube.CreateSimplex();
                 SceneManager.LoadScene("LoginScene");
                 ClientState = ClientState.Standby;
@@ -396,10 +399,16 @@ namespace Cynthia.Card.Client
         public Task<bool> Register(string username, string password, string playername) => HubConnection.InvokeAsync<bool>("Register", username, password, playername);
         public async Task<UserInfo> Login(string username, string password)
         {
+            Assets.Script.DynamicCards.PremiumCollectionClient.Reset();
             //登录,如果成功保存登录信息
             User = await HubConnection.InvokeAsync<UserInfo>("Login", username, password);
             if (User != null)
+            {
                 Player.PlayerName = User.PlayerName;
+                try { await Assets.Script.DynamicCards.PremiumCollectionClient.Refresh(); }
+                catch (Exception e) { Debug.LogWarning("Premium collection unavailable: " + e.Message); }
+            }
+            if (User != null) await Assets.Script.DynamicCards.DailyQuestClient.Refresh(true);
             return User;
         }
         // get the version of the Trinket Map to decide if it needs an update

@@ -416,6 +416,8 @@ namespace Cynthia.Card.Server
                 {
                     await Disconnect(user.ConnectionId);
                 }
+                // Finish the required reward before publishing authenticated access.
+                await _databaseService.GetDailyQuests(user.UserName);
                 user.PlayerName = loginUser.PlayerName;
                 user.Decks = loginUser.Decks;
                 user.Blacklist = loginUser.Blacklist;
@@ -471,7 +473,35 @@ namespace Cynthia.Card.Server
             return loginUser;
         }
 
-        public bool Register(string username, string password, string playerName) => _databaseService.Register(username, password, playerName);
+        public Task<bool> Register(string username, string password, string playerName) => _databaseService.Register(username, password, playerName);
+
+        public Task<PremiumCollectionResult> GetPremiumCollection(string connectionId) =>
+            _users.TryGetValue(connectionId, out var user) ? _databaseService.GetPremiumCollection(user.UserName) :
+                Task.FromResult(new PremiumCollectionResult { Status = "unauthenticated" });
+
+        public Task<DailyQuestResult> GetDailyQuests(string connectionId) =>
+            _users.TryGetValue(connectionId,out var dailyUser) ? _databaseService.GetDailyQuests(dailyUser.UserName) :
+                Task.FromResult(new DailyQuestResult { Status="unauthenticated" });
+
+        public async Task AwardDailyCrown(User user, string roundId, DateTimeOffset settledUtc)
+        {
+            await _databaseService.AwardDailyCrown(user.UserName,roundId,settledUtc);
+            // The notification only invalidates the client cache. Its next authenticated fetch owns the data.
+            try { await _hub.Clients.Client(user.ConnectionId).SendAsync("DailyQuestsChanged"); }
+            catch (Exception e)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Warn(e,
+                    "Daily reward persisted but cache notification failed. User={0}, Round={1}", user.UserName, roundId);
+            }
+        }
+
+        public Task<PremiumCollectionResult> CraftPremium(string connectionId, string cardId) =>
+            _users.TryGetValue(connectionId, out var user) ? _databaseService.CraftPremium(user.UserName, cardId) :
+                Task.FromResult(new PremiumCollectionResult { Status = "unauthenticated" });
+
+        public Task<PremiumCollectionResult> SelectPremium(string connectionId, string cardId, bool premium) =>
+            _users.TryGetValue(connectionId, out var user) ? _databaseService.SelectPremium(user.UserName, cardId, premium) :
+                Task.FromResult(new PremiumCollectionResult { Status = "unauthenticated" });
 
         public bool Match(string connectionId, string deckId, string password, int usingBlacklist)//匹配
         {
@@ -487,6 +517,8 @@ namespace Cynthia.Card.Server
                 var player = user.CurrentPlayer = new ClientPlayer(user, () => _hub);//Container.Resolve<IHubContext<GwentHub>>);
                 //设置玩家的卡组
                 player.Deck = user.Decks.Single(x => x.Id == deckId);
+                var collection = _databaseService.GetPremiumCollection(user.UserName).GetAwaiter().GetResult().Collection;
+                player.PremiumCards = new HashSet<string>(collection.SelectedCards.Intersect(collection.OwnedCards));
                 player.CurrentAvatar = user.CurrentAvatar;
                 player.CurrentBorder = user.CurrentBorder;
                 player.CurrentTitle = user.CurrentTitle;

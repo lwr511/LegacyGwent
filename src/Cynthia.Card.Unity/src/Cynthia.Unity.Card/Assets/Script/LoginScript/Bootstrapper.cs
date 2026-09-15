@@ -19,6 +19,10 @@ public class Bootstrapper : MonoBehaviour
         if (UnityEditor.EditorPrefs.GetBool("LegacyGwent.UseLocalServer." + Application.dataPath, true))
             serverUrl = "http://127.0.0.1:5005/hub/gwent";
         else
+#elif DEVELOPMENT_BUILD
+        if (System.Environment.GetCommandLineArgs().Any(x => x == "-premium-network-a" || x == "-premium-network-b"))
+            serverUrl = "http://127.0.0.1:5005/hub/gwent";
+        else
 #endif
             serverUrl = $"http://{Dns.GetHostEntry("cynthia.ovyno.com").AddressList[0]}:5005/hub/gwent";
         Debug.Log("[LegacyGwent] Connecting to " + serverUrl);
