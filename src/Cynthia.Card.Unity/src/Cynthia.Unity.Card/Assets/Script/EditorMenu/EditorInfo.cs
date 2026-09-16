@@ -21,6 +21,12 @@ public class EditorInfo : MonoBehaviour
 {
     public Assets.Script.DynamicCards.PremiumCollectionPanel PremiumPanel { get; private set; }
     public int PremiumFilter { get; private set; } = 2; // ordinary followed by its premium version
+    public bool OnlyOwned { get; private set; }
+    public void SetOwnedFilter(bool value)
+    {
+        OnlyOwned=value;
+        SetPremiumFilter(PremiumFilter);
+    }
     public static bool RightClickedPremium;
     public void SetPremiumFilter(int value)
     {
@@ -35,7 +41,7 @@ public class EditorInfo : MonoBehaviour
         foreach (var card in cards)
         {
             if (PremiumFilter != 1) { card.IsPremium = false; result.Add(card); }
-            if (PremiumFilter != 0)
+            if (PremiumFilter != 0 && (!OnlyOwned || Assets.Script.DynamicCards.PremiumCollectionClient.Owns(card.CardId)))
                 result.Add(new CardStatus(card.CardId) { IsPremium = true });
         }
         return result;
@@ -518,6 +524,8 @@ public class EditorInfo : MonoBehaviour
         var preview = EditorStatus == EditorStatus.EditorDeck ? EditorArtCard :
             EditorStatus == EditorStatus.ShowCards ? ShowArtCard : null;
         if (preview == null) return;
+        var rotating=preview.CardImg.GetComponent<Assets.Script.DynamicCards.DynamicCardView>();
+        if(rotating!=null && rotating.IsDragging)return;
         LastHoveredCard = card.CardId;
         PremiumPanel.Preview(card);
         if (preview.gameObject.activeSelf && preview.CurrentCore?.CardId == card.CardId && preview.CurrentCore.IsPremium == card.IsPremium) return;
@@ -581,7 +589,7 @@ public class EditorInfo : MonoBehaviour
     {
         if (card == null || card.IsCardBack || PremiumPanel.Busy || GameEvent.RighClickActive || SceneManager.GetSceneByName("RightClick").isLoaded) return;
         RightClickedCardID = card.CardId;
-        RightClickedPremium = Assets.Script.DynamicCards.PremiumCollectionClient.Show(card);
+        RightClickedPremium = card.IsPremium ?? Assets.Script.DynamicCards.PremiumCollectionClient.Selected(card.CardId);
         GameEvent.RighClickActive = true;
         SceneManager.LoadScene("RightClick", LoadSceneMode.Additive);
     }

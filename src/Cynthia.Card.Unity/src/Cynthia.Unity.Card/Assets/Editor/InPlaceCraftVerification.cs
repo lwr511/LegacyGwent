@@ -90,6 +90,9 @@ public static class InPlaceCraftVerification
             Check(denied.Status=="unavailable" && PremiumCollectionClient.Account.MeteoritePowder==before && locked.CardImg.GetComponent<PremiumCardAppearance>().IsLocked,
                 "rejected crafting preserves the gray card and balance without an animation");
             int instance=locked.GetInstanceID();var position=Center(locked.CardImg.rectTransform);float scroll=editor.ShowCardScroll.value;
+            editor.OpenCardDetails(new CardStatus(ids[0]){IsPremium=true});
+            await Until(()=>UnityEngine.Object.FindObjectOfType<righclickLogic>()!=null,"premium details opened for crafting");
+            await Task.Delay(500);
             editor.PremiumPanel.CraftClicked();editor.PremiumPanel.CraftClicked();
             await Until(()=>PremiumCollectionClient.Owns(ids[0]),"server craft");
             Check(Resources.FindObjectsOfTypeAll<RectMask2D>().Any(x=>x.name=="PremiumCraftInPlace" && x.gameObject.activeInHierarchy),

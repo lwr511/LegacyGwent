@@ -17,6 +17,7 @@ namespace Assets.Script.DynamicCards
         private Text wallet, status, craftLabel, selectLabel;
         private Button craft, select;
         private RectTransform actions;
+        private righclickLogic detailsOwner;
         private CardStatus current;
         private bool busy, opened;
         private bool catalogAvailable;
@@ -40,15 +41,30 @@ namespace Assets.Script.DynamicCards
             wallet = Label(currency, "PowderBalance", new Vector2(35, 0), new Vector2(280, 60), 24);
             showFilters = Filters(owner.ShowSearch);
             deckFilters = Filters(owner.EditorSearch);
-            actions = Rect("PremiumCraftActions", owner.EditorUI.transform, new Vector2(1, 0), new Vector2(-240, 180), new Vector2(355, 130));
+            actions = Rect("PremiumCraftActions", owner.EditorUI.transform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(380, 100));
             status = Label(actions, "Ownership", new Vector2(0, 45), new Vector2(355, 32), 18);
-            craft = Button(actions, "CraftPremium", Vector2.zero, new Vector2(350, 44), out craftLabel);
+            craft = Button(actions, "CraftPremium", Vector2.zero, new Vector2(380, 60), out craftLabel);
             Icon(craft.transform, "Powder", new Vector2(-143, 0), new Vector2(25, 32));
             craft.onClick.AddListener(CraftClicked);
             select = Button(actions, "SelectCardVersion", new Vector2(0, -41), new Vector2(350, 32), out selectLabel);
             selectLabel.fontSize = 17;
             select.onClick.AddListener(SelectClicked);
             RefreshLabels();
+        }
+
+        public void AttachDetails(RectTransform parent, righclickLogic owner)
+        {
+            detailsOwner=owner;
+            actions.SetParent(parent,false);
+            actions.anchorMin=actions.anchorMax=new Vector2(.5f,.5f);
+            actions.anchoredPosition=new Vector2(407,-367);
+            RefreshLabels();
+        }
+        public void DetachDetails(righclickLogic owner)
+        {
+            if(detailsOwner!=owner)return;
+            detailsOwner=null;
+            if(actions!=null && editor!=null) { actions.SetParent(editor.EditorUI.transform,false);actions.gameObject.SetActive(false); }
         }
 
         private void OnEnable() { PremiumCollectionClient.Changed += AccountChanged; }
@@ -90,20 +106,23 @@ namespace Assets.Script.DynamicCards
             var pos = sr.anchoredPosition;
             sr.sizeDelta = new Vector2(340, sr.sizeDelta.y);
             sr.anchoredPosition = pos + new Vector2(-170, 0);
-            var row = Rect("CardVersionFilters", sr.parent, sr.anchorMin, pos + new Vector2(195, 0), new Vector2(340, 40));
+            var row = Rect("CardVersionFilters", sr.parent, sr.anchorMin, pos + new Vector2(195, 12), new Vector2(340, 76));
             row.anchorMax = sr.anchorMax;
-            var labels = new[] { Text("普通卡", "Standard"), Text("闪卡", "Premium"), Text("全部", "All") };
-            var icons = new[] { "db_filter_premium_standard", "db_filter_premium_premium", "db_filter_premium_all" };
-            var result = new Button[3];
-            for (int i = 0; i < 3; i++)
+            var labels = new[] { Text("普通", "Standard"), Text("闪卡", "Premium"), Text("全部", "All"), Text("已拥有", "Owned") };
+            var icons = new[] { "db_filter_premium_standard", "db_filter_premium_premium", "db_filter_premium_all", "db_filter_owned_owned" };
+            var result = new Button[4];
+            for (int i = 0; i < result.Length; i++)
             {
                 int filter = i;
                 Text label;
-                result[i] = Button(row, "Filter" + i, new Vector2((i - 1) * 114, 0), new Vector2(110, 38), out label);
-                label.fontSize = 16; label.rectTransform.sizeDelta = new Vector2(76, 34); label.rectTransform.anchoredPosition = new Vector2(13, 0);
+                result[i] = Button(row, "Filter" + i, new Vector2((i - 1.5f) * 82, 0), new Vector2(50, 50), out label);
+                StyleButton(result[i],"btn_square_idle","btn_square_hovered","btn_square_down");
+                var selected=Rect("Selected",result[i].transform,new Vector2(.5f,.5f),Vector2.zero,new Vector2(50,50)).gameObject.AddComponent<Image>();
+                selected.sprite=Resources.Load<Sprite>("PremiumCrafting/btn_square_toggle_frame");selected.raycastTarget=false;
+                label.fontSize = 14; label.rectTransform.sizeDelta = new Vector2(80, 20); label.rectTransform.anchoredPosition = new Vector2(0, -34);
                 label.text = labels[i];
-                Icon((RectTransform)result[i].transform, icons[i], new Vector2(-38, 0), new Vector2(25, 28));
-                result[i].onClick.AddListener(() => { if (busy) return; current = null; editor.SetPremiumFilter(filter); RefreshLabels(); });
+                Icon((RectTransform)result[i].transform, icons[i], Vector2.zero, new Vector2(28, 32));
+                result[i].onClick.AddListener(() => { if (busy) return; current = null; if(filter==3)editor.SetOwnedFilter(!editor.OnlyOwned);else editor.SetPremiumFilter(filter); RefreshLabels(); });
             }
             return result;
         }
@@ -112,11 +131,11 @@ namespace Assets.Script.DynamicCards
         {
             if (wallet == null) return;
             wallet.text = Text("陨星粉尘  ", "Meteorite Powder  ") + (PremiumCollectionClient.Ready ? PremiumCollectionClient.Account.MeteoritePowder.ToString("N0") : "—");
-            actions.gameObject.SetActive(current?.IsPremium == true && (!PremiumCollectionClient.Owns(current.CardId) || error != null) &&
+            actions.gameObject.SetActive(detailsOwner!=null && current?.IsPremium == true && (!PremiumCollectionClient.Owns(current.CardId) || error != null) &&
                 (editor.EditorStatus == EditorStatus.ShowCards || editor.EditorStatus == EditorStatus.EditorDeck));
             foreach (var group in new[] { showFilters, deckFilters })
                 if (group != null) for (int i = 0; i < group.Length; i++)
-                { group[i].image.color = i == editor.PremiumFilter ? new Color(.48f, .36f, .16f) : new Color(.18f, .15f, .12f); group[i].interactable = !busy; }
+                { group[i].transform.Find("Selected").gameObject.SetActive(i==3?editor.OnlyOwned:i==editor.PremiumFilter); group[i].interactable = !busy; }
             if (current == null) return;
             bool owns = PremiumCollectionClient.Owns(current.CardId);
             int cost; bool available = PremiumCollectionClient.Costs.TryGetValue(current.CardId, out cost);
@@ -137,7 +156,7 @@ namespace Assets.Script.DynamicCards
 
         public async void CraftClicked()
         {
-            if (busy || current?.IsPremium != true || !craft.interactable) return;
+            if (busy || detailsOwner==null || current?.IsPremium != true || !craft.interactable) return;
             string card = current.CardId;
             string accountId = PremiumCollectionClient.Account.Id;
             busy = true; RefreshLabels();
@@ -156,7 +175,15 @@ namespace Assets.Script.DynamicCards
                     if (preview.gameObject.activeInHierarchy && preview.CurrentCore?.CardId == card && preview.CurrentCore.IsPremium == true)
                         targets.Add(preview.CardBorder.rectTransform);
                     var effect = gameObject.AddComponent<PremiumCraftEffect>();
-                    await effect.Play(targets, () => { if (this != null && PremiumCollectionClient.Account?.Id == accountId) editor.RefreshPremiumCards(card); });
+                    var detail=detailsOwner;
+                    if(detail!=null && detail.DisplayID==card)targets.Add(detail.CardBorder.rectTransform);
+                    await effect.Play(targets, () => {
+                        if (this != null && PremiumCollectionClient.Account?.Id == accountId)
+                        {
+                            editor.RefreshPremiumCards(card);
+                            if(detail!=null && detail.DisplayID==card)detail.RefreshCardVisual();
+                        }
+                    });
                     if (this != null) { current = new CardStatus(card) { IsPremium = true }; error = null; }
                 }
                 else error = ErrorText(result.Status);
@@ -216,11 +243,20 @@ namespace Assets.Script.DynamicCards
         private Button Button(Transform parent, string name, Vector2 pos, Vector2 size, out Text label)
         {
             var r = Rect(name, parent, new Vector2(.5f, .5f), pos, size);
-            var image = r.gameObject.AddComponent<Image>(); image.color = new Color(.22f, .17f, .11f);
-            var outline = r.gameObject.AddComponent<Outline>(); outline.effectColor = new Color(.62f, .48f, .26f); outline.effectDistance = new Vector2(1, -1);
+            var image = r.gameObject.AddComponent<Image>();
             var b = r.gameObject.AddComponent<Button>(); b.targetGraphic = image;
+            StyleButton(b,"btn_wide_idle_300","btn_wide_hovered_300","btn_wide_down_300","btn_wide_inactive_300");
             label = Label(r, "Label", Vector2.zero, size - new Vector2(8, 4), 21);
             return b;
+        }
+        private static void StyleButton(Button button,string normal,string hover,string down,string disabled=null)
+        {
+            button.image.sprite=Resources.Load<Sprite>("PremiumCrafting/"+normal);
+            button.image.color=Color.white;
+            button.transition=Selectable.Transition.SpriteSwap;
+            button.spriteState=new SpriteState { highlightedSprite=Resources.Load<Sprite>("PremiumCrafting/"+hover),
+                pressedSprite=Resources.Load<Sprite>("PremiumCrafting/"+down),
+                disabledSprite=disabled==null?button.image.sprite:Resources.Load<Sprite>("PremiumCrafting/"+disabled) };
         }
         private static void Icon(Transform parent, string name, Vector2 pos, Vector2 size)
         {

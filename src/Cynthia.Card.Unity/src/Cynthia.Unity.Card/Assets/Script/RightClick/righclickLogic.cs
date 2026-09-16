@@ -92,10 +92,15 @@ public class righclickLogic : MonoBehaviour
     }
     public void UpdateCard(string CardId)
     {
+        UpdateCard(CardId,true);
+    }
+    public void RefreshCardVisual() { UpdateCard(DisplayID,false); }
+    private void UpdateCard(string CardId,bool addHistory)
+    {
         
 
         DisplayID=CardId;
-        History.Add(DisplayID);
+        if(addHistory)History.Add(DisplayID);
         CardInfo = GwentMap.CardMap[CardId];
         int request = ++cardRequest;
         if (dynamicCardRoot == null)
@@ -220,6 +225,8 @@ public class righclickLogic : MonoBehaviour
         {
             AddLinked(ID);
         }
+        Assets.Script.DynamicCards.PremiumCardAppearance.Apply(CardImg,
+            new CardStatus(CardId){IsPremium=detailsLayout.IsPremium},CardBorder,FactionIcon);
         detailsLayout.Refresh();
     }
     public void AddLinked(string ID)

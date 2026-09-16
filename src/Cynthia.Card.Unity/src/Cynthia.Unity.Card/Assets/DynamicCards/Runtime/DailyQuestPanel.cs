@@ -14,7 +14,7 @@ namespace Assets.Script.DynamicCards
         private Text hudText, timer, balance, login, progress, status;
         private DailyResetRing ring;
         private Image crownFill;
-        private readonly Image[] crowns=new Image[6];
+        private readonly Image[] crowns=new Image[3];
         private readonly Text[] tiers=new Text[3];
         private float nextPaint;
         public bool IsOpen => page!=null;
@@ -69,7 +69,22 @@ namespace Assets.Script.DynamicCards
             var bar=Image(design,"ProgressBar","Progression_bar_bg",new Vector2(0,-35),new Vector2(910,35));bar.raycastTarget=false;
             crownFill=Image(design,"ProgressFill","Progression_bar_fill",new Vector2(0,-35),new Vector2(900,29));
             crownFill.type=UnityEngine.UI.Image.Type.Filled;crownFill.fillMethod=UnityEngine.UI.Image.FillMethod.Horizontal;crownFill.fillOrigin=0;crownFill.raycastTarget=false;
-            for(int i=0;i<6;i++) crowns[i]=Image(design,"Crown"+i,"crown-empty",new Vector2(-375+i*150,0),new Vector2(60,60));
+            for(int i=0;i<3;i++)
+            {
+                var empty=Image(design,"Crown"+i,"crown-empty",new Vector2(-300+i*300,8),new Vector2(60,60));
+                empty.color=new Color(.6f,.6f,.6f);empty.raycastTarget=false;
+                crowns[i]=Image(empty.transform,"EarnedHalf","Crown",Vector2.zero,new Vector2(60,60));
+                crowns[i].type=UnityEngine.UI.Image.Type.Filled;
+                crowns[i].fillMethod=UnityEngine.UI.Image.FillMethod.Horizontal;
+                crowns[i].fillOrigin=0;crowns[i].fillAmount=0;crowns[i].raycastTarget=false;
+            }
+            for(int i=1;i<=6;i++)
+            {
+                float x=-450+i*150;
+                var tick=Image(design,"ProgressTick"+i,null,new Vector2(x,-35),new Vector2(2,25));
+                tick.color=new Color(.92f,.8f,.48f,.9f);tick.raycastTarget=false;
+                Text(design,"ProgressStep"+i,new Vector2(x,-62),new Vector2(32,20),14).text=i.ToString();
+            }
             for(int i=0;i<3;i++)
             {
                 float x=-310+i*310;
@@ -97,21 +112,21 @@ namespace Assets.Script.DynamicCards
             var daily=PremiumCollectionClient.Account?.DailyQuests;
             var left=TimeSpan.FromSeconds(DailyQuestClient.RemainingSeconds);
             string countdown=state==null?"正在同步任务":left.TotalSeconds<=0?"正在等待每日重置":$"{(int)left.TotalHours} 小时 {left.Minutes:00} 分钟后重置";
-            hudText.text="每日任务\n"+(state==null?"正在同步":$"{daily?.Crowns??0} / 6 冠  ·  {countdown}");
+            hudText.text="每日任务\n"+(state==null?"正在同步":$"{(daily?.Crowns??0)/2f:0.#} / 3 冠  ·  {countdown}");
             ring.Value=state==null?0:(float)(DailyQuestClient.RemainingSeconds/86400d);
             if(page==null)return;
             timer.text=countdown+"  ·  中国时间 00:00";
             if(state==null || daily==null)
-            {login.text="正在同步";progress.text="— / 6";status.text=DailyQuestClient.Error??"正在获取服务器任务进度";return;}
+            {login.text="正在同步";progress.text="— / 3 王冠";crownFill.fillAmount=0;foreach(var crown in crowns)crown.fillAmount=0;status.text=DailyQuestClient.Error??"正在获取服务器任务进度";return;}
             login.text="+"+state.LoginPowder+" 粉尘\n"+(daily.LoginGranted?"已到账":"未完成");
             int cap=state.Tiers.Last().Crowns;
             crownFill.fillAmount=daily.Crowns/(float)cap;
-            progress.text=$"{daily.Crowns} / {cap} 小王冠";
+            progress.text=$"{daily.Crowns/2f:0.#} / {cap/2f:0.#} 王冠";
             for(int i=0;i<crowns.Length;i++)
-            {crowns[i].sprite=Resources.Load<Sprite>("DailyQuests/"+(i<daily.Crowns?"Crown":"crown-empty"));crowns[i].color=i<daily.Crowns?Color.white:new Color(.6f,.6f,.6f);}
+            {crowns[i].fillAmount=Mathf.Clamp01((daily.Crowns-i*2)/2f);}
             for(int i=0;i<tiers.Length;i++)
-            {var tier=state.Tiers[i];tiers[i].text=$"{tier.Crowns} 个小王冠\n+{tier.Powder} 粉尘\n"+(daily.Crowns>=tier.Crowns?"已到账":"未完成");tiers[i].color=daily.Crowns>=tier.Crowns?new Color(.92f,.8f,.48f):Color.white;}
-            status.text=DailyQuestClient.Error??(daily.Crowns>=cap?"今日奖励已全部获得，明日继续。":"每赢一个真人对局的小局，获得一个小王冠。奖励自动到账。");
+            {var tier=state.Tiers[i];tiers[i].text=$"{tier.Crowns/2f:0.#} 个王冠\n+{tier.Powder} 粉尘\n"+(daily.Crowns>=tier.Crowns?"已到账":"未完成");tiers[i].color=daily.Crowns>=tier.Crowns?new Color(.92f,.8f,.48f):Color.white;}
+            status.text=DailyQuestClient.Error??(daily.Crowns>=cap?"今日奖励已全部获得，明日继续。":"每赢一个真人对局的小局，获得半个王冠；6 个刻度对应 3 个完整王冠。奖励自动到账。");
             balance.text=$"今日已获得 {daily.PowderGranted} / {state.DailyCap} 粉尘    ·    持有 {PremiumCollectionClient.Account.MeteoritePowder} 粉尘";
         }
         private void OnDisable(){Close();}

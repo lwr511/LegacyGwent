@@ -27,6 +27,9 @@ namespace Assets.Script.DynamicCards
         private int navigationIndex = -1;
         private string navigationId;
         private bool? navigationPremium;
+        private PremiumCollectionPanel collection;
+        public bool IsPremium => PremiumFor(owner.DisplayID) ?? (owner.DisplayID==EditorInfo.RightClickedCardID
+            ? EditorInfo.RightClickedPremium : PremiumCollectionClient.Selected(owner.DisplayID));
         public bool? PremiumFor(string id) => id == navigationId ? navigationPremium : null;
 
         public void Initialize(righclickLogic controller)
@@ -75,6 +78,9 @@ namespace Assets.Script.DynamicCards
             var editor = Resources.FindObjectsOfTypeAll<EditorInfo>().FirstOrDefault(x => x.gameObject.scene.IsValid() && x.EditorUI.activeInHierarchy);
             if (editor != null)
             {
+                collection=editor.PremiumPanel;
+                collection.AttachDetails(design,owner);
+                owner.SoundButton.GetComponent<RectTransform>().anchoredPosition=new Vector2(407,300);
                 var context = editor.EditorStatus == EditorStatus.EditorDeck ? editor.EditorCardsContext : editor.ShowCardsContent;
                 navigation.AddRange(context.GetComponentsInChildren<CardShowInfo>().Select(x => x.CurrentCore));
             }
@@ -93,10 +99,12 @@ namespace Assets.Script.DynamicCards
                     (owner.DisplayID != EditorInfo.RightClickedCardID || x.IsPremium == EditorInfo.RightClickedPremium));
             previous.gameObject.SetActive(navigationIndex > 0); next.gameObject.SetActive(navigationIndex >= 0 && navigationIndex < navigation.Count - 1);
             LayoutRebuilder.ForceRebuildLayoutImmediate(details);
+            if(collection!=null)collection.Preview(new CardStatus(owner.DisplayID){IsPremium=IsPremium});
         }
 
         private void Navigate(int step)
         {
+            if(collection!=null && collection.Busy)return;
             int index = navigationIndex + step;
             if (index < 0 || index >= navigation.Count) return;
             navigationIndex = index; navigationId = navigation[index].CardId; navigationPremium = navigation[index].IsPremium;
@@ -106,10 +114,11 @@ namespace Assets.Script.DynamicCards
         public void Close(UnityEngine.Events.UnityAction completed)
         {
             if (closing) return; closing = true;
+            if(collection!=null)collection.DetachDetails(owner);
             fade.DOKill(); fade.interactable = false;
             fade.DOFade(0, .3f).SetUpdate(true).OnComplete(() => completed());
         }
-        private void OnDestroy() { if (fade != null) fade.DOKill(); }
+        private void OnDestroy() { if(collection!=null)collection.DetachDetails(owner);if (fade != null) fade.DOKill(); }
 
         private void BuildRelated()
         {

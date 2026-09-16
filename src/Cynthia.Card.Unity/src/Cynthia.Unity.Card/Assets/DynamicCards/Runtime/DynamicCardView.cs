@@ -10,6 +10,9 @@ namespace Assets.Script.DynamicCards
     // A child of the existing art image: existing borders, badges and card backs retain their draw order.
     public sealed class DynamicCardView : MonoBehaviour
     {
+        private const float HorizontalLimit=.7f;
+        private const float VerticalLimit=1f/3f;
+        public bool IsDragging => dragging;
         private Image art;
         private RawImage surface;
         private Material surfaceMaterial;
@@ -341,7 +344,7 @@ namespace Assets.Script.DynamicCards
                 // Return to neutral first; then resume the old client's gentle carousel motion.
                 float idleTime = Mathf.Min(age - 1, Time.unscaledTime - releasedAt - 2);
                 float blend = Mathf.SmoothStep(0, 1, Mathf.Clamp01(idleTime));
-                target = idleTime > 0 ? new Vector2(Mathf.Sin(idleTime * .47f), Mathf.Sin(idleTime * .73f)) * blend : Vector2.zero;
+                target = idleTime > 0 ? new Vector2(Mathf.Sin(idleTime * .47f) * HorizontalLimit, Mathf.Sin(idleTime * .73f) * VerticalLimit) * blend : Vector2.zero;
             }
             current = Vector2.Lerp(current, target, 1 - Mathf.Exp(-(dragging ? 18 : 12) * Time.unscaledDeltaTime));
             float pitch = Mathf.Lerp(entry.xStart, entry.xEnd, (current.y + 1) * .5f);
@@ -427,7 +430,7 @@ namespace Assets.Script.DynamicCards
             // Screen-relative travel keeps the same feel at different window sizes.
             float referenceScale = Mathf.Max(1, Screen.height) / 900f;
             target = dragStart + new Vector2(-delta.x / (150 * referenceScale), delta.y / (120 * referenceScale));
-            target = new Vector2(Mathf.Clamp(target.x, -1, 1), Mathf.Clamp(target.y, -1, 1));
+            target = new Vector2(Mathf.Clamp(target.x, -HorizontalLimit, HorizontalLimit), Mathf.Clamp(target.y, -VerticalLimit, VerticalLimit));
         }
         public void OnEndDrag(PointerEventData data) { ReturnToCenter(); }
         internal void ReturnToCenter() { if (dragging) releasedAt = Time.unscaledTime; dragging = false; target = Vector2.zero; }

@@ -518,7 +518,8 @@ namespace Cynthia.Card.Server
                 //设置玩家的卡组
                 player.Deck = user.Decks.Single(x => x.Id == deckId);
                 var collection = _databaseService.GetPremiumCollection(user.UserName).GetAwaiter().GetResult().Collection;
-                player.PremiumCards = new HashSet<string>(collection.SelectedCards.Intersect(collection.OwnedCards));
+                // Match appearance is authoritative: every premium this player owns is available in battle.
+                player.PremiumCards = new HashSet<string>(collection.OwnedCards);
                 player.CurrentAvatar = user.CurrentAvatar;
                 player.CurrentBorder = user.CurrentBorder;
                 player.CurrentTitle = user.CurrentTitle;

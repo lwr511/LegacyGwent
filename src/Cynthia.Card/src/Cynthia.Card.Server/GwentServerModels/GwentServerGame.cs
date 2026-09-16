@@ -14,6 +14,7 @@ namespace Cynthia.Card.Server
         public Action<GameResult> GameResultEvent { get; set; }
         public Func<int, string, DateTimeOffset, Task> RoundWon { get; set; }
         private readonly string dailyMatchId = Guid.NewGuid().ToString("N");
+        private static bool UsesPremium(Player player, string cardId) => player is AIPlayer || player.PremiumCards.Contains(cardId);
         public GameResult TempGameResult { get; set; } = new GameResult();
         public int[] RedCoin { get; private set; } = new int[3];
         public Pipeline OperactionList { get; private set; } = new Pipeline();
@@ -110,7 +111,8 @@ namespace Cynthia.Card.Server
             var playerIndex = RedCoin[0];
             for (int i = Balance.ComparePointMin; i <= Balance.ComparePointMax; i++)
             {
-                selectList.Add(new CardStatus(cardId) { Name = i.ToString(), Strength = i });
+                // System-owned opening bid artwork is always premium, independent of either wallet.
+                selectList.Add(new CardStatus(cardId) { Name = i.ToString(), Strength = i, IsPremium = true });
             }
             var task1 = GetSelectMenuCards(Player1Index, selectList, isCanOver: false, title: "请选择你认为后手价值的点数");
             var task2 = GetSelectMenuCards(Player2Index, selectList, isCanOver: false, title: "请选择你认为后手价值的点数");
@@ -691,7 +693,7 @@ namespace Cynthia.Card.Server
         {
             foreach (var card in info.SelectList)
                 if (!card.IsCardBack && !card.Conceal && card.IsPremium == null)
-                    card.IsPremium = Players[playerIndex].PremiumCards.Contains(card.CardId);
+                    card.IsPremium = UsesPremium(Players[playerIndex],card.CardId);
             if (info.SelectList.Count == 0)
             {
                 return new List<int>();
@@ -1714,9 +1716,9 @@ namespace Cynthia.Card.Server
             )
             .Mess(RNG).ToList();
             foreach (var card in PlayersLeader[Player1Index].Concat(PlayersDeck[Player1Index]))
-                card.Status.IsPremium = player1.PremiumCards.Contains(card.Status.CardId);
+                card.Status.IsPremium = UsesPremium(player1,card.Status.CardId);
             foreach (var card in PlayersLeader[Player2Index].Concat(PlayersDeck[Player2Index]))
-                card.Status.IsPremium = player2.PremiumCards.Contains(card.Status.CardId);
+                card.Status.IsPremium = UsesPremium(player2,card.Status.CardId);
         }
         public async Task SendBigRoundEndToCemetery()
         {
@@ -1776,7 +1778,7 @@ namespace Cynthia.Card.Server
             //创造对应的卡
             var creatCard = new GameCard(this, playerIndex, new CardStatus(cardId, PlayersFaction[playerIndex], RowPosition.None), cardId);
             setting?.Invoke(creatCard.Status);
-            creatCard.Status.IsPremium = Players[playerIndex].PremiumCards.Contains(creatCard.Status.CardId);
+            creatCard.Status.IsPremium = UsesPremium(Players[playerIndex],creatCard.Status.CardId);
             //将创造的卡以不显示的方式移动到目标位置!
             await LogicCardMove(creatCard, row, position.CardIndex);
             //发送信息,显示创造的卡
