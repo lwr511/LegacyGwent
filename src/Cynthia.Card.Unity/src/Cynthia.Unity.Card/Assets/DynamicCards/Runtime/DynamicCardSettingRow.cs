@@ -39,13 +39,13 @@ namespace Assets.Script.DynamicCards
             }
             controller.RefreshLabels();
         }
-        private void OnEnable() { if (choice != null) RefreshLabels(); }
+        private void OnEnable() { TextLocalization.LanguageChanged += RefreshLabels; if (choice != null) RefreshLabels(); }
+        private void OnDisable() { TextLocalization.LanguageChanged -= RefreshLabels; }
         private void RefreshLabels()
         {
-            var locale = DependencyResolver.Container.Resolve<LocalizationService>().TextLocalization.ChosenLanguage.Filename.ToLowerInvariant();
-            bool chinese = locale.Contains("cn") || locale.Contains("zh");
-            choice.ChoseList = new List<string> { chinese ? "关闭" : "Off", chinese ? "开启" : "On" };
-            if (label != null) label.text = chinese ? "动态卡牌" : "Animated cards";
+            if (choice == null) return;
+            choice.ChoseList = new List<string> { "Settings_Off", "Settings_On" };
+            if (label != null) label.text = LocalizedLabel.Get("Settings_AnimatedCards");
             choice.Index = DynamicCardSettings.Enabled ? 1 : 0;
         }
     }

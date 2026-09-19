@@ -1,4 +1,5 @@
 using System;
+using Assets.Script.Localization;
 using System.Globalization;
 using System.Threading.Tasks;
 using Autofac;
@@ -13,14 +14,15 @@ namespace Assets.Script.DynamicCards
     {
         public static event Action Changed;
         public static DailyQuestResult State { get; private set; }
-        public static string Error { get; private set; }
+        private static string errorKey;
+        public static string Error => errorKey == null ? null : LocalizedLabel.Get(errorKey);
         private static int session;
         private static Task pending;
         private static bool refreshQueued;
         private static float sampledAt, lastAttempt = -100;
         private static double secondsToReset;
         public static double RemainingSeconds => Math.Max(0,secondsToReset-(Time.realtimeSinceStartup-sampledAt));
-        public static void Reset() { session++; State=null; Error=null; pending=null; refreshQueued=false; lastAttempt=-100; Changed?.Invoke(); }
+        public static void Reset() { session++; State=null; errorKey=null; pending=null; refreshQueued=false; lastAttempt=-100; Changed?.Invoke(); }
         public static Task Refresh(bool force=false)
         {
             if (pending != null)
@@ -63,15 +65,15 @@ namespace Assets.Script.DynamicCards
                 lastAttempt=Time.realtimeSinceStartup;
                 var result=await client.HubConnection.InvokeAsync<DailyQuestResult>("GetDailyQuests");
                 if (version!=session || client.User?.Id!=user) return;
-                if (!result.Success) { Error="任务同步暂不可用"; Changed?.Invoke(); return; }
+                if (!result.Success) { errorKey="DailyQuest_SyncError"; Changed?.Invoke(); return; }
                 var server=DateTimeOffset.Parse(result.ServerUtc,CultureInfo.InvariantCulture);
                 var reset=DateTimeOffset.Parse(result.ResetUtc,CultureInfo.InvariantCulture);
                 sampledAt=Time.realtimeSinceStartup; secondsToReset=(reset-server).TotalSeconds;
-                State=result; Error=null;
+                State=result; errorKey=null;
                 PremiumCollectionClient.Accept(result.Wallet,user);
                 Changed?.Invoke();
             }
-            catch (Exception e) { if(version==session) { Error="任务同步暂不可用"; Changed?.Invoke(); Debug.LogWarning("Daily quests: "+e.Message); } }
+            catch (Exception e) { if(version==session) { errorKey="DailyQuest_SyncError"; Changed?.Invoke(); Debug.LogWarning("Daily quests: "+e.Message); } }
         }
     }
 }

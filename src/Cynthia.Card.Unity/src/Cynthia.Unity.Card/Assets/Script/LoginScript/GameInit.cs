@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using Cynthia.Card.Client;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
@@ -39,6 +39,27 @@ public class GameInit : MonoBehaviour
         ConfigureGame();
         LoadServerMessage();
     }
+
+    private int newsRequest;
+    private void OnEnable() { TextLocalization.LanguageChanged += LanguageChanged; }
+    private void OnDisable() { TextLocalization.LanguageChanged -= LanguageChanged; newsRequest++; }
+    private async void LanguageChanged()
+    {
+        if (_translator == null || _gwentClientService == null) return;
+        try { await RefreshNews(); }
+        catch { if (this != null && NotesText != null) NotesText.text = _translator.GetText("LoginMenu_NewsError"); }
+    }
+    private async System.Threading.Tasks.Task RefreshNews()
+    {
+        int request = ++newsRequest;
+        string language = _translator.TextLocalization.ChosenLanguage.Filename;
+        string news = await _gwentClientService.GetLocalizedNotes(language);
+        if (this == null || request != newsRequest || NotesText == null) return;
+        NotesText.text = news.Replace("\\n", "\n");
+        LayoutRebuilder.ForceRebuildLayoutImmediate(NotesText.rectTransform);
+        NotesContext.sizeDelta = new Vector2(NotesContext.sizeDelta.x, NotesText.rectTransform.sizeDelta.y);
+    }
+
     public async void GetLink()
     {
         link = await _gwentClientService.GetDownloadLink();
@@ -105,20 +126,7 @@ public class GameInit : MonoBehaviour
         }
         try
         {
-            var textLanguageManager = DependencyResolver.Container.Resolve<LocalizationService>().TextLocalization;
-            var language = textLanguageManager.ChosenLanguage.Filename;
-            if (language=="cn")
-            {
-                NotesText.text = (await _gwentClientService.GetNotes()).Replace("\\n", "\n");
-                LayoutRebuilder.ForceRebuildLayoutImmediate(NotesText.GetComponent<RectTransform>());
-                NotesContext.sizeDelta = new Vector2(NotesContext.sizeDelta.x, NotesText.GetComponent<RectTransform>().sizeDelta.y);
-            }
-            if (Array.Exists(new[] { "en", "ru", "pl","cn" }, element => element == language))
-            {
-                NotesText.text = (await _gwentClientService.GetNotesEN()).Replace("\\n", "\n");
-                LayoutRebuilder.ForceRebuildLayoutImmediate(NotesText.GetComponent<RectTransform>());
-                NotesContext.sizeDelta = new Vector2(NotesContext.sizeDelta.x, NotesText.GetComponent<RectTransform>().sizeDelta.y);
-            }
+            await RefreshNews();
         }
         catch
         {

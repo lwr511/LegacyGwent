@@ -214,7 +214,7 @@ namespace Cynthia.Card.Client
             {
                 if (clientTrinketMapVersion != severTrinketMapVersion)
                 {
-                    infoText.text = "loading trinkets information";
+                    infoText.text = _translator.GetText("LoginMenu_TrinketDataUpdating");
                     var loadedAvatarMap = JsonConvert.DeserializeObject<Dictionary<string, TrinketAvatar>>(await GetAvatarMap());
                     TrinketMap.AvatarMap = loadedAvatarMap;
                     var loadedBorderMap = JsonConvert.DeserializeObject<Dictionary<string, Border>>(await GetBorderMap());
@@ -247,13 +247,19 @@ namespace Cynthia.Card.Client
                 // 1. Locales are not downloaded and the client is outdated
                 // 2. There came out a new version of locales since the last time we downloaded them
 
+                string localeVersion = null;
+                try { localeVersion = await HubConnection.InvokeAsync<string>("GetGameLocalesVersion"); }
+                catch (Microsoft.AspNetCore.SignalR.HubException) { /* Older servers use the card-map version. */ }
+                // Translation-only fixes must invalidate caches even when card rules do not change.
                 if (!fileHandler.AreFilesDownloaded() && clientVersion != serverVersion ||
-                    localesWereLastUpdatedTo != serverVersion)
+                    localesWereLastUpdatedTo != serverVersion ||
+                    localeVersion != null && PlayerPrefs.GetString("LocalizationContentVersion", "") != localeVersion)
                 {
                     infoText.text = _translator.GetText("LoginMenu_LanguagesUpdating");
                     var loadedGameLocales = JsonConvert.DeserializeObject<IList<GameLocale>>(await GetGameLocales());
                     fileHandler.SaveGameLocales(loadedGameLocales);
                     PlayerPrefs.SetString("LocalizationVersion", serverVersion.ToString());
+                    if (localeVersion != null) PlayerPrefs.SetString("LocalizationContentVersion", localeVersion);
                 }
                 infoText.text = _translator.GetText("LoginMenu_GameUpdated");
             }
@@ -350,6 +356,16 @@ namespace Cynthia.Card.Client
         public Task<string> GetNotesEN()
         {
             return HubConnection.InvokeAsync<string>("GetNotesEN");
+        }
+
+        public async Task<string> GetLocalizedNotes(string language)
+        {
+            // Keep compatibility with servers that do not yet expose localized news.
+            if (language == "cn") return await GetNotes();
+            if (language == "en") return await GetNotesEN();
+            try { return await HubConnection.InvokeAsync<string>("GetLocalizedNotes", language); }
+            catch (Microsoft.AspNetCore.SignalR.HubException)
+            { return _translator.GetText("LoginMenu_NewsBody"); }
         }
         public Task<string> GetDownloadLink()
         {

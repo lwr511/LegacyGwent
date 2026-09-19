@@ -1,4 +1,5 @@
 using System;
+using Assets.Script.Localization;
 using System.Linq;
 using Cynthia.Card;
 using UnityEngine;
@@ -38,7 +39,7 @@ namespace Assets.Script.DynamicCards
             ring.raycastTarget=false;
             Image(hud,"Clock","timer_preview_icon",new Vector2(-115,0),new Vector2(22,30)).raycastTarget=false;
             hudText=Text(hud,"DailyTasks",new Vector2(30,0),new Vector2(220,78),16);
-            DailyQuestClient.Changed+=Paint; PremiumCollectionClient.Changed+=Paint;
+            DailyQuestClient.Changed+=Paint; PremiumCollectionClient.Changed+=Paint; TextLocalization.LanguageChanged+=Paint;
             Paint();
         }
         public void Open()
@@ -57,14 +58,14 @@ namespace Assets.Script.DynamicCards
                 var art=Image(design,"SideOrnament",side<0?"ranked_play_season_left_white":"ranked_play_season_right_white",new Vector2(side*550,-24),new Vector2(1000,606));
                 art.preserveAspect=true;art.color=new Color(1,1,1,.5f);art.raycastTarget=false;
             }
-            Text(design,"Title",new Vector2(0,365),new Vector2(930,70),38).text="每日任务";
+            LocalizedLabel.Set(Text(design,"Title",new Vector2(0,365),new Vector2(930,70),38),"DailyQuest_Title");
             timer=Text(design,"ResetCountdown",new Vector2(0,305),new Vector2(930,45),21);
             var loginBg=Image(design,"LoginReward","current_player_bg",new Vector2(0,200),new Vector2(930,110));
-            Text(loginBg.transform,"Title",new Vector2(-260,15),new Vector2(320,40),25).text="每日登录";
-            Text(loginBg.transform,"Description",new Vector2(-220,-24),new Vector2(400,32),18).text="每天登录，奖励自动到账";
+            LocalizedLabel.Set(Text(loginBg.transform,"Title",new Vector2(-260,15),new Vector2(320,40),25),"DailyQuest_LoginTitle");
+            LocalizedLabel.Set(Text(loginBg.transform,"Description",new Vector2(-220,-24),new Vector2(400,32),18),"DailyQuest_LoginDescription");
             var powder=Image(loginBg.transform,"Powder",null,new Vector2(215,0),new Vector2(48,48));powder.sprite=Resources.Load<Sprite>("PremiumCrafting/Powder");
             login=Text(loginBg.transform,"LoginStatus",new Vector2(345,0),new Vector2(220,80),22);
-            Text(design,"CrownTitle",new Vector2(-260,88),new Vector2(410,50),28).text="每日小局胜利";
+            LocalizedLabel.Set(Text(design,"CrownTitle",new Vector2(-260,88),new Vector2(410,50),28),"DailyQuest_RoundsTitle");
             progress=Text(design,"CrownCount",new Vector2(290,88),new Vector2(350,50),23);
             var bar=Image(design,"ProgressBar","Progression_bar_bg",new Vector2(0,-35),new Vector2(910,35));bar.raycastTarget=false;
             crownFill=Image(design,"ProgressFill","Progression_bar_fill",new Vector2(0,-35),new Vector2(900,29));
@@ -96,7 +97,7 @@ namespace Assets.Script.DynamicCards
             var close=Rect("CloseDailyQuests",design,new Vector2(0,-400),new Vector2(240,50));
             var click=close.gameObject.AddComponent<Image>();click.color=Color.clear;
             var closeButton=close.gameObject.AddComponent<Button>();closeButton.targetGraphic=click;closeButton.onClick.AddListener(Close);
-            Text(close,"Label",Vector2.zero,new Vector2(240,50),24).text="[Esc]  关闭";
+            LocalizedLabel.Set(Text(close,"Label",Vector2.zero,new Vector2(240,50),24),"Common_CloseEsc");
             _=DailyQuestClient.Refresh(true);Paint();
         }
         public void Close() { if(page!=null)Destroy(page.gameObject);page=null; }
@@ -111,31 +112,31 @@ namespace Assets.Script.DynamicCards
             var state=DailyQuestClient.State;
             var daily=PremiumCollectionClient.Account?.DailyQuests;
             var left=TimeSpan.FromSeconds(DailyQuestClient.RemainingSeconds);
-            string countdown=state==null?"正在同步任务":left.TotalSeconds<=0?"正在等待每日重置":$"{(int)left.TotalHours} 小时 {left.Minutes:00} 分钟后重置";
-            hudText.text="每日任务\n"+(state==null?"正在同步":$"{(daily?.Crowns??0)/2f:0.#} / 3 冠  ·  {countdown}");
+            string countdown=state==null?LocalizedLabel.Get("DailyQuest_Syncing"):left.TotalSeconds<=0?LocalizedLabel.Get("DailyQuest_ResetPending"):LocalizedLabel.Get("DailyQuest_Countdown",(int)left.TotalHours,left.Minutes);
+            hudText.text=LocalizedLabel.Get("DailyQuest_Title")+"\n"+(state==null?LocalizedLabel.Get("Common_Syncing"):LocalizedLabel.Get("DailyQuest_HudProgress",(daily?.Crowns??0)/2f,countdown));
             ring.Value=state==null?0:(float)(DailyQuestClient.RemainingSeconds/86400d);
             if(page==null)return;
-            timer.text=countdown+"  ·  中国时间 00:00";
+            timer.text=LocalizedLabel.Get("DailyQuest_ResetTime",countdown);
             if(state==null || daily==null)
-            {login.text="正在同步";progress.text="— / 3 王冠";crownFill.fillAmount=0;foreach(var crown in crowns)crown.fillAmount=0;status.text=DailyQuestClient.Error??"正在获取服务器任务进度";return;}
-            login.text="+"+state.LoginPowder+" 粉尘\n"+(daily.LoginGranted?"已到账":"未完成");
+            {login.text=LocalizedLabel.Get("Common_Syncing");progress.text=LocalizedLabel.Get("DailyQuest_Progress","—",3);crownFill.fillAmount=0;foreach(var crown in crowns)crown.fillAmount=0;foreach(var tier in tiers)tier.text="";balance.text="";status.text=DailyQuestClient.Error??LocalizedLabel.Get("DailyQuest_Fetching");return;}
+            login.text=LocalizedLabel.Get("DailyQuest_LoginReward",state.LoginPowder,LocalizedLabel.Get(daily.LoginGranted?"DailyQuest_Granted":"DailyQuest_Incomplete"));
             int cap=state.Tiers.Last().Crowns;
             crownFill.fillAmount=daily.Crowns/(float)cap;
-            progress.text=$"{daily.Crowns/2f:0.#} / {cap/2f:0.#} 王冠";
+            progress.text=LocalizedLabel.Get("DailyQuest_Progress",daily.Crowns/2f,cap/2f);
             for(int i=0;i<crowns.Length;i++)
             {crowns[i].fillAmount=Mathf.Clamp01((daily.Crowns-i*2)/2f);}
             for(int i=0;i<tiers.Length;i++)
-            {var tier=state.Tiers[i];tiers[i].text=$"{tier.Crowns/2f:0.#} 个王冠\n+{tier.Powder} 粉尘\n"+(daily.Crowns>=tier.Crowns?"已到账":"未完成");tiers[i].color=daily.Crowns>=tier.Crowns?new Color(.92f,.8f,.48f):Color.white;}
-            status.text=DailyQuestClient.Error??(daily.Crowns>=cap?"今日奖励已全部获得，明日继续。":"每赢一个真人对局的小局，获得半个王冠；6 个刻度对应 3 个完整王冠。奖励自动到账。");
-            balance.text=$"今日已获得 {daily.PowderGranted} / {state.DailyCap} 粉尘    ·    持有 {PremiumCollectionClient.Account.MeteoritePowder} 粉尘";
+            {var tier=state.Tiers[i];tiers[i].text=LocalizedLabel.Get("DailyQuest_Tier",tier.Crowns/2f,tier.Powder,LocalizedLabel.Get(daily.Crowns>=tier.Crowns?"DailyQuest_Granted":"DailyQuest_Incomplete"));tiers[i].color=daily.Crowns>=tier.Crowns?new Color(.92f,.8f,.48f):Color.white;}
+            status.text=DailyQuestClient.Error??LocalizedLabel.Get(daily.Crowns>=cap?"DailyQuest_Complete":"DailyQuest_Rules");
+            balance.text=LocalizedLabel.Get("DailyQuest_Wallet",daily.PowderGranted,state.DailyCap,PremiumCollectionClient.Account.MeteoritePowder);
         }
         private void OnDisable(){Close();}
-        private void OnDestroy(){DailyQuestClient.Changed-=Paint;PremiumCollectionClient.Changed-=Paint;Close();}
+        private void OnDestroy(){DailyQuestClient.Changed-=Paint;PremiumCollectionClient.Changed-=Paint;TextLocalization.LanguageChanged-=Paint;Close();}
         private static RectTransform Rect(string name,Transform parent,Vector2 pos,Vector2 size)=>PremiumCollectionPanel.Rect(name,parent,new Vector2(.5f,.5f),pos,size);
         private static Image Image(Transform parent,string name,string sprite,Vector2 pos,Vector2 size)
         {var image=Rect(name,parent,pos,size).gameObject.AddComponent<Image>();if(sprite!=null)image.sprite=Resources.Load<Sprite>("DailyQuests/"+sprite);return image;}
         private Text Text(Transform parent,string name,Vector2 pos,Vector2 size,int fontSize)
-        {var text=Rect(name,parent,pos,size).gameObject.AddComponent<Text>();text.font=font;text.fontSize=fontSize;text.alignment=TextAnchor.MiddleCenter;text.color=Color.white;text.raycastTarget=false;return text;}
+        {var text=Rect(name,parent,pos,size).gameObject.AddComponent<Text>();text.font=font;text.fontSize=fontSize;text.resizeTextForBestFit=true;text.resizeTextMinSize=Mathf.Max(11,fontSize-5);text.resizeTextMaxSize=fontSize;text.alignment=TextAnchor.MiddleCenter;text.color=Color.white;text.raycastTarget=false;return text;}
     }
     public sealed class DailyResetRing : MaskableGraphic
     {

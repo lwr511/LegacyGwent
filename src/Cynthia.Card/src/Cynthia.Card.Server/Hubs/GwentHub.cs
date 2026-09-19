@@ -105,12 +105,15 @@ namespace Cynthia.Card.Server
         public string GetBorderMap() => _gwentServerService.GetBorderMap(); // retreive border info from server
         public string GetTitleMap() => _gwentServerService.GetTitleMap(); // retreive title info from server
         public string GetGameLocales() => _gwentServerService.GetGameLocales();
+        public string GetGameLocalesVersion() => _gwentServerService.GetGameLocalesVersion();
 
         public async Task<string> GetLatestVersion() => await _gwentServerService.GetLatestVersion(Context.ConnectionId);
 
         public async Task<string> GetNotes() => await _gwentServerService.GetNotes(Context.ConnectionId);
 
         public async Task<string> GetNotesEN() => await _gwentServerService.GetNotesEN(Context.ConnectionId);
+
+        public Task<string> GetLocalizedNotes(string language) => _gwentServerService.GetLocalizedNotes(Context.ConnectionId, language);
 
         public async Task<string> GetDownloadLink() => await _gwentServerService.GetDownloadLink(Context.ConnectionId);   
 

@@ -27,10 +27,6 @@ namespace Assets.Script.DynamicCards
         private LocalizationService translator;
         public bool Busy => busy;
         public string CurrentCardId => current?.CardId;
-        private bool Chinese => translator.TextLocalization.ChosenLanguage.Filename == "cn" ||
-            translator.TextLocalization.ChosenLanguage.Filename.StartsWith("cn.");
-        internal string Text(string cn, string en) => Chinese ? cn : en;
-
         public void Initialize(EditorInfo owner)
         {
             editor = owner;
@@ -68,14 +64,14 @@ namespace Assets.Script.DynamicCards
             if(actions!=null && editor!=null) { actions.SetParent(editor.EditorUI.transform,false);actions.gameObject.SetActive(false); }
         }
 
-        private void OnEnable() { PremiumCollectionClient.Changed += AccountChanged; }
-        private void OnDisable() { PremiumCollectionClient.Changed -= AccountChanged; opened = false; }
+        private void OnEnable() { PremiumCollectionClient.Changed += AccountChanged; TextLocalization.LanguageChanged += RefreshLabels; }
+        private void OnDisable() { PremiumCollectionClient.Changed -= AccountChanged; TextLocalization.LanguageChanged -= RefreshLabels; opened = false; }
         public async void Open()
         {
             opened = true; current = null; error = null;
             RefreshLabels();
             try { await PremiumCollectionClient.Refresh(); }
-            catch (Exception e) { error = Text("粉尘同步失败，重新进入收藏重试", "Collection unavailable. Reopen to retry."); Debug.LogWarning(e.Message); }
+            catch (Exception e) { error = "Premium_SyncError"; Debug.LogWarning(e.Message); }
             if (this != null) RefreshLabels();
         }
 
@@ -109,7 +105,7 @@ namespace Assets.Script.DynamicCards
             sr.anchoredPosition = pos + new Vector2(-170, 0);
             var row = Rect("CardVersionFilters", sr.parent, sr.anchorMin, pos + new Vector2(195, 12), new Vector2(340, 76));
             row.anchorMax = sr.anchorMax;
-            var labels = new[] { Text("普通", "Standard"), Text("闪卡", "Premium"), Text("全部", "All"), Text("已拥有", "Owned") };
+            var labels = new[] { "Premium_Standard", "Premium_Premium", "Premium_All", "Premium_Owned" };
             var icons = new[] { "db_filter_premium_standard", "db_filter_premium_premium", "db_filter_premium_all", "db_filter_owned_owned" };
             var result = new Button[4];
             for (int i = 0; i < result.Length; i++)
@@ -120,8 +116,9 @@ namespace Assets.Script.DynamicCards
                 StyleButton(result[i],"btn_square_idle","btn_square_hovered","btn_square_down");
                 var selected=Rect("Selected",result[i].transform,new Vector2(.5f,.5f),Vector2.zero,new Vector2(50,50)).gameObject.AddComponent<Image>();
                 selected.sprite=Resources.Load<Sprite>("PremiumCrafting/btn_square_toggle_frame");selected.raycastTarget=false;
-                label.fontSize = 14; label.rectTransform.sizeDelta = new Vector2(80, 20); label.rectTransform.anchoredPosition = new Vector2(0, -34);
-                label.text = labels[i];
+                label.fontSize = 14; label.resizeTextMaxSize = 14; label.resizeTextMinSize = 10;
+                label.rectTransform.sizeDelta = new Vector2(80, 20); label.rectTransform.anchoredPosition = new Vector2(0, -34);
+                LocalizedLabel.Set(label, labels[i]);
                 Icon((RectTransform)result[i].transform, icons[i], Vector2.zero, new Vector2(28, 32));
                 result[i].onClick.AddListener(() => { if (busy) return; current = null; if(filter==3)editor.SetOwnedFilter(!editor.OnlyOwned);else editor.SetPremiumFilter(filter); RefreshLabels(); });
             }
@@ -131,7 +128,7 @@ namespace Assets.Script.DynamicCards
         private void RefreshLabels()
         {
             if (wallet == null) return;
-            wallet.text = Text("陨星粉尘  ", "Meteorite Powder  ") + (PremiumCollectionClient.Ready ? PremiumCollectionClient.Account.MeteoritePowder.ToString("N0") : "—");
+            wallet.text = LocalizedLabel.Get("Premium_Wallet", PremiumCollectionClient.Ready ? PremiumCollectionClient.Account.MeteoritePowder.ToString("N0", translator.TextLocalization.Culture) : "—");
             actions.gameObject.SetActive(detailsOwner != null && current?.IsPremium == true &&
                 (editor.EditorStatus == EditorStatus.ShowCards || editor.EditorStatus == EditorStatus.EditorDeck));
             foreach (var group in new[] { showFilters, deckFilters })
@@ -142,19 +139,19 @@ namespace Assets.Script.DynamicCards
             int limit = CardInventory.Limit(current.CardId);
             int cost; bool available = PremiumCollectionClient.Costs.TryGetValue(current.CardId, out cost);
             bool full = count >= limit;
-            status.text = error ?? (PremiumCollectionClient.Ready
-                ? Text("普通 ×", "Standard ×") + CardInventory.Limit(current.CardId) + Text("  ·  闪卡 ", "  ·  Premium ") + count + "/" + limit
-                : Text("正在同步收藏…", "Synchronizing collection…"));
-            craftLabel.text = busy ? Text("合成中…", "Crafting…") : full ? Text("闪卡已集齐", "All copies crafted") :
-                pendingRequestId != null && pendingCardId == current.CardId ? Text("重试上次合成", "Retry last craft") :
-                Text("合成 1 张闪卡   ", "Craft 1 premium   ") + (available ? cost.ToString() : "—");
+            status.text = (error == null ? null : LocalizedLabel.Get(error)) ?? (PremiumCollectionClient.Ready
+                ? LocalizedLabel.Get("Premium_Ownership", CardInventory.Limit(current.CardId), count, limit)
+                : LocalizedLabel.Get("Premium_Syncing"));
+            craftLabel.text = busy ? LocalizedLabel.Get("Premium_Crafting") : full ? LocalizedLabel.Get("Premium_Full") :
+                pendingRequestId != null && pendingCardId == current.CardId ? LocalizedLabel.Get("Premium_Retry") :
+                LocalizedLabel.Get("Premium_Craft", available ? cost.ToString() : "—");
             craft.interactable = !busy && !full && available && PremiumCollectionClient.Ready &&
                 (PremiumCollectionClient.Account.MeteoritePowder >= cost || pendingRequestId != null);
             craft.gameObject.SetActive(current.IsPremium == true);
             if (!available && PremiumCollectionClient.Ready && error == null)
-                status.text = Text("此卡暂无闪卡版本", "No premium version available");
+                status.text = LocalizedLabel.Get("Premium_Unavailable");
             else if (!full && available && PremiumCollectionClient.Ready && PremiumCollectionClient.Account.MeteoritePowder < cost && error == null)
-                status.text += Text(" · 还需 ", " · Need ") + (cost - PremiumCollectionClient.Account.MeteoritePowder) + Text(" 粉尘", " powder");
+                status.text += LocalizedLabel.Get("Premium_NeedPowder", cost - PremiumCollectionClient.Account.MeteoritePowder);
             select.gameObject.SetActive(false);
         }
 
@@ -198,7 +195,7 @@ namespace Assets.Script.DynamicCards
             }
             catch (Exception e)
             {
-                error = Text("未确认合成结果，正在刷新余额", "Result uncertain; refreshing collection"); Debug.LogWarning(e.Message);
+                error = "Premium_Uncertain"; Debug.LogWarning(e.Message);
                 try { await PremiumCollectionClient.Refresh(); } catch { }
             }
             finally
@@ -224,12 +221,12 @@ namespace Assets.Script.DynamicCards
                     preview.CurrentCore = current;
                 }
             }
-            catch (Exception e) { error = Text("选用失败，请重试", "Could not equip. Please retry."); Debug.LogWarning(e.Message); }
+            catch (Exception e) { error = "Premium_EquipError"; Debug.LogWarning(e.Message); }
             finally { busy = false; if (this != null) AccountChanged(); }
         }
 
-        private string ErrorText(string code) => code == "already_owned" ? Text("该闪卡数量已满，没有重复扣费", "All copies owned; no additional powder spent") :
-            code == "insufficient_powder" ? Text("粉尘不足", "Insufficient powder") : Text("操作失败，请重新进入收藏重试", "Operation failed. Reopen collection to retry.");
+        private string ErrorText(string code) => code == "already_owned" ? "Premium_AlreadyOwned" :
+            code == "insufficient_powder" ? "Premium_InsufficientPowder" : "Premium_OperationError";
 
         public static void MarkCard(CardShowInfo view, CardStatus card)
         {
@@ -246,7 +243,7 @@ namespace Assets.Script.DynamicCards
         {
             var t = Rect(name, parent, new Vector2(.5f, .5f), pos, size).gameObject.AddComponent<Text>();
             t.font = font; t.fontSize = fontSize; t.alignment = TextAnchor.MiddleCenter; t.color = new Color(.94f, .87f, .66f); t.raycastTarget = false;
-            t.horizontalOverflow = HorizontalWrapMode.Wrap; return t;
+            t.horizontalOverflow = HorizontalWrapMode.Wrap; t.resizeTextForBestFit=true; t.resizeTextMinSize=Mathf.Max(10,fontSize-5); t.resizeTextMaxSize=fontSize; return t;
         }
         private Button Button(Transform parent, string name, Vector2 pos, Vector2 size, out Text label)
         {

@@ -62,17 +62,18 @@ namespace Assets.Script.DynamicCards
             owner.AbilityDisplay = labels["CardDetails/CardDetails/Ability/AbilityFlavorText"];
             strengthValue = labels["CardDetails/CardDetails/CreatureFolder/Strength/Value"];
             creature = strengthValue.transform.parent.parent.gameObject;
-            labels["CardDetails/CardDetails/CreatureFolder/Strength/Label"].text = chinese ? "战力" : "STRENGTH";
+            LocalizedLabel.Set(labels["CardDetails/CardDetails/CreatureFolder/Strength/Label"], "CardDetails_Strength");
             owner.layoutGroup = details;
             PlaceCard(card, owner.CardBorder.rectTransform, design, new Vector2(407, -16), 380);
             // Only the visible portrait receives a drag, never the padded 1024-square artwork.
             owner.CardImg.raycastTarget = false; owner.CardBorder.raycastTarget = true;
             BuildRelated();
-            var close = TextButton(design, "Close", new Vector2(0, -400), new Vector2(240, 45), chinese ? "[Esc]  关闭" : "[Esc]  CLOSE", owner.Closerightclick);
+            var close = TextButton(design, "Close", new Vector2(0, -400), new Vector2(240, 45), LocalizedLabel.Get("Common_CloseEsc"), owner.Closerightclick);
             owner.ExitButtonText = close.GetComponentInChildren<Text>();
-            var back = TextButton(design, "HistoryBack", new Vector2(-245, -400), new Vector2(200, 45), chinese ? "返回" : "BACK", owner.BackButton);
+            var back = TextButton(design, "HistoryBack", new Vector2(-245, -400), new Vector2(200, 45), LocalizedLabel.Get("RegisterMenu_BackButton"), owner.BackButton);
             owner.BackButtonText = back.GetComponentInChildren<Text>();
-            owner.SoundButton = TextButton(design, "CardVoice", new Vector2(407, -355), new Vector2(200, 38), chinese ? "▷  语音" : "▷  VOICE", owner.PlaySound).gameObject;
+            owner.SoundButton = TextButton(design, "CardVoice", new Vector2(407, -355), new Vector2(200, 38), LocalizedLabel.Get("CardDetails_Voice"), owner.PlaySound).gameObject;
+            LocalizedLabel.Set(owner.SoundButton.GetComponentInChildren<Text>(), "CardDetails_Voice");
             previous = Arrow("PreviousCard", new Vector2(-715, 2), true, () => Navigate(-1));
             next = Arrow("NextCard", new Vector2(670, 2), false, () => Navigate(1));
             var editor = Resources.FindObjectsOfTypeAll<EditorInfo>().FirstOrDefault(x => x.gameObject.scene.IsValid() && x.EditorUI.activeInHierarchy);
@@ -92,8 +93,8 @@ namespace Assets.Script.DynamicCards
             strengthValue.text = owner.CardInfo.Strength.ToString();
             linkedViewport.gameObject.SetActive(owner.CardInfo.LinkedCards.Count != 0);
             owner.BackButtonText.transform.parent.gameObject.SetActive(owner.History.Count > 1);
-            owner.ExitButtonText.text = chinese ? "[Esc]  关闭" : "[Esc]  CLOSE";
-            owner.BackButtonText.text = chinese ? "返回" : "BACK";
+            LocalizedLabel.Set(owner.ExitButtonText, "Common_CloseEsc");
+            LocalizedLabel.Set(owner.BackButtonText, "RegisterMenu_BackButton");
             if (navigationIndex < 0 || navigation[navigationIndex].CardId != owner.DisplayID)
                 navigationIndex = navigation.FindIndex(x => x.CardId == owner.DisplayID &&
                     (owner.DisplayID != EditorInfo.RightClickedCardID || x.IsPremium == EditorInfo.RightClickedPremium));

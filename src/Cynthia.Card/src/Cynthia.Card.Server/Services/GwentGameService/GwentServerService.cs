@@ -1086,6 +1086,13 @@ When other players are available, player matchmaking will be prioritized. Add #f
 
         }
 
+        public Task<string> GetLocalizedNotes(string connectionId, string language)
+        {
+            if (language == "cn") return GetNotes(connectionId);
+            if (language == "en") return GetNotesEN(connectionId);
+            return Task.FromResult(_gwentLocalizationService.GetText(language, "LoginMenu_NewsBody"));
+        }
+
         public async Task<string> GetDownloadLink(string connectionId)
         {
             await Task.CompletedTask;
@@ -1412,6 +1419,7 @@ When other players are available, player matchmaking will be prioritized. Add #f
         {
             return _gwentLocalizationService.GetGameLocales();
         }
+        public string GetGameLocalesVersion() => _gwentLocalizationService.GetVersion();
 
         public int GetPalyernameMMR(string playername) => _databaseService.QueryMMR(playername);
 
