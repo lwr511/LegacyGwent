@@ -24,6 +24,8 @@ namespace Assets.Script.DynamicCards
         private string error;
         private string pendingRequestId, pendingCardId, pendingAccountId;
         private Button[] showFilters, deckFilters;
+        private LegacyTierFilterButton[] groupFilters;
+        private static readonly Group?[] CollectionGroups = { null, Group.Gold, Group.Silver, Group.Copper };
         private LocalizationService translator;
         public bool Busy => busy;
         public string CurrentCardId => current?.CardId;
@@ -38,9 +40,12 @@ namespace Assets.Script.DynamicCards
             wallet = Label(currency, "PowderBalance", new Vector2(35, 0), new Vector2(280, 60), 24);
             showFilters = Filters(owner.ShowSearch);
             deckFilters = Filters(owner.EditorSearch);
+            BuildGroupFilters();
             actions = Rect("PremiumCraftActions", owner.EditorUI.transform, new Vector2(.5f, .5f), Vector2.zero, new Vector2(380, 100));
-            status = Label(actions, "Ownership", new Vector2(0, 45), new Vector2(355, 32), 18);
+            status = Label(actions, "Ownership", new Vector2(0, 51), new Vector2(380, 48), 24);
             craft = Button(actions, "CraftPremium", Vector2.zero, new Vector2(380, 60), out craftLabel);
+            craftLabel.fontSize = craftLabel.resizeTextMaxSize = 26;
+            craftLabel.resizeTextMinSize = 22;
             Icon(craft.transform, "Powder", new Vector2(-143, 0), new Vector2(25, 32));
             craft.onClick.AddListener(CraftClicked);
             select = Button(actions, "SelectCardVersion", new Vector2(0, -41), new Vector2(350, 32), out selectLabel);
@@ -103,7 +108,7 @@ namespace Assets.Script.DynamicCards
             var pos = sr.anchoredPosition;
             sr.sizeDelta = new Vector2(340, sr.sizeDelta.y);
             sr.anchoredPosition = pos + new Vector2(-170, 0);
-            var row = Rect("CardVersionFilters", sr.parent, sr.anchorMin, pos + new Vector2(195, 12), new Vector2(340, 76));
+            var row = Rect("CardVersionFilters", sr.parent, sr.anchorMin, pos + new Vector2(195, 12), new Vector2(416, 76));
             row.anchorMax = sr.anchorMax;
             var labels = new[] { "Premium_Standard", "Premium_Premium", "Premium_All", "Premium_Owned" };
             var icons = new[] { "db_filter_premium_standard", "db_filter_premium_premium", "db_filter_premium_all", "db_filter_owned_owned" };
@@ -112,12 +117,12 @@ namespace Assets.Script.DynamicCards
             {
                 int filter = i;
                 Text label;
-                result[i] = Button(row, "Filter" + i, new Vector2((i - 1.5f) * 82, 0), new Vector2(50, 50), out label);
+                result[i] = Button(row, "Filter" + i, new Vector2((i - 1.5f) * 104, 0), new Vector2(50, 50), out label);
                 StyleButton(result[i],"btn_square_idle","btn_square_hovered","btn_square_down");
                 var selected=Rect("Selected",result[i].transform,new Vector2(.5f,.5f),Vector2.zero,new Vector2(50,50)).gameObject.AddComponent<Image>();
                 selected.sprite=Resources.Load<Sprite>("PremiumCrafting/btn_square_toggle_frame");selected.raycastTarget=false;
-                label.fontSize = 14; label.resizeTextMaxSize = 14; label.resizeTextMinSize = 10;
-                label.rectTransform.sizeDelta = new Vector2(80, 20); label.rectTransform.anchoredPosition = new Vector2(0, -34);
+                label.fontSize = 22; label.resizeTextMaxSize = 22; label.resizeTextMinSize = 18;
+                label.rectTransform.sizeDelta = new Vector2(102, 30); label.rectTransform.anchoredPosition = new Vector2(0, -36);
                 LocalizedLabel.Set(label, labels[i]);
                 Icon((RectTransform)result[i].transform, icons[i], Vector2.zero, new Vector2(28, 32));
                 result[i].onClick.AddListener(() => { if (busy) return; current = null; if(filter==3)editor.SetOwnedFilter(!editor.OnlyOwned);else editor.SetPremiumFilter(filter); RefreshLabels(); });
@@ -125,9 +130,64 @@ namespace Assets.Script.DynamicCards
             return result;
         }
 
+        private void BuildGroupFilters()
+        {
+            var search = editor.ShowSearch.GetComponent<RectTransform>();
+            var factions = (RectTransform)editor.ShowButtons[0].transform.parent;
+            factions.anchoredPosition -= new Vector2(170, 0);
+            search.anchoredPosition = new Vector2(factions.anchoredPosition.x, search.anchoredPosition.y);
+            search.sizeDelta = new Vector2(500, search.sizeDelta.y);
+
+            // Fixed header: two rows of four original controls, separate from the masked card list.
+            var grid = Rect("CollectionFilters", search.parent, new Vector2(1, 1),
+                new Vector2(-174, -70), new Vector2(304, 118));
+            var layout = grid.gameObject.AddComponent<GridLayoutGroup>();
+            layout.cellSize = new Vector2(70, 56); layout.spacing = new Vector2(8, 6);
+            layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount; layout.constraintCount = 4;
+            var template = Resources.Load<LegacyTierFilterButton>("LegacyCollectionFilters/TierTemplate");
+            groupFilters = new LegacyTierFilterButton[CollectionGroups.Length];
+            for (int i = 0; i < groupFilters.Length; i++)
+            {
+                int index = i;
+                var slot = Rect("TierSlot" + i, grid, new Vector2(.5f, .5f), Vector2.zero, layout.cellSize);
+                var button = Instantiate(template, slot, false);
+                button.name = "GroupFilter" + i;
+                button.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+                button.transform.localScale = Vector3.one * 1.4f;
+                button.SetTier(i);
+                groupFilters[i] = button;
+                button.onClick.AddListener(() => { if (!busy) editor.SetShowGroup(CollectionGroups[index]); });
+            }
+            var oldVersionRow = showFilters[0].transform.parent.gameObject;
+            for (int i = 0; i < showFilters.Length; i++)
+            {
+                var slot = Rect("VersionSlot" + i, grid, new Vector2(.5f, .5f), Vector2.zero, layout.cellSize);
+                var button = showFilters[i];
+                var rect = (RectTransform)button.transform;
+                rect.SetParent(slot, false);
+                rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
+                rect.anchoredPosition = Vector2.zero;
+                rect.localScale = Vector3.one * 1.12f;
+                button.GetComponentInChildren<Text>().gameObject.SetActive(false);
+            }
+            Destroy(oldVersionRow);
+            RefreshGroupSelection();
+        }
+
+        public void RefreshGroupSelection()
+        {
+            if (groupFilters == null) return;
+            for (int i = 0; i < groupFilters.Length; i++)
+            {
+                groupFilters[i].SetSelected(editor.ShowGroup == CollectionGroups[i]);
+                groupFilters[i].interactable = !busy;
+            }
+        }
+
         private void RefreshLabels()
         {
             if (wallet == null) return;
+            RefreshGroupSelection();
             wallet.text = LocalizedLabel.Get("Premium_Wallet", PremiumCollectionClient.Ready ? PremiumCollectionClient.Account.MeteoritePowder.ToString("N0", translator.TextLocalization.Culture) : "—");
             actions.gameObject.SetActive(detailsOwner != null && current?.IsPremium == true &&
                 (editor.EditorStatus == EditorStatus.ShowCards || editor.EditorStatus == EditorStatus.EditorDeck));
@@ -250,10 +310,16 @@ namespace Assets.Script.DynamicCards
             var r = Rect(name, parent, new Vector2(.5f, .5f), pos, size);
             var image = r.gameObject.AddComponent<Image>();
             var b = r.gameObject.AddComponent<Button>(); b.targetGraphic = image;
-            StyleButton(b,"btn_wide_idle_300","btn_wide_hovered_300","btn_wide_down_300","btn_wide_inactive_300");
+            StyleWideButton(b);
             label = Label(r, "Label", Vector2.zero, size - new Vector2(8, 4), 21);
             return b;
         }
+        // Original InputButtonContainerPrefab/Button_BasicUI, also used by the craft button.
+        internal static void StyleWideButton(Button button)
+        {
+            StyleButton(button, "btn_wide_idle_300", "btn_wide_hovered_300", "btn_wide_down_300", "btn_wide_inactive_300");
+        }
+
         private static void StyleButton(Button button,string normal,string hover,string down,string disabled=null)
         {
             button.image.sprite=Resources.Load<Sprite>("PremiumCrafting/"+normal);

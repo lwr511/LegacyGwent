@@ -206,8 +206,10 @@ public class righclickLogic : MonoBehaviour
         FlavourDisplay.text=translator.GetCardFlavor(CardInfo.CardId);
         LayoutRebuilder.ForceRebuildLayoutImmediate(layoutGroup);
 
-        foreach (Transform child in ScrollContent)
+        for (int i = ScrollContent.childCount - 1; i >= 0; i--)
         {
+            var child = ScrollContent.GetChild(i);
+            child.SetParent(null, false);
             Destroy(child.gameObject);
         }
         List<string> LinkedCardsList = CardInfo.LinkedCards;
@@ -236,7 +238,8 @@ public class righclickLogic : MonoBehaviour
         linkedCardScript.myRightClickLogic = this;
         linkedCardScript.ID = ID;
         detailsLayout.StyleLinked(linkedCardScript);
-        linkedCardScript.UpdateSelfContent(); 
+        linkedCardScript.UpdateSelfContent();
+        detailsLayout.RefreshLinkedLayout(linkedCardScript);
     }
     public void Closerightclick()
     {

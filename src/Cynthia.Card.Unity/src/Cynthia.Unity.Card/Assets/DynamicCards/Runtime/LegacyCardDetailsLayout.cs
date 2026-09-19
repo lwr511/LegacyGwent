@@ -15,6 +15,8 @@ namespace Assets.Script.DynamicCards
     {
         private righclickLogic owner;
         private RectTransform design, details, linkedViewport;
+        private ScrollRect detailsScroll;
+        private float layoutScale = -1;
         private Text strengthValue;
         private GameObject creature;
         private Font fallback, heading, body;
@@ -62,6 +64,17 @@ namespace Assets.Script.DynamicCards
             owner.AbilityDisplay = labels["CardDetails/CardDetails/Ability/AbilityFlavorText"];
             strengthValue = labels["CardDetails/CardDetails/CreatureFolder/Strength/Value"];
             creature = strengthValue.transform.parent.parent.gameObject;
+            owner.NameDisplay.fontSize = owner.NameDisplay.resizeTextMaxSize = 40;
+            owner.NameDisplay.resizeTextMinSize = 28;
+            owner.TagsDisplay.fontSize = 26;
+            owner.FlavourDisplay.fontSize = 24;
+            owner.FlavourDisplay.fontStyle = FontStyle.Normal;
+            owner.FlavourDisplay.color = new Color(.82f, .82f, .77f);
+            var flavorSize = owner.FlavourDisplay.GetComponent<LayoutElement>();
+            flavorSize.minHeight = 0; flavorSize.preferredHeight = -1;
+            owner.AbilityDisplay.fontSize = 30;
+            strengthValue.GetComponent<LayoutElement>().minHeight = 54;
+            strengthValue.GetComponent<LayoutElement>().preferredHeight = 54;
             LocalizedLabel.Set(labels["CardDetails/CardDetails/CreatureFolder/Strength/Label"], "CardDetails_Strength");
             owner.layoutGroup = details;
             PlaceCard(card, owner.CardBorder.rectTransform, design, new Vector2(407, -16), 380);
@@ -69,6 +82,7 @@ namespace Assets.Script.DynamicCards
             owner.CardImg.raycastTarget = false; owner.CardBorder.raycastTarget = true;
             BuildRelated();
             var close = TextButton(design, "Close", new Vector2(0, -400), new Vector2(240, 45), LocalizedLabel.Get("Common_CloseEsc"), owner.Closerightclick);
+            PremiumCollectionPanel.StyleWideButton(close);
             owner.ExitButtonText = close.GetComponentInChildren<Text>();
             var back = TextButton(design, "HistoryBack", new Vector2(-245, -400), new Vector2(200, 45), LocalizedLabel.Get("RegisterMenu_BackButton"), owner.BackButton);
             owner.BackButtonText = back.GetComponentInChildren<Text>();
@@ -100,6 +114,8 @@ namespace Assets.Script.DynamicCards
                     (owner.DisplayID != EditorInfo.RightClickedCardID || x.IsPremium == EditorInfo.RightClickedPremium));
             previous.gameObject.SetActive(navigationIndex > 0); next.gameObject.SetActive(navigationIndex >= 0 && navigationIndex < navigation.Count - 1);
             LayoutRebuilder.ForceRebuildLayoutImmediate(details);
+            detailsScroll.verticalNormalizedPosition = 1;
+            owner.Slider.SetActive(details.rect.height > detailsScroll.viewport.rect.height);
             if(collection!=null)collection.Preview(new CardStatus(owner.DisplayID){IsPremium=IsPremium});
         }
 
@@ -112,6 +128,18 @@ namespace Assets.Script.DynamicCards
             owner.UpdateCard(navigationId);
         }
         private void Update() { if (Input.GetKeyDown(KeyCode.Escape)) owner.Closerightclick(); }
+        private void LateUpdate()
+        {
+            if (detailsScroll == null) return;
+            float scale = owner.CardImg.canvas.scaleFactor;
+            if (Mathf.Approximately(layoutScale, scale)) return;
+            layoutScale = scale;
+            float position = detailsScroll.verticalNormalizedPosition;
+            foreach (var linked in owner.ScrollContent.GetComponentsInChildren<LinkedCard>()) RefreshLinkedLayout(linked);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(details);
+            detailsScroll.verticalNormalizedPosition = position;
+            owner.Slider.SetActive(details.rect.height > detailsScroll.viewport.rect.height);
+        }
         public void Close(UnityEngine.Events.UnityAction completed)
         {
             if (closing) return; closing = true;
@@ -123,25 +151,32 @@ namespace Assets.Script.DynamicCards
 
         private void BuildRelated()
         {
-            linkedViewport = Rect("ConnectedCardsPreview", details, Vector2.zero, new Vector2(640, 240));
-            var sizing = linkedViewport.gameObject.AddComponent<LayoutElement>(); sizing.minHeight = 0; sizing.preferredHeight = 240; sizing.flexibleHeight = 1; sizing.flexibleWidth = 1;
-            var viewport = Rect("Viewport", linkedViewport, Vector2.zero, Vector2.zero); Stretch(viewport);
-            viewport.offsetMax = new Vector2(-14, 0);
+            // Scroll the entire description together, so large text and long translations stay reachable.
+            var viewport = Rect("DetailsViewport", design, new Vector2(-270, 0), new Vector2(660, 700));
             viewport.gameObject.AddComponent<RectMask2D>();
-            var input = viewport.gameObject.AddComponent<Image>(); input.color = Color.clear;
-            var content = Rect("ConnectedCards", viewport, Vector2.zero, new Vector2(0, 0));
-            content.anchorMin = new Vector2(0, 1); content.anchorMax = Vector2.one; content.pivot = new Vector2(.5f, 1);
-            var layout = content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.spacing = 16; layout.childControlWidth = layout.childControlHeight = true;
-            layout.childForceExpandWidth = true; layout.childForceExpandHeight = false; layout.padding = new RectOffset(15, 8, 18, 8);
-            content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            var scroll = linkedViewport.gameObject.AddComponent<ScrollRect>(); scroll.viewport = viewport; scroll.content = content; scroll.horizontal = false; scroll.movementType = ScrollRect.MovementType.Clamped;
-            var bar = Image(linkedViewport, "Scrollbar", "scrollbar_middle");
-            bar.rectTransform.anchorMin = new Vector2(1, 0); bar.rectTransform.anchorMax = Vector2.one;
-            bar.rectTransform.sizeDelta = new Vector2(5, 0); bar.rectTransform.anchoredPosition = new Vector2(-4, 0);
+            viewport.gameObject.AddComponent<Image>().color = Color.clear;
+            details.SetParent(viewport, false);
+            details.anchorMin = new Vector2(0, 1); details.anchorMax = Vector2.one;
+            details.pivot = new Vector2(.5f, 1); details.sizeDelta = new Vector2(-20, 0);
+            details.anchoredPosition = new Vector2(-10, 0);
+            details.GetComponent<VerticalLayoutGroup>().padding.top = 0;
+            details.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            linkedViewport = Rect("ConnectedCards", details, Vector2.zero, Vector2.zero);
+            var layout = linkedViewport.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.spacing = 20; layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = true; layout.childForceExpandHeight = false;
+            layout.padding = new RectOffset(15, 8, 18, 8);
+            detailsScroll = viewport.gameObject.AddComponent<ScrollRect>();
+            detailsScroll.viewport = viewport; detailsScroll.content = details; detailsScroll.horizontal = false;
+            detailsScroll.movementType = ScrollRect.MovementType.Clamped; detailsScroll.scrollSensitivity = 35;
+            var bar = Image(design, "DetailsScrollbar", "scrollbar_middle");
+            bar.rectTransform.anchoredPosition = new Vector2(57, 0); bar.rectTransform.sizeDelta = new Vector2(10, 700);
             var handle = Image(bar.transform, "Handle", "scroll_bar_sellector"); Stretch(handle.rectTransform);
-            var scrollbar = bar.gameObject.AddComponent<Scrollbar>(); scrollbar.handleRect = handle.rectTransform; scrollbar.targetGraphic = handle; scrollbar.direction = Scrollbar.Direction.BottomToTop;
-            scroll.verticalScrollbar = scrollbar;
-            owner.ScrollContent = content; owner.Slider = bar.gameObject;
+            var scrollbar = bar.gameObject.AddComponent<Scrollbar>();
+            scrollbar.handleRect = handle.rectTransform; scrollbar.targetGraphic = handle;
+            scrollbar.direction = Scrollbar.Direction.BottomToTop;
+            detailsScroll.verticalScrollbar = scrollbar;
+            owner.ScrollContent = linkedViewport; owner.Slider = bar.gameObject;
         }
 
         public void StyleLinked(LinkedCard linked)
@@ -155,16 +190,52 @@ namespace Assets.Script.DynamicCards
             root.localScale = Vector3.one;
             var size = root.GetComponent<LayoutElement>();
             if (size == null) size = root.gameObject.AddComponent<LayoutElement>();
-            size.minHeight = 120; size.preferredHeight = 120; size.flexibleWidth = 1;
-            PlaceCard(card, linked.CardBorder.rectTransform, root, new Vector2(-255, 0), 84);
-            linked.NameDisplay = TextLabel(root, "Name", new Vector2(55, 44), new Vector2(470, 25), 18, heading);
-            linked.TagsDisplay = TextLabel(root, "Categories", new Vector2(55, 17), new Vector2(470, 22), 18, body);
+            size.minHeight = 164; size.preferredHeight = 164; size.flexibleWidth = 1;
+            PlaceCard(card, linked.CardBorder.rectTransform, root, new Vector2(-255, 0), 110);
+            linked.NameDisplay = TextLabel(root, "Name", Vector2.zero, new Vector2(450, 36), 28, heading);
+            linked.TagsDisplay = TextLabel(root, "Categories", Vector2.zero, new Vector2(450, 32), 24, body);
             linked.TagsDisplay.color = new Color(.90f, .89f, .88f);
-            linked.AbilityDisplay = TextLabel(root, "Ability", new Vector2(55, -30), new Vector2(470, 66), 20, body);
+            linked.AbilityDisplay = TextLabel(root, "Ability", Vector2.zero, new Vector2(450, 80), 28, body);
+            // The old bitmap font uses a 400-wide box with an offset glyph origin.
+            // Anchor an upright numeric font directly to the visible faction banner instead.
+            var number = linked.Strength;
+            var numberRect = number.rectTransform;
+            numberRect.SetParent(linked.FactionIcon.transform, false);
+            numberRect.anchorMin = numberRect.anchorMax = numberRect.pivot = new Vector2(.5f, 1);
+            numberRect.localRotation = Quaternion.identity; numberRect.localScale = Vector3.one;
+            numberRect.anchoredPosition = new Vector2(0, -4); numberRect.sizeDelta = new Vector2(90, 90);
+            number.font = Resources.Load<Font>("FountInfo/hinted-GWENT-ExtraBold") ?? fallback;
+            number.fontStyle = FontStyle.Normal; number.fontSize = 78;
+            number.alignment = TextAnchor.MiddleCenter; number.resizeTextForBestFit = true;
+            number.resizeTextMinSize = 58; number.resizeTextMaxSize = 78;
+            number.raycastTarget = false;
             var click = root.gameObject.AddComponent<Image>(); click.color = Color.clear;
             var action = root.GetComponent<Button>();
             if (action == null) action = root.gameObject.AddComponent<Button>();
             action.interactable = true; action.targetGraphic = click; action.onClick.RemoveAllListeners(); action.onClick.AddListener(linked.UpdateOnButtonClick);
+        }
+
+        public void RefreshLinkedLayout(LinkedCard linked)
+        {
+            var texts = new[] { linked.NameDisplay, linked.TagsDisplay, linked.AbilityDisplay };
+            float height = 16;
+            foreach (var text in texts)
+            {
+                // Leave room for pixel rounding at non-integer Canvas scale factors.
+                float textHeight = string.IsNullOrEmpty(text.text) ? 0 : Mathf.Ceil(text.preferredHeight) + 6;
+                text.rectTransform.sizeDelta = new Vector2(450, textHeight);
+                height += textHeight + 6;
+            }
+            height = Mathf.Max(164, height);
+            var size = linked.GetComponent<LayoutElement>();
+            size.minHeight = size.preferredHeight = height;
+            float top = height * .5f - 8;
+            foreach (var text in texts)
+            {
+                float h = text.rectTransform.sizeDelta.y;
+                text.rectTransform.anchoredPosition = new Vector2(75, top - h * .5f);
+                top -= h + 6;
+            }
         }
 
         private RectTransform Build(JObject node, Transform parent, string path)
@@ -221,12 +292,13 @@ namespace Assets.Script.DynamicCards
         {
             var r = Rect(name, parent, pos, size); var image = r.gameObject.AddComponent<Image>(); image.color = Color.clear;
             var b = r.gameObject.AddComponent<Button>(); b.targetGraphic = image; b.onClick.AddListener(action);
-            var t = TextLabel(r, "Label", Vector2.zero, size, 22, heading); t.text = caption; t.alignment = TextAnchor.MiddleCenter; return b;
+            var t = TextLabel(r, "Label", Vector2.zero, size, 26, heading); t.text = caption; t.alignment = TextAnchor.MiddleCenter; return b;
         }
         private Text TextLabel(Transform parent, string name, Vector2 pos, Vector2 size, int fontSize, Font font)
         {
             var t = Rect(name, parent, pos, size).gameObject.AddComponent<Text>(); t.font = font ?? fallback; t.fontSize = fontSize; t.color = Color.white;
-            t.alignment = TextAnchor.UpperLeft; t.raycastTarget = false; t.horizontalOverflow = HorizontalWrapMode.Wrap; return t;
+            t.alignment = TextAnchor.UpperLeft; t.raycastTarget = false; t.horizontalOverflow = HorizontalWrapMode.Wrap;
+            t.verticalOverflow = VerticalWrapMode.Overflow; return t;
         }
         private static void PlaceCard(RectTransform card, RectTransform border, Transform parent, Vector2 center, float width)
         {

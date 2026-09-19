@@ -22,6 +22,14 @@ public class EditorInfo : MonoBehaviour
     public Assets.Script.DynamicCards.PremiumCollectionPanel PremiumPanel { get; private set; }
     public int PremiumFilter { get; private set; } = 2; // ordinary followed by its premium version
     public bool OnlyOwned { get; private set; }
+    public Group? ShowGroup { get; private set; }
+    public void SetShowGroup(Group? group)
+    {
+        ShowGroup = group;
+        ClearCardPreview();
+        if (EditorStatus == EditorStatus.ShowCards) AutoSetShowCards();
+        PremiumPanel.RefreshGroupSelection();
+    }
     public void SetOwnedFilter(bool value)
     {
         OnlyOwned=value;
@@ -333,6 +341,8 @@ public class EditorInfo : MonoBehaviour
         SetShowCardInfo
         (
             _cards
+            .Where(x => !ShowGroup.HasValue || x.Group == ShowGroup.Value ||
+                (ShowGroup == Group.Gold && x.Group == Group.Leader))
             .Where(x => ((_showFaction == Faction.All) ? true : (x.Faction == _showFaction)))
             .Where(x => ((_showSearchMessage == "") ? true :
                 (_translator.GetCardName(x.CardInfo().CardId).Contains(_showSearchMessage, StringComparison.OrdinalIgnoreCase) ||
@@ -353,6 +363,7 @@ public class EditorInfo : MonoBehaviour
         _showSearchMessage = "";
         _nowSwitchFaction = Faction.All;
         _showFaction = Faction.All;
+        ShowGroup = null;
         _nowShow = (int)Faction.All;
         for (var i = 0; i < ShowButtons.Length; i++)
             ShowButtons[i].SetIsOnWithoutNotify(i == _nowShow);
