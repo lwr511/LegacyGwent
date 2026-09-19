@@ -14,7 +14,7 @@ Windows, macOS, Linux均可。
 
 直接在[微软开发者官网](https://dotnet.microsoft.com/download/dotnet/3.1)下载对应版本然后安装即可。
 
-### 3. 客户端UI: Unity 2019.4.1f1（版本必须一样）
+### 3. 客户端UI: Unity 2019.4.41f2（版本必须一样）
 
 安装方法：
 
