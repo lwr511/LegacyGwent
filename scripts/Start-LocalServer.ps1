@@ -1,4 +1,4 @@
-param([switch]$Rebuild)
+param([switch]$Rebuild,[int]$Port=5005)
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
 $local = Join-Path $repo 'work\LocalServer'
@@ -10,7 +10,7 @@ if (!(Test-Path $dotnet) -or !(Test-Path $mongo)) { throw "Local tools are missi
 $env:DOTNET_MULTILEVEL_LOOKUP = '0'
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 $env:MONGO_CONNECTION_STRING = 'mongodb://127.0.0.1:28020/gwent-diy'
-$env:LEGACY_GWENT_LISTEN_URL = 'http://127.0.0.1:5005'
+$env:LEGACY_GWENT_LISTEN_URL = "http://127.0.0.1:$Port"
 $env:ASPNETCORE_ENVIRONMENT = 'Development'
 
 if ($Rebuild -or !(Test-Path $dll)) {
@@ -44,5 +44,5 @@ function Start-OwnedProcess($Name, $Executable, $Arguments, $Port, $Directory) {
 }
 
 Start-OwnedProcess 'mongodb' $mongo "--bind_ip 127.0.0.1 --port 28020 --dbpath `"$local\data`" --logpath `"$local\logs\mongodb.log`" --logappend" 28020 $local
-Start-OwnedProcess 'server' $dotnet "`"$dll`"" 5005 $server
-Write-Host 'Local Gwent is running: http://127.0.0.1:5005. Unity: Tools > Legacy Gwent > Server > Local, then restart Play mode.'
+Start-OwnedProcess 'server' $dotnet "`"$dll`"" $Port $server
+Write-Host "Local Gwent is running: http://127.0.0.1:$Port. Unity: Tools > Legacy Gwent > Server > Local, then restart Play mode."

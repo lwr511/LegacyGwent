@@ -31,6 +31,7 @@ public static class PremiumCraftingVerification
             foreach (var asset in AssetDatabase.FindAssets("t:Texture2D", new[] { "Assets/Resources/PremiumCrafting", "Assets/Resources/LegacyCardPreview" }))
             {
                 var path = AssetDatabase.GUIDToAssetPath(asset);
+                if (new[] { "Noise27White", "PortalNoise", "CardShineTex" }.Contains(Path.GetFileNameWithoutExtension(path))) continue;
                 var importer = (TextureImporter)AssetImporter.GetAtPath(path);
                 if (importer.textureType != TextureImporterType.Sprite) { importer.textureType = TextureImporterType.Sprite; importer.spriteImportMode = SpriteImportMode.Single; importer.SaveAndReimport(); }
             }
@@ -89,10 +90,11 @@ public static class PremiumCraftingVerification
                 var locked=PremiumCollectionClient.Costs.Keys.First(x=>!PremiumCollectionClient.Owns(x));
                 editor.ClickEditorUICoreCard(new CardStatus(locked){IsPremium=true}); await Task.Delay(300);
                 check(deck.Deck.Count==count,"locked premium cannot be added to deck");
+                int premiumBefore = CardInventory.DeckPremiumCount(deck, card);
                 editor.ClickEditorUICoreCard(new CardStatus(card){IsPremium=false}); await Task.Delay(500);
-                check(PremiumCollectionClient.Selected(card),"adding ordinary comparison preserves premium selection for every copy");
+                check(CardInventory.DeckPremiumCount(deck, card) == premiumBefore,"adding standard never changes the deck's premium copy count");
                 editor.ClickEditorUICoreCard(new CardStatus(card){IsPremium=true}); await Task.Delay(500);
-                check(PremiumCollectionClient.Selected(card),"adding owned premium variant saves premium selection");
+                check(CardInventory.DeckPremiumCount(deck, card) <= PremiumCollectionClient.Count(card, true),"adding premium respects the owned copy count");
                 File.WriteAllText(Path.Combine(Work,"ui-contracts.json"),Newtonsoft.Json.JsonConvert.SerializeObject(checks,Newtonsoft.Json.Formatting.Indented));
             }
             if (mode == "craft")

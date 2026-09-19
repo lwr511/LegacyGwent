@@ -56,13 +56,14 @@ class Program
         Check(game.PlayersLeader[0].Single().Status.IsPremium == true && game.PlayersLeader[1].Single().Status.IsPremium == false, "leader and opening-screen status preserve selected version");
         Check(game.PlayersDeck[0].Single().Status.CreateBackCard().IsPremium != true, "concealing an owned premium does not leak its state");
         var duplicates = new TestPlayer { PlayerName="three copies", Deck=new DeckModel { Leader=leader, Deck=new List<string> {card,card,card} }, PremiumCards=new HashSet<string>(state.SelectedCards) };
+        CardInventory.InitializeDeck(duplicates.Deck, (await fresh.GetPremiumCollection(user.UserName)).Collection);
         var duplicateGame = new GwentServerGame(duplicates, two);
-        Check(duplicateGame.PlayersDeck[0].Count()==3 && duplicateGame.PlayersDeck[0].All(x=>x.Status.IsPremium==true),
-            "one bronze unlock makes all three deck copies premium");
-        Check((await fresh.GetPremiumCollection(user.UserName)).Collection.OwnedCards.Count(x=>x==card)==1,
-            "three premium deck copies share one account ownership entry");
+        Check(duplicateGame.PlayersDeck[0].Count()==3 && duplicateGame.PlayersDeck[0].Count(x=>x.Status.IsPremium==true)==1,
+            "one bronze craft supplies one premium and two standard deck copies");
+        Check(CardInventory.PremiumCount((await fresh.GetPremiumCollection(user.UserName)).Collection,card)==1,
+            "the account persists an explicit one-copy premium inventory");
         Check((await fresh.GetPremiumCollection(user.UserName)).Collection.MeteoritePowder==50,
-            "using three premium deck copies does not charge additional crafting fees");
+            "using a mixed deck does not charge additional crafting fees");
         Console.WriteLine("COMPLETE checks=" + checks);
     }
     private sealed class TestPlayer : Player { }

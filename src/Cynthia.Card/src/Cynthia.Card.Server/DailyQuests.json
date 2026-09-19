@@ -1,8 +1,8 @@
 {
-  "LoginPowder": 10,
+  "LoginPowder": 20,
   "Tiers": [
-    { "Crowns": 2, "Powder": 10 },
-    { "Crowns": 4, "Powder": 20 },
-    { "Crowns": 6, "Powder": 30 }
+    { "Crowns": 2, "Powder": 25 },
+    { "Crowns": 4, "Powder": 35 },
+    { "Crowns": 6, "Powder": 45 }
   ]
 }

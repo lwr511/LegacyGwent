@@ -25,6 +25,8 @@ namespace Cynthia.Card.Server
             var update = Builders<PremiumCollection>.Update
                 .SetOnInsert(x => x.MeteoritePowder, 0).SetOnInsert(x => x.Revision, 0)
                 .SetOnInsert(x => x.OwnedCards, new List<string>()).SetOnInsert(x => x.SelectedCards, new List<string>())
+                .SetOnInsert(x => x.InventoryVersion, 1).SetOnInsert(x => x.PremiumCopies, new Dictionary<string, int>())
+                .SetOnInsert(x => x.CraftReceipts, new List<PremiumCraftReceipt>())
                 .SetOnInsert(x => x.Rewards, new List<PowderReward>());
             try
             {

@@ -36,7 +36,9 @@ public class ListCardShowInfo : MonoBehaviour
             animatedView.enabled = false;
             Destroy(animatedView);
         }
-        Border.sprite = (group == Group.Gold ? Gold : (group == Group.Silver ? Silver : Copper));
+        Border.sprite = Resources.Load<Sprite>("PremiumCrafting/dp_slot_" + (group == Group.Gold ? "gold" : group == Group.Silver ? "silver" : "bronze"))
+            ?? (group == Group.Gold ? Gold : (group == Group.Silver ? Silver : Copper));
+        Assets.Script.DynamicCards.CardCopyBadge.StyleBorder(Border, CardStatus?.IsPremium == true, group);
         Strength.text = strength.ToString();
         Name.text = name;
 
@@ -58,27 +60,26 @@ public class ListCardShowInfo : MonoBehaviour
                 Miniature.sprite = obj.Result;
             };
         }
+        Star.gameObject.SetActive(strength <= 0);
+        Strength.gameObject.SetActive(strength > 0);
         if (strength <= 0)
         {
             Star.gameObject.SetActive(true);
             Strength.gameObject.SetActive(false);
             Star.sprite = (group == Group.Gold ? GoldStar : (group == Group.Silver ? SilverStar : CopperStar));
         }
-        if (count > 1)
-        {
-            Count.SetActive(true);
-            CountText.text = $"x{count.ToString()}";
-        }
+        Count.SetActive(Assets.Script.DynamicCards.CardCopyBadge.ShowsCount(CardStatus));
+        CountText.text = $"x{count}";
     }
     public void SetCardInfo(CardStatus card, int count = 1)
     {
         CardStatus = card;
         SetCardInfo(CardStatus.Strength, CardStatus.Name, count, CardStatus.Group, CardStatus.CardArtsId);
     }
-    public void SetCardInfo(string id, int count = 1)
+    public void SetCardInfo(string id, int count = 1, bool premium = false)
     {
         var translator = DependencyResolver.Container.Resolve<LocalizationService>();
-        CardStatus = new CardStatus(id);
+        CardStatus = new CardStatus(id) { IsPremium = premium };
         CardStatus.Name = translator.GetCardName(id);
         CardStatus.Info = translator.GetCardInfo(id);
         SetCardInfo(CardStatus.Strength, CardStatus.Name, count, CardStatus.Group, CardStatus.CardArtsId);

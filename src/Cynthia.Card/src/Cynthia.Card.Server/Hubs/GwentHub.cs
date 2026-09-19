@@ -21,6 +21,9 @@ namespace Cynthia.Card.Server
         public Task<PremiumCollectionResult> GetPremiumCollection() => _gwentServerService.GetPremiumCollection(Context.ConnectionId);
         public Task<DailyQuestResult> GetDailyQuests() => _gwentServerService.GetDailyQuests(Context.ConnectionId);
         public Task<PremiumCollectionResult> CraftPremium(string cardId) => _gwentServerService.CraftPremium(Context.ConnectionId, cardId);
+
+        public Task<PremiumCollectionResult> CraftPremiumCopy(string cardId, string requestId) =>
+            _gwentServerService.CraftPremiumCopy(Context.ConnectionId, cardId, requestId);
         // Legacy Unity serializes bool arguments as strings. Use an explicit 0/1 wire value.
         public Task<PremiumCollectionResult> SelectPremium(string cardId, int premium) => premium == 0 || premium == 1
             ? _gwentServerService.SelectPremium(Context.ConnectionId, cardId, premium == 1)

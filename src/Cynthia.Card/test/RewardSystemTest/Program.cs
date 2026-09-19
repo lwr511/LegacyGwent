@@ -70,6 +70,7 @@ partial class Program
         {
             await StartHost();
             await Group("LAN login / reset / cap",NetworkDaily);
+            await Group("per-copy inventory, crafting and deck versions",PremiumCopyCases);
             await Group("calendar boundaries and offline gaps",Calendar);
             await Group("processing-day attribution and cross-day retries",ProcessingDay);
             await Group("strict network schema and input boundaries",WireContracts);

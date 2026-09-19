@@ -57,7 +57,7 @@ partial class Program
         existing.Rewards.Add(new PowderReward { RewardId = "unrelated-admin", Amount = 7000 });
         await Accounts.InsertOneAsync(existing);
         wallet = (await service.GetPremiumCollection(rich.UserName)).Collection;
-        Check(wallet.MeteoritePowder == 12000 && wallet.Revision == 10, "existing balances above 5000 receive an additive grant");
+        Check(wallet.MeteoritePowder == 12000 && wallet.Revision == 11 && wallet.InventoryVersion == 1, "existing balances above 5000 receive an additive grant and one inventory migration");
         Check(wallet.OwnedCards.Contains(card) && wallet.SelectedCards.Contains(card) && wallet.DailyQuests.Crowns == 3 && wallet.Rewards.Count == 2,
             "initial grant preserves ownership, selection, daily progress and other rewards");
 

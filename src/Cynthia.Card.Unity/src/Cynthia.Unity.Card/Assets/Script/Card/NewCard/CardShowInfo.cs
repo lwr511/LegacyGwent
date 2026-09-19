@@ -226,6 +226,7 @@ public class CardShowInfo : MonoBehaviour
             CardBorder.sprite = SilverBorder;
         if (CurrentCore.Group == Group.Copper)
             CardBorder.sprite = CopperBorder;
+        Assets.Script.DynamicCards.CardCopyBadge.StyleBorder(CardBorder, CurrentCore.IsPremium == true, CurrentCore.Group);
         if (CardInfo.Faction == Faction.Monsters)
             FactionIcon.sprite = MonstersIcon;
         if (CardInfo.Faction == Faction.Nilfgaard)

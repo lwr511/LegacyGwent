@@ -312,14 +312,21 @@ public class MatchInfo : MonoBehaviour
         //DeckIcon.sprite = Resources.Load<Sprite>("Sprites/Control/coin_northern");
         //////////////////////////////////////////////////
         var leader = Instantiate(LaderPrefab);
-        leader.GetComponent<LeaderShow>().SetLeader(deck.Leader);
+        CardInventory.InitializeDeck(deck, Assets.Script.DynamicCards.PremiumCollectionClient.Account);
+        leader.GetComponent<LeaderShow>().SetLeader(deck.Leader, deck.PremiumLeader == true);
         leader.transform.SetParent(CardsContext, false);
         var cards = deck.Deck.Select(x => GwentMap.CardMap[x]);
-        cards.OrderByDescending(x => x.Group).ThenByDescending(x => x.Strength).GroupBy(x => x.Name).ForAll(x =>
+        cards.OrderByDescending(x => x.Group).ThenByDescending(x => x.Strength).GroupBy(x => x.CardId).ForAll(x =>
             {
-                var card = Instantiate(CardPrefab);
-                card.GetComponent<ListCardShowInfo>().SetCardInfo(x.First().CardId, x.Count());
-                card.transform.SetParent(CardsContext, false);
+                int premium = CardInventory.DeckPremiumCount(deck, x.Key);
+                foreach (bool version in new[] { false, true })
+                {
+                    int copies = version ? premium : x.Count() - premium;
+                    if (copies <= 0) continue;
+                    var card = Instantiate(CardPrefab);
+                    card.GetComponent<ListCardShowInfo>().SetCardInfo(x.Key, copies, version);
+                    card.transform.SetParent(CardsContext, false);
+                }
             });
         CopperCount.text = cards.Where(x => x.Group == Group.Copper).Count().ToString();
         SilverCount.text = $"{cards.Where(x => x.Group == Group.Silver).Count().ToString()}/6";

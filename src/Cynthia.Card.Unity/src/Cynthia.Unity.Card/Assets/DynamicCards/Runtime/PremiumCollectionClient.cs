@@ -16,7 +16,8 @@ namespace Assets.Script.DynamicCards
         public static bool Ready { get; private set; }
         private static int session;
         private static GwentClientService Client => DependencyResolver.Container.Resolve<GwentClientService>();
-        public static bool Owns(string card) => Ready && card != null && Account.OwnedCards.Contains(card);
+        public static int Count(string card, bool premium) => premium ? (Ready ? CardInventory.PremiumCount(Account, card) : 0) : CardInventory.Limit(card);
+        public static bool Owns(string card) => Count(card, true) > 0;
         public static bool Selected(string card) => Owns(card) && Account.SelectedCards.Contains(card);
         public static bool Show(CardStatus card) => card != null && !card.IsCardBack && !card.Conceal &&
             (UnityEngine.SceneManagement.SceneManager.GetSceneByName("GamePlay").isLoaded ? card.IsPremium == true :
@@ -31,7 +32,8 @@ namespace Assets.Script.DynamicCards
         }
 
         public static async Task<PremiumCollectionResult> Refresh() => await Request("GetPremiumCollection");
-        public static async Task<PremiumCollectionResult> Craft(string card) => await Request("CraftPremium", card);
+        public static async Task<PremiumCollectionResult> Craft(string card) => await Craft(card, Guid.NewGuid().ToString("N"));
+        public static async Task<PremiumCollectionResult> Craft(string card, string requestId) => await Request("CraftPremiumCopy", card, requestId);
         public static async Task<PremiumCollectionResult> Select(string card, bool premium) => await Request("SelectPremium", card, premium ? 1 : 0);
 
         private static async Task<PremiumCollectionResult> Request(string method, params object[] args)

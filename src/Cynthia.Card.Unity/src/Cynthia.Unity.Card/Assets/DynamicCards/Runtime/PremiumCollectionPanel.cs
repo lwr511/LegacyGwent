@@ -22,6 +22,7 @@ namespace Assets.Script.DynamicCards
         private bool busy, opened;
         private bool catalogAvailable;
         private string error;
+        private string pendingRequestId, pendingCardId, pendingAccountId;
         private Button[] showFilters, deckFilters;
         private LocalizationService translator;
         public bool Busy => busy;
@@ -131,27 +132,30 @@ namespace Assets.Script.DynamicCards
         {
             if (wallet == null) return;
             wallet.text = Text("陨星粉尘  ", "Meteorite Powder  ") + (PremiumCollectionClient.Ready ? PremiumCollectionClient.Account.MeteoritePowder.ToString("N0") : "—");
-            actions.gameObject.SetActive(detailsOwner!=null && current?.IsPremium == true && (!PremiumCollectionClient.Owns(current.CardId) || error != null) &&
+            actions.gameObject.SetActive(detailsOwner != null && current?.IsPremium == true &&
                 (editor.EditorStatus == EditorStatus.ShowCards || editor.EditorStatus == EditorStatus.EditorDeck));
             foreach (var group in new[] { showFilters, deckFilters })
                 if (group != null) for (int i = 0; i < group.Length; i++)
-                { group[i].transform.Find("Selected").gameObject.SetActive(i==3?editor.OnlyOwned:i==editor.PremiumFilter); group[i].interactable = !busy; }
+                { group[i].transform.Find("Selected").gameObject.SetActive(i == 3 ? editor.OnlyOwned : i == editor.PremiumFilter); group[i].interactable = !busy; }
             if (current == null) return;
-            bool owns = PremiumCollectionClient.Owns(current.CardId);
+            int count = PremiumCollectionClient.Count(current.CardId, true);
+            int limit = CardInventory.Limit(current.CardId);
             int cost; bool available = PremiumCollectionClient.Costs.TryGetValue(current.CardId, out cost);
-            status.text = error ?? (owns ? Text("闪卡已合成 · 永久拥有", "Premium unlocked permanently") :
-                available ? Text("闪卡尚未合成", "Premium not crafted") :
-                PremiumCollectionClient.Ready ? Text("此卡暂无闪卡版本", "No premium version available") : Text("正在同步收藏…", "Synchronizing collection…"));
-            craftLabel.text = busy ? Text("合成中…", "Transmuting…") : owns ? Text("已合成", "Crafted") :
-                Text("合成闪卡   ", "Transmute   ") + (available ? cost.ToString() : "—");
-            craft.interactable = !busy && !owns && available && PremiumCollectionClient.Ready && PremiumCollectionClient.Account.MeteoritePowder >= cost;
-            craft.gameObject.SetActive(current.IsPremium == true && !owns);
-            if (!owns && available && PremiumCollectionClient.Ready && PremiumCollectionClient.Account.MeteoritePowder < cost && error == null)
-                status.text = Text("未合成 · 还需 ", "Not crafted · Need ") + (cost - PremiumCollectionClient.Account.MeteoritePowder) + Text(" 粉尘", " powder");
-            bool selected = PremiumCollectionClient.Selected(current.CardId);
-            selectLabel.text = selected ? Text("已选用闪卡 · 切换普通卡", "Premium equipped · Use standard") : Text("选用闪卡", "Use premium");
-            select.gameObject.SetActive(false); // An unlock applies to all copies; no per-copy equip step.
-            select.interactable = owns && !busy;
+            bool full = count >= limit;
+            status.text = error ?? (PremiumCollectionClient.Ready
+                ? Text("普通 ×", "Standard ×") + CardInventory.Limit(current.CardId) + Text("  ·  闪卡 ", "  ·  Premium ") + count + "/" + limit
+                : Text("正在同步收藏…", "Synchronizing collection…"));
+            craftLabel.text = busy ? Text("合成中…", "Crafting…") : full ? Text("闪卡已集齐", "All copies crafted") :
+                pendingRequestId != null && pendingCardId == current.CardId ? Text("重试上次合成", "Retry last craft") :
+                Text("合成 1 张闪卡   ", "Craft 1 premium   ") + (available ? cost.ToString() : "—");
+            craft.interactable = !busy && !full && available && PremiumCollectionClient.Ready &&
+                (PremiumCollectionClient.Account.MeteoritePowder >= cost || pendingRequestId != null);
+            craft.gameObject.SetActive(current.IsPremium == true);
+            if (!available && PremiumCollectionClient.Ready && error == null)
+                status.text = Text("此卡暂无闪卡版本", "No premium version available");
+            else if (!full && available && PremiumCollectionClient.Ready && PremiumCollectionClient.Account.MeteoritePowder < cost && error == null)
+                status.text += Text(" · 还需 ", " · Need ") + (cost - PremiumCollectionClient.Account.MeteoritePowder) + Text(" 粉尘", " powder");
+            select.gameObject.SetActive(false);
         }
 
         public async void CraftClicked()
@@ -159,11 +163,15 @@ namespace Assets.Script.DynamicCards
             if (busy || detailsOwner==null || current?.IsPremium != true || !craft.interactable) return;
             string card = current.CardId;
             string accountId = PremiumCollectionClient.Account.Id;
+            if (pendingCardId != card || pendingAccountId != accountId)
+            { pendingRequestId = null; pendingCardId = card; pendingAccountId = accountId; }
+            if (pendingRequestId == null) pendingRequestId = Guid.NewGuid().ToString("N");
             busy = true; RefreshLabels();
             try
             {
                 if (this == null || !isActiveAndEnabled || PremiumCollectionClient.Account?.Id != accountId) return;
-                var result = await PremiumCollectionClient.Craft(card);
+                var result = await PremiumCollectionClient.Craft(card, pendingRequestId);
+                pendingRequestId = null;
                 if (this == null || !isActiveAndEnabled || PremiumCollectionClient.Account?.Id != accountId) return;
                 if (result.Success)
                 {
@@ -220,7 +228,7 @@ namespace Assets.Script.DynamicCards
             finally { busy = false; if (this != null) AccountChanged(); }
         }
 
-        private string ErrorText(string code) => code == "already_owned" ? Text("该闪卡已合成，没有重复扣费", "Already crafted; no additional powder spent") :
+        private string ErrorText(string code) => code == "already_owned" ? Text("该闪卡数量已满，没有重复扣费", "All copies owned; no additional powder spent") :
             code == "insufficient_powder" ? Text("粉尘不足", "Insufficient powder") : Text("操作失败，请重新进入收藏重试", "Operation failed. Reopen collection to retry.");
 
         public static void MarkCard(CardShowInfo view, CardStatus card)

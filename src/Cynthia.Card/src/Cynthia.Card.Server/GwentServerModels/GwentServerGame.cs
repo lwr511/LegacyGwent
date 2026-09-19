@@ -1696,7 +1696,7 @@ namespace Cynthia.Card.Server
                     RowPosition.MyLeader
                 ),player2.Deck.Leader)
         }.ToList();
-            //将卡组转化成实体,并且打乱牌组
+            // Create copies, assign their saved versions, then shuffle in ApplyDeckVersions.
             PlayersDeck[Player1Index] = player1.Deck.Deck.Select(cardId =>
                 new GameCard(this, Player1Index,
                     new CardStatus(
@@ -1704,7 +1704,7 @@ namespace Cynthia.Card.Server
                         PlayersFaction[Player1Index],
                         RowPosition.MyDeck
                     ), cardId))
-            .Mess(RNG).ToList();
+            .ToList();
             //需要更改,将卡牌效果变成对应Id的卡牌效果
             PlayersDeck[Player2Index] = player2.Deck.Deck.Select(cardId =>
                 new GameCard(this, Player2Index,
@@ -1714,11 +1714,24 @@ namespace Cynthia.Card.Server
                         RowPosition.MyDeck
                     ), cardId)
             )
-            .Mess(RNG).ToList();
-            foreach (var card in PlayersLeader[Player1Index].Concat(PlayersDeck[Player1Index]))
-                card.Status.IsPremium = UsesPremium(player1,card.Status.CardId);
-            foreach (var card in PlayersLeader[Player2Index].Concat(PlayersDeck[Player2Index]))
-                card.Status.IsPremium = UsesPremium(player2,card.Status.CardId);
+            .ToList();
+            ApplyDeckVersions(player1, Player1Index);
+            ApplyDeckVersions(player2, Player2Index);
+        }
+
+        private void ApplyDeckVersions(Player player, int index)
+        {
+            foreach (var leader in PlayersLeader[index])
+                leader.Status.IsPremium = player is AIPlayer || (player.Deck.PremiumLeader ?? UsesPremium(player, leader.Status.CardId));
+            var remaining = player.Deck.PremiumCards == null ? null : new Dictionary<string, int>(player.Deck.PremiumCards);
+            foreach (var card in PlayersDeck[index])
+            {
+                int count = remaining != null && remaining.TryGetValue(card.Status.CardId, out var value) ? value : 0;
+                card.Status.IsPremium = player is AIPlayer || (remaining == null ? UsesPremium(player, card.Status.CardId) : count > 0);
+                if (count > 0) remaining[card.Status.CardId] = count - 1;
+            }
+            // Version assignment is independent of the draw order.
+            PlayersDeck[index] = PlayersDeck[index].Mess(RNG).ToList();
         }
         public async Task SendBigRoundEndToCemetery()
         {
@@ -1778,7 +1791,7 @@ namespace Cynthia.Card.Server
             //创造对应的卡
             var creatCard = new GameCard(this, playerIndex, new CardStatus(cardId, PlayersFaction[playerIndex], RowPosition.None), cardId);
             setting?.Invoke(creatCard.Status);
-            creatCard.Status.IsPremium = UsesPremium(Players[playerIndex],creatCard.Status.CardId);
+            creatCard.Status.IsPremium = creatCard.Status.IsPremium ?? UsesPremium(Players[playerIndex],creatCard.Status.CardId);
             //将创造的卡以不显示的方式移动到目标位置!
             await LogicCardMove(creatCard, row, position.CardIndex);
             //发送信息,显示创造的卡

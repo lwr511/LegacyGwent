@@ -499,6 +499,10 @@ namespace Cynthia.Card.Server
             _users.TryGetValue(connectionId, out var user) ? _databaseService.CraftPremium(user.UserName, cardId) :
                 Task.FromResult(new PremiumCollectionResult { Status = "unauthenticated" });
 
+        public Task<PremiumCollectionResult> CraftPremiumCopy(string connectionId, string cardId, string requestId) =>
+            _users.TryGetValue(connectionId, out var user) ? _databaseService.CraftPremiumCopy(user.UserName, cardId, requestId) :
+                Task.FromResult(new PremiumCollectionResult { Status = "unauthenticated" });
+
         public Task<PremiumCollectionResult> SelectPremium(string connectionId, string cardId, bool premium) =>
             _users.TryGetValue(connectionId, out var user) ? _databaseService.SelectPremium(user.UserName, cardId, premium) :
                 Task.FromResult(new PremiumCollectionResult { Status = "unauthenticated" });
@@ -513,12 +517,17 @@ namespace Cynthia.Card.Server
                 //如果玩家不处于闲置状态,或玩家没有该Id的卡组,或者该卡组不符合标准,禁止匹配
                 if (user.UserState != UserState.Standby || !(user.Decks.Any(x => x.Id == deckId) && (user.Decks.Single(x => x.Id == deckId).IsSpecialDeck() || user.Decks.Single(x => x.Id == deckId).IsBasicDeck())))
                     return false;
+                var collection = _databaseService.GetPremiumCollection(user.UserName).GetAwaiter().GetResult().Collection;
+                var savedDeck = user.Decks.Single(x => x.Id == deckId);
+                CardInventory.InitializeDeck(savedDeck, collection);
+                if (!CardInventory.ValidDeckVersions(savedDeck, collection)) return false;
                 //建立一个新的玩家
                 var player = user.CurrentPlayer = new ClientPlayer(user, () => _hub);//Container.Resolve<IHubContext<GwentHub>>);
                 //设置玩家的卡组
-                player.Deck = user.Decks.Single(x => x.Id == deckId);
-                var collection = _databaseService.GetPremiumCollection(user.UserName).GetAwaiter().GetResult().Collection;
-                // Match appearance is authoritative: every premium this player owns is available in battle.
+                // Snapshot the saved versions; edits while queued cannot change this match.
+                player.Deck = new DeckModel { Id = savedDeck.Id, Name = savedDeck.Name, Leader = savedDeck.Leader,
+                    Deck = savedDeck.Deck.ToList(), PremiumCards = new Dictionary<string, int>(savedDeck.PremiumCards),
+                    PremiumLeader = savedDeck.PremiumLeader };
                 player.PremiumCards = new HashSet<string>(collection.OwnedCards);
                 player.CurrentAvatar = user.CurrentAvatar;
                 player.CurrentBorder = user.CurrentBorder;
@@ -714,7 +723,7 @@ namespace Cynthia.Card.Server
 
         public bool AddDeck(string connectionId, DeckModel deck)
         {
-            if (deck.Leader == "12004")
+            if (deck == null || deck.Leader == "12004")
             {
                 return false;
             }
@@ -724,6 +733,9 @@ namespace Cynthia.Card.Server
             var user = _users[connectionId];
             if (user.Decks.Count >= 1000)
                 return false;
+            var collection = _databaseService.GetPremiumCollection(user.UserName).GetAwaiter().GetResult().Collection;
+            if (!CardInventory.ValidDeckVersions(deck, collection)) return false;
+            CardInventory.InitializeDeck(deck, collection);
             //if (!deck.IsBasicDeck())
             //return false;
             if (!_databaseService.AddDeck(user.UserName, deck))
@@ -779,6 +791,9 @@ namespace Cynthia.Card.Server
             var user = _users[connectionId];
             if (user.Decks.Count < 0)
                 return false;
+            var collection = _databaseService.GetPremiumCollection(user.UserName).GetAwaiter().GetResult().Collection;
+            if (!CardInventory.ValidDeckVersions(deck, collection)) return false;
+            CardInventory.InitializeDeck(deck, collection);
             //如果卡组不合规范
             if (!_databaseService.ModifyDeck(user.UserName, id, deck))
                 return false;

@@ -61,6 +61,8 @@ public class GameCardShowControl : MonoBehaviour
     //TEST
     private void OnMouseOver()
     {
+        if (GameEvent.RighClickActive || SceneManager.GetSceneByName("RightClick").isLoaded)
+            return;
 #if UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
         if (Input.GetMouseButtonDown(1))
         {
@@ -309,6 +311,10 @@ public class GameCardShowControl : MonoBehaviour
     //调度开始
     public void MulliganStart(IList<CardStatus> cards, int total)//调度界面
     {
+        // A card detail opened during the opening bid must not cover the mulligan controls.
+        var details = FindObjectOfType<righclickLogic>();
+        if (details != null)
+            details.Closerightclick();
         NowMulliganCount = 0;
         NowMulliganTotal = total;
         useCardTitle = string.Format(_translator.GetText("IngameMenu_MulliganTitle"), NowMulliganCount, NowMulliganTotal);

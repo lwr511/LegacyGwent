@@ -74,7 +74,7 @@ namespace Assets.Script.DynamicCards
             owner.BackButtonText = back.GetComponentInChildren<Text>();
             owner.SoundButton = TextButton(design, "CardVoice", new Vector2(407, -355), new Vector2(200, 38), chinese ? "▷  语音" : "▷  VOICE", owner.PlaySound).gameObject;
             previous = Arrow("PreviousCard", new Vector2(-715, 2), true, () => Navigate(-1));
-            next = Arrow("NextCard", new Vector2(640, 2), false, () => Navigate(1));
+            next = Arrow("NextCard", new Vector2(670, 2), false, () => Navigate(1));
             var editor = Resources.FindObjectsOfTypeAll<EditorInfo>().FirstOrDefault(x => x.gameObject.scene.IsValid() && x.EditorUI.activeInHierarchy);
             if (editor != null)
             {
@@ -212,7 +212,7 @@ namespace Assets.Script.DynamicCards
 
         private Button Arrow(string name, Vector2 pos, bool left, UnityEngine.Events.UnityAction action)
         {
-            var image = Image(design, name, "preview_arrow_inactive"); image.rectTransform.anchoredPosition = pos; image.rectTransform.sizeDelta = new Vector2(150, 150);
+            var image = Image(design, name, "preview_arrow_inactive"); image.rectTransform.anchoredPosition = pos; image.rectTransform.sizeDelta = new Vector2(100, 100);
             image.preserveAspect = true; if (left) image.rectTransform.localScale = new Vector3(-1, 1, 1);
             var button = image.gameObject.AddComponent<Button>(); button.targetGraphic = image; button.onClick.AddListener(action); return button;
         }
