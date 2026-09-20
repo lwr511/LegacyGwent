@@ -10,6 +10,7 @@ namespace Assets.Script.DynamicCards
     {
         private ChoseValue choice;
         private Text label;
+        private bool refreshing;
         public static void Install(GameObject template)
         {
             if (template == null) return;
@@ -26,7 +27,10 @@ namespace Assets.Script.DynamicCards
             foreach (var text in row.GetComponentsInChildren<Text>(true))
                 if (!text.transform.IsChildOf(choice.transform) && text.text.Length > 1)
                 { controller.label = text; break; }
-            choice.onValueChanged.AddListener(index => DynamicCardSettings.Enabled = index == 1);
+            choice.onValueChanged.AddListener(index =>
+            {
+                if (!controller.refreshing) DynamicCardSettings.Quality = (DynamicCardQuality)index;
+            });
             var rect = (RectTransform)row.transform;
             if (row.transform.parent.GetComponent<LayoutGroup>() == null)
             {
@@ -39,14 +43,28 @@ namespace Assets.Script.DynamicCards
             }
             controller.RefreshLabels();
         }
-        private void OnEnable() { TextLocalization.LanguageChanged += RefreshLabels; if (choice != null) RefreshLabels(); }
-        private void OnDisable() { TextLocalization.LanguageChanged -= RefreshLabels; }
+        private void OnEnable()
+        {
+            TextLocalization.LanguageChanged += RefreshLabels;
+            DynamicCardSettings.Changed += RefreshLabels;
+            if (choice != null) RefreshLabels();
+        }
+        private void OnDisable()
+        {
+            TextLocalization.LanguageChanged -= RefreshLabels;
+            DynamicCardSettings.Changed -= RefreshLabels;
+        }
         private void RefreshLabels()
         {
             if (choice == null) return;
-            choice.ChoseList = new List<string> { "Settings_Off", "Settings_On" };
-            if (label != null) label.text = LocalizedLabel.Get("Settings_AnimatedCards");
-            choice.Index = DynamicCardSettings.Enabled ? 1 : 0;
+            refreshing = true;
+            try
+            {
+                choice.ChoseList = new List<string> { "Settings_Off", "Settings_AnimatedCardsLow", "Settings_AnimatedCardsMedium", "Settings_AnimatedCardsHigh" };
+                if (label != null) label.text = LocalizedLabel.Get("Settings_AnimatedCardQuality");
+                choice.Index = (int)DynamicCardSettings.Quality;
+            }
+            finally { refreshing = false; }
         }
     }
 }

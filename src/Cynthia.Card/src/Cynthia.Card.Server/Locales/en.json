@@ -4,6 +4,10 @@
         "Filename": "en"
     },
     "MenuLocales": {
+        "Settings_AnimatedCardQuality": "Animated card quality",
+        "Settings_AnimatedCardsLow": "Low",
+        "Settings_AnimatedCardsMedium": "Medium",
+        "Settings_AnimatedCardsHigh": "High",
         "LoginMenu_TrinketDataUpdating": "Updating cosmetic data…",
         "TrinketsMenu_NewReward": "NEW REWARD!",
         "LoginMenu_NewsBody": "This is the DIY server. Have fun playing!\n\nThis game is permanently free and open-source.\nDownloads and community: https://discord.gg/Dw9sKgaUZN\n\nAI matchmaking:\nai: Geralt and Ciri\nai1: Recruit Training\nai2: Avallac’h\nai3: King Auberon\nai4: Iron Falcon Mercenaries\nai5: Dragon Hunter\nEnter the corresponding matchmaking password to challenge the AI. Players take priority when available. Add #f to force an AI match (for example, ai#f).",

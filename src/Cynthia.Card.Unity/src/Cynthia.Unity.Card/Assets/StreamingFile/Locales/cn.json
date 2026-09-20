@@ -4,6 +4,10 @@
         "Filename": "cn"
     },
     "MenuLocales": {
+        "Settings_AnimatedCardQuality": "闪卡画质",
+        "Settings_AnimatedCardsLow": "低",
+        "Settings_AnimatedCardsMedium": "中",
+        "Settings_AnimatedCardsHigh": "高",
         "LoginMenu_TrinketDataUpdating": "正在更新饰品数据…",
         "TrinketsMenu_NewReward": "获得新奖励！",
         "LoginMenu_NewsBody": "欢迎来到 DIY 服务器，祝你玩得开心！\n\n本作永久免费开源。\n下载与社区：https://discord.gg/Dw9sKgaUZN\n\nAI 匹配密码：\nai：杰洛特与希里\nai1：新兵训练\nai2：阿瓦拉克\nai3：奥贝伦王\nai4：铁隼佣兵团\nai5：猎龙人\n输入对应匹配密码即可挑战 AI。有其他玩家时优先匹配玩家；添加 #f 后缀可强制挑战 AI（例如 ai#f）。",

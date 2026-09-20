@@ -4,6 +4,10 @@
         "Filename": "pl"
     },
     "MenuLocales": {
+        "Settings_AnimatedCardQuality": "Jakość animacji kart",
+        "Settings_AnimatedCardsLow": "Niska",
+        "Settings_AnimatedCardsMedium": "Średnia",
+        "Settings_AnimatedCardsHigh": "Wysoka",
         "LoginMenu_TrinketDataUpdating": "Aktualizowanie danych ozdób…",
         "TrinketsMenu_NewReward": "NOWA NAGRODA!",
         "LoginMenu_NewsBody": "Witaj na serwerze DIY! Miłej gry!\n\nGra jest na zawsze darmowa i ma otwarty kod źródłowy.\nPobieranie gry i społeczność: https://discord.gg/Dw9sKgaUZN\n\nMecze przeciw SI:\nai: Geralt i Ciri\nai1: Szkolenie rekrutów\nai2: Avallac’h\nai3: Król Auberon\nai4: Najemnicy Żelaznych Sokołów\nai5: Łowca smoków\nWpisz odpowiednie hasło wyszukiwania meczu, aby wyzwać SI. Dostępni gracze mają pierwszeństwo. Dodaj #f, aby wymusić mecz przeciw SI (np. ai#f).",

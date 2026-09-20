@@ -4,6 +4,10 @@
         "Filename": "ru"
     },
     "MenuLocales": {
+        "Settings_AnimatedCardQuality": "Качество анимации карт",
+        "Settings_AnimatedCardsLow": "Низкое",
+        "Settings_AnimatedCardsMedium": "Среднее",
+        "Settings_AnimatedCardsHigh": "Высокое",
         "LoginMenu_TrinketDataUpdating": "Обновление данных украшений…",
         "TrinketsMenu_NewReward": "НОВАЯ НАГРАДА!",
         "LoginMenu_NewsBody": "Добро пожаловать на DIY-сервер! Приятной игры!\n\nИгра навсегда бесплатна, её исходный код открыт.\nЗагрузка игры и сообщество: https://discord.gg/Dw9sKgaUZN\n\nМатчи против ИИ:\nai: Геральт и Цири\nai1: Обучение новобранцев\nai2: Аваллак’х\nai3: Король Оберон\nai4: Наёмники Железных Соколов\nai5: Охотник на драконов\nВведите соответствующий пароль поиска матча, чтобы вызвать ИИ. При наличии игроков приоритет отдаётся им. Добавьте #f для обязательного матча против ИИ (например, ai#f).",

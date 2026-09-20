@@ -29,6 +29,11 @@ namespace Assets.Script.DynamicCards
         private GameObject model;
         private Camera renderCamera;
         private RenderTexture texture;
+        private DynamicCardQualityProfile qualityProfile;
+        private DynamicCardPostProcessRenderer postProcess;
+        // Explicit diagnostics only; no per-frame allocations or timers in normal play.
+        internal long RenderCount { get; private set; }
+        internal RenderTexture RenderTarget { get { return texture; } }
         private AudioSource sound;
         private DynamicCardEffects effects;
         private DynamicCardSourceControllers sourceControllers;
@@ -164,10 +169,52 @@ namespace Assets.Script.DynamicCards
             if (changed) view.Refresh();
         }
 
-        private void OnEnable() { ActiveViews.Add(this); DynamicCardSettings.Changed += Refresh; if (art != null) Refresh(); }
-        private void OnDisable() { ActiveViews.Remove(this); DynamicCardSettings.Changed -= Refresh; Clear(); }
+        private void OnEnable() { ActiveViews.Add(this); DynamicCardSettings.Changed += ApplyQualitySetting; if (art != null) Refresh(); }
+        private void OnDisable() { ActiveViews.Remove(this); DynamicCardSettings.Changed -= ApplyQualitySetting; Clear(); }
         private void OnDestroy() { Clear(); }
         private void OnApplicationFocus(bool focused) { if (!focused) ReturnToCenter(); }
+
+        private void ApplyQualitySetting()
+        {
+            // Off still releases everything. Live quality changes keep the model, lease,
+            // animation clock, audio and interaction state; pending loads use the latest tier.
+            if (!DynamicCardSettings.Enabled || (model == null && !preparing)) Refresh();
+            else qualityProfile = DynamicCardQualityProfile.Get(DynamicCardSettings.Quality);
+        }
+
+        private bool ApplyRenderTarget()
+        {
+            int size = qualityProfile.Resolution(preview);
+            if (size == 0) return false;
+            if (texture != null && texture.width == size && texture.IsCreated()) return true;
+            var replacement = new RenderTexture(size, size, 24, RenderTextureFormat.ARGB32);
+            replacement.name = "Dynamic card " + (preview ? "preview " : "thumbnail ") + size;
+            if (!replacement.Create()) { Destroy(replacement); return false; }
+            var previous = texture;
+            // Keep a valid picture even if a tier change happens between UI renders.
+            if (previous != null && previous.IsCreated()) Graphics.Blit(previous, replacement);
+            texture = replacement;
+            renderCamera.targetTexture = replacement;
+            if (surface != null) surface.texture = replacement;
+            if (previous != null) { previous.Release(); Destroy(previous); }
+            return true;
+        }
+
+        private void RenderCard()
+        {
+            UnityEngine.Profiling.Profiler.BeginSample("DynamicCards.Render");
+            long started = DynamicCardRenderMetrics.Begin();
+            try
+            {
+                renderCamera.Render();
+                RenderCount++;
+            }
+            finally
+            {
+                DynamicCardRenderMetrics.End(started, texture.width, texture.height);
+                UnityEngine.Profiling.Profiler.EndSample();
+            }
+        }
 
         private void Refresh()
         {
@@ -236,7 +283,10 @@ namespace Assets.Script.DynamicCards
             renderCamera.enabled = false;
             var originalPostEffects = model.GetComponentsInChildren<DynamicCardPostEffect>(true);
             if (originalPostEffects.Length != 0)
-                cameraObject.AddComponent<DynamicCardPostProcessRenderer>().Effects = originalPostEffects;
+            {
+                postProcess = cameraObject.AddComponent<DynamicCardPostProcessRenderer>();
+                postProcess.Effects = originalPostEffects;
+            }
             renderCamera.fieldOfView = entry.fieldOfView;
             renderCamera.nearClipPlane = entry.nearClip;
             renderCamera.farClipPlane = entry.farClip;
@@ -245,8 +295,9 @@ namespace Assets.Script.DynamicCards
             renderCamera.allowHDR = false;
             renderCamera.allowMSAA = false;
             // Source cameras render a square; the card art is a portrait region inside that square.
-            texture = new RenderTexture(preview ? 1024 : 384, preview ? 1024 : 384, 24, RenderTextureFormat.ARGB32);
-            texture.Create(); renderCamera.targetTexture = texture;
+            qualityProfile = DynamicCardQualityProfile.Get(DynamicCardSettings.Quality);
+            if (!ApplyRenderTarget()) { Clear(); yield break; }
+            if (postProcess != null) postProcess.Downsample = qualityProfile.PostProcessDownsample;
             DynamicCardFraming.Apply(renderCamera, entry, miniature);
             pivot = string.IsNullOrEmpty(entry.pivot) ? null : model.transform.Find(entry.pivot);
             if (pivot != null) pivotRest = pivot.localRotation;
@@ -288,7 +339,7 @@ namespace Assets.Script.DynamicCards
             // run yet. Apply it before exposing the first frame of multi-part card rigs.
             foreach (var property in model.GetComponentsInChildren<DynamicCardAnimatedMaterialProperty>())
                 if (property.isActiveAndEnabled) property.ApplyNow();
-            renderCamera.Render();
+            RenderCard();
             surface.enabled = true;
             preparing = false;
             if (presentation != null)
@@ -363,11 +414,17 @@ namespace Assets.Script.DynamicCards
             if(sourceControllers!=null)sourceControllers.Tick(age,Time.unscaledDeltaTime,pitch,yaw);
             surface.color = art.color;
             // Thumbnail textures need fewer redraws; each card has its own phase to spread camera work.
-            if(preview || Time.unscaledTime>=nextRender)
+            int fps = qualityProfile.FramesPerSecond(preview);
+            if(fps == 0 || Time.unscaledTime>=nextRender)
             {
-                renderCamera.Render();
-                float step=1f/24f;float phase=(GetInstanceID()&31)/32f*step;
-                nextRender=(Mathf.Floor((Time.unscaledTime-phase)/step)+1)*step+phase;
+                if (!ApplyRenderTarget()) return;
+                if (postProcess != null) postProcess.Downsample = qualityProfile.PostProcessDownsample;
+                RenderCard();
+                if (fps > 0)
+                {
+                    float step=1f/fps;float phase=(GetInstanceID()&31)/32f*step;
+                    nextRender=(Mathf.Floor((Time.unscaledTime-phase)/step)+1)*step+phase;
+                }
             }
         }
 
@@ -456,6 +513,7 @@ namespace Assets.Script.DynamicCards
             if (frame != null) frame.localRotation = frameRest;
             model = null; renderCamera = null; texture = null; surface = null; sound = null; pivot = null;
             effects = null; sourceControllers = null; entry = null;
+            postProcess = null; qualityProfile = null; nextRender = 0;
             target = current = Vector2.zero; dragging = false; age = 0; releasedAt = -10;
         }
     }

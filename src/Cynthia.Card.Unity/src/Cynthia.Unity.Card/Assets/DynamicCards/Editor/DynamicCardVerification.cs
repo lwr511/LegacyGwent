@@ -21,7 +21,7 @@ namespace Assets.Script.DynamicCards.Editor
         private static RectTransform frame;
         private static Camera camera;
         private static RenderTexture target;
-        private static bool oldSetting;
+        private static DynamicCardQuality oldSetting;
         private static Vector4 initialViewMaterial;
         private static string Output { get { return Path.GetFullPath("../../../../work/DynamicCards"); } }
         static DynamicCardVerification() { EditorApplication.playModeStateChanged += State; }
@@ -62,14 +62,14 @@ namespace Assets.Script.DynamicCards.Editor
             EditorSceneManager.CloseScene(source,true);SceneManager.SetActiveScene(scene);
             var bootstrap = new GameObject("Local verification services").AddComponent<Bootstrapper>();
             DependencyResolver.Container = bootstrap.AutoRegisterService(new ContainerBuilder()).Build();
-            bool previous = DynamicCardSettings.Enabled;int quality = PlayerPrefs.GetInt("quality",2);
+            var previous = DynamicCardSettings.Quality;int quality = PlayerPrefs.GetInt("quality",2);
             DynamicCardSettingRow.Install(panel.transform.Find(selectorPath).gameObject);
             var row = panel.transform.Find("DynamicCardsOption");if(row==null)throw new Exception("Settings row not installed.");
             var selector = row.GetComponentInChildren<ChoseValue>(true);
             if(selector.onValueChanged.GetPersistentEventCount()!=0)throw new Exception("Cloned quality listener leaked into animated-card settings.");
             selector.Index = 1;if(!DynamicCardSettings.Enabled || PlayerPrefs.GetInt("quality",2)!=quality)throw new Exception("Setting changed the wrong preference.");
             selector.Index = 0;if(DynamicCardSettings.Enabled)throw new Exception("Setting did not turn off.");
-            DynamicCardSettings.Enabled = previous;
+            DynamicCardSettings.Quality = previous;
             var canvas = new GameObject("Settings canvas",typeof(Canvas)).GetComponent<Canvas>();canvas.renderMode = RenderMode.ScreenSpaceCamera;
             panel.transform.SetParent(canvas.transform,false);((RectTransform)panel.transform).anchoredPosition = Vector2.zero;
             camera = new GameObject("Settings camera").AddComponent<Camera>();camera.backgroundColor = new Color(.035f,.045f,.065f);camera.clearFlags = CameraClearFlags.SolidColor;camera.orthographic = true;
@@ -81,7 +81,7 @@ namespace Assets.Script.DynamicCards.Editor
         {
             if (state != PlayModeStateChange.EnteredPlayMode || !SessionState.GetBool("DynamicCardVerify", false)) return;
             SessionState.SetBool("DynamicCardVerify", false);
-            oldSetting = DynamicCardSettings.Enabled;
+            oldSetting = DynamicCardSettings.Quality;
             art = GameObject.Find("VerifiedArt").GetComponent<Image>();
             frame = GameObject.Find("VerifiedCard").GetComponent<RectTransform>();
             camera = new GameObject("VerificationCamera").AddComponent<Camera>();
@@ -196,6 +196,6 @@ namespace Assets.Script.DynamicCards.Editor
             Directory.CreateDirectory(Output);File.WriteAllBytes(Path.Combine(Output,name),image.EncodeToPNG());Object.Destroy(image);RenderTexture.active = previous;
         }
         private static void Finish(int code)
-        { EditorApplication.update -= Tick;DynamicCardSettings.Enabled = oldSetting;EditorApplication.Exit(code); }
+        { EditorApplication.update -= Tick;DynamicCardSettings.Quality = oldSetting;EditorApplication.Exit(code); }
     }
 }

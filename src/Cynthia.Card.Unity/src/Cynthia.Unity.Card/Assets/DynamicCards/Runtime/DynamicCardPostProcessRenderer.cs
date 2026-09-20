@@ -7,6 +7,7 @@ namespace Assets.Script.DynamicCards
     public sealed class DynamicCardPostProcessRenderer : MonoBehaviour
     {
         public DynamicCardPostEffect[] Effects;
+        [System.NonSerialized] public int Downsample = 1;
         private readonly List<Material> active = new List<Material>();
 
         private void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -20,25 +21,50 @@ namespace Assets.Script.DynamicCards
                     if (material != null) active.Add(material);
                 }
             if (active.Count == 0) { Graphics.Blit(source, destination); return; }
-            RenderTexture current = source, owned = null;
+            RenderTexture reducedSource = null, reducedResult = null;
+            RenderTexture owned = null;
             try
             {
+                if (Downsample > 1)
+                {
+                    int width = Mathf.Max(1, source.width / Downsample), height = Mathf.Max(1, source.height / Downsample);
+                    reducedSource = RenderTexture.GetTemporary(width, height, 0, source.format);
+                    reducedResult = RenderTexture.GetTemporary(width, height, 0, source.format);
+                    reducedSource.filterMode = reducedResult.filterMode = FilterMode.Bilinear;
+                    Graphics.Blit(source, reducedSource);
+                }
+                var input = reducedSource != null ? reducedSource : source;
+                var output = reducedResult != null ? reducedResult : destination;
+                RenderTexture current = input;
                 for (int i = 0; i < active.Count; i++)
                 {
-                    var target = i == active.Count - 1 ? destination : RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
-                    var scratch = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
+                    RenderTexture target = null, scratch = null;
+                    bool ownsTarget = i != active.Count - 1;
                     try
                     {
+                        target = ownsTarget ? RenderTexture.GetTemporary(input.width, input.height, 0, input.format) : output;
+                        scratch = RenderTexture.GetTemporary(input.width, input.height, 0, input.format);
                         Graphics.Blit(current, scratch, active[i], 0);
                         Graphics.Blit(scratch, target, active[i], 0);
+                        if (owned != null) RenderTexture.ReleaseTemporary(owned);
+                        owned = ownsTarget ? target : null;
+                        current = target;
+                        ownsTarget = false; // Ownership transferred to the next pass / outer finally.
                     }
-                    finally { RenderTexture.ReleaseTemporary(scratch); }
-                    if (owned != null) RenderTexture.ReleaseTemporary(owned);
-                    owned = i == active.Count - 1 ? null : target;
-                    current = target;
+                    finally
+                    {
+                        if (scratch != null) RenderTexture.ReleaseTemporary(scratch);
+                        if (ownsTarget && target != null) RenderTexture.ReleaseTemporary(target);
+                    }
                 }
+                if (reducedResult != null) Graphics.Blit(reducedResult, destination);
             }
-            finally { if (owned != null) RenderTexture.ReleaseTemporary(owned); }
+            finally
+            {
+                if (owned != null) RenderTexture.ReleaseTemporary(owned);
+                if (reducedSource != null) RenderTexture.ReleaseTemporary(reducedSource);
+                if (reducedResult != null) RenderTexture.ReleaseTemporary(reducedResult);
+            }
         }
     }
 }
