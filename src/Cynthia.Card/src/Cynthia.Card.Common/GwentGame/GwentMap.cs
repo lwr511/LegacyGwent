@@ -12367,8 +12367,8 @@ namespace Cynthia.Card
                     IsCountdown = false,
                     IsDerive = false,
                     Categories = new Categorie[]{ Categorie.Dwarf, Categorie.Soldier},
-                    Flavor = "“随你们怎么画，各位亲爱的矮人。但是我把话放在这里，它造不出来。”",
-                    Info = "“我知道自己死定了。所以我要拉几个一起上路的。”",
+                    Flavor = "“我知道自己死定了。所以我要拉几个一起上路的。”",
+                    Info = "选择2个单位，将它们移至所在半场的此排。自身移动后使所在排随机1个单位获得2点增益。",
                     CardArtsId = "202476",
                     LinkedCards=new List<String> {},
                 }
@@ -13802,7 +13802,7 @@ namespace Cynthia.Card
                     IsDerive = false,
                     Categories = new Categorie[]{ Categorie.ClanHeymaey},
                     Flavor = "在危难关头，圣母弗蕾雅于欧特克尔的船上现身，传授他平息风暴的方法。她早已知晓，欧特克尔将像他的兄弟一样，谱写一段更为宏大的传奇。",
-                    Info = "使对方场上的“倾盆大雨”和“史凯利杰风暴”伤害提升1点。",
+                    Info = "己方场上每有1个未锁定的欧特克尔，对方场上的“倾盆大雨”伤害提高1点；若己方场上有未锁定的欧特克尔，对方场上的“史凯利杰风暴”伤害提高1点（不叠加）。",
                     CardArtsId = "c10001000",
                     LinkedCards=new List<String> {"14019"},
                 }
@@ -14033,7 +14033,7 @@ namespace Cynthia.Card
                     IsDerive = false,
                     Categories = new Categorie[]{Categorie.Druid},
                     Flavor = "有些乌鸦会说人话。而有些人，学会了乌鸦的语言。",
-                    Info = "生成2只乌鸦，复活所有战力不高于2的乌鸦。",
+                    Info = "生成2只乌鸦。复活自己墓场中所有基础战力不高于2的乌鸦。\n佚亡。",
                     CardArtsId = "202514",
                     LinkedCards=new List<String> {"70136"},
                 }
@@ -14643,7 +14643,7 @@ namespace Cynthia.Card
                     IsDerive = false,
                     Categories = new Categorie[]{ Categorie.Lyria,Categorie.Officer},
                     Flavor = "",
-                    Info = "回合结束时，若至少具有3点增益，将增益转化为护甲，并向同一排的友方单位授予2点增益点。\n重复2次。",
+                    Info = "己方回合结束时，若自身至少具有3点增益，将增益转化为护甲并重置自身，然后使同排其他友军单位获得2点增益。此效果最多触发3次。",
                     CardArtsId = "202112",
                     LinkedCards=new List<String> {},
                 }
@@ -14896,7 +14896,7 @@ namespace Cynthia.Card
                     IsDerive = false,
                     Categories = new Categorie[]{ Categorie.Special, Categorie.Item},
                     Flavor = "手艺是厉害，可没谁会夸上一句，这些人就只会“啊啊啊，我的腿！”",
-                    Info = "选定对方单排，使其单位数量调整为4，优先移入战力最大或移出战力最小的单位。对因此移动的单位，造成2点伤害。",
+                    Info = "选定对方单排，使其单位数量调整为4：不足4个时从其他排移入战力最强的单位，超过4个时向其他排移出战力最强的单位。对因此移动的单位，造成2点伤害。",
                     CardArtsId = "203256",
                     LinkedCards=new List<String> {},
                 }
@@ -14918,7 +14918,7 @@ namespace Cynthia.Card
                     Categories = new Categorie[]{ Categorie.Beast},
                     HideTags = new HideTag[]{HideTag.Deathwish},
                     Flavor = "当一个头不够时。",
-                    Info = "部署：使卡组中的一个野兽单位获得2点增益。遗愿：使卡组中战力最低的野兽获得4点增益。",
+                    Info = "部署：使牌组中的一个非金色野兽单位获得2点增益。遗愿：使牌组中战力最低的非金色野兽获得4点增益。",
                     CardArtsId = "202856",
                     LinkedCards=new List<String> {},
                 }
@@ -14939,7 +14939,7 @@ namespace Cynthia.Card
                     IsDerive = false,
                     Categories = new Categorie[]{ Categorie.Beast, Categorie.Cursed},
                     Flavor = "不想少只眼睛的话……就别叫他小猫咪。",
-                    Info = "部署：使所有野兽友方获得1点强化，无论他们身在何处，若他们处于满月下，则额外获得1点增益。",
+                    Info = "部署：使手牌、牌组和场上的所有其他友方野兽获得1点强化；己方满月排上的友方野兽再获得1点增益。",
                     CardArtsId = "203081",
                     LinkedCards=new List<String> {"25009"},
                 }
@@ -14982,7 +14982,7 @@ namespace Cynthia.Card
                     Categories = new Categorie[]{ Categorie.Leader,Categorie.Cintra},
                     CrewCount = 1,
                     Flavor = "人们叫她“辛特拉的母狮”。这可不是毫无根据的。",
-                    Info = "获得一个友军铜色/银色非间谍单位的所有增益和护甲，随后将其收回牌组。然后从牌组打出1张铜色/银色单位牌。操控。",
+                    Info = "获得一个友军铜色/银色单位的所有增益和护甲，随后将其收回牌组。然后从牌组打出1张铜色/银色单位牌。操控。",
                     CardArtsId = "18340",
                     LinkedCards=new List<String> {},
                 }

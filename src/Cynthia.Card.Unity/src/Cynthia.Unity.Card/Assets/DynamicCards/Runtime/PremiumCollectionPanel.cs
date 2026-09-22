@@ -56,6 +56,7 @@ namespace Assets.Script.DynamicCards
 
         public void AttachDetails(RectTransform parent, righclickLogic owner)
         {
+            if (actions == null) return;
             detailsOwner=owner;
             actions.SetParent(parent,false);
             actions.anchorMin=actions.anchorMax=new Vector2(.5f,.5f);
