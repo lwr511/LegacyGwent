@@ -39,7 +39,7 @@ namespace Cynthia.Card
         private async Task<int> FUNCTION1()
         {
             var ids = GwentMap.GetCreateCardsId(x => x.Is(filter: x => x.HasAllCategorie(Categorie.Alchemy) && x.IsAnyGroup(Group.Copper, Group.Silver)), Game.RNG);
-            return await Game.CreateAndMoveStay(PlayerIndex, ids.ToArray());
+            return await Game.CreateAndMoveStay(PlayerIndex, ids.ToArray(), source: Card);
         }
 
         private async Task<int> FUNCTION2()

@@ -15,8 +15,8 @@ namespace Cynthia.Card
             if (@event.Target != Card) return;
             var row = @event.DeathLocation.RowPosition;
             var list = Game.RowToList(PlayerIndex, row);
-            await Game.CreateCard(CardId.LesserDAl, PlayerIndex, new CardLocation(row, list.Count));
-            await Game.CreateCard(CardId.LesserDAl, PlayerIndex, new CardLocation(row, list.Count));
+            await Game.CreateCard(CardId.LesserDAl, PlayerIndex, new CardLocation(row, list.Count), source: Card);
+            await Game.CreateCard(CardId.LesserDAl, PlayerIndex, new CardLocation(row, list.Count), source: Card);
         }
     }
 }

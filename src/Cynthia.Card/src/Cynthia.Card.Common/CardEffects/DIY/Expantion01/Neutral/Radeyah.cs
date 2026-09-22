@@ -23,7 +23,7 @@ namespace Cynthia.Card
             var selectList = cardsId.Select(x => new CardStatus(x)).ToList();
             if (!(await Game.GetSelectMenuCards(PlayerIndex, selectList)).TrySingle(out var cardIndex))
                 return 0;
-            await Game.CreateToStayFirst(cardsId[cardIndex], PlayerIndex, x => x.IsDoomed = true);
+            await Game.CreateToStayFirst(cardsId[cardIndex], PlayerIndex, x => x.IsDoomed = true, source: Card);
             return 1;
         }
     }

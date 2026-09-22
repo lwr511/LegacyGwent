@@ -71,7 +71,7 @@ namespace Cynthia.Card
                .Where(x => !GwentMap.CardMap[x].HasAnyCategorie(Categorie.Agent) && GwentMap.CardMap[x].Is(Group.Silver, CardType.Unit))
                .Mess(Game.RNG)
                .Take(3).ToArray();
-            return await Game.CreateAndMoveStay(PlayerIndex, cardsId);
+            return await Game.CreateAndMoveStay(PlayerIndex, cardsId, source: Card);
         }
     }
 }

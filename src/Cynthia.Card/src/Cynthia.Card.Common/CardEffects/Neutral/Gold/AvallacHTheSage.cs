@@ -18,7 +18,7 @@ namespace Cynthia.Card
             {
                 return 0;
             }
-            await Game.CreateToStayFirst(createId, PlayerIndex);
+            await Game.CreateToStayFirst(createId, PlayerIndex, source: Card);
             return 1;
         }
     }

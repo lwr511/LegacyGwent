@@ -17,7 +17,7 @@ namespace Cynthia.Card
             // we give it the doomed tag which is just display but not .IsDoomed = true, because we had to recode the ban to happen after the death, and if we set it to doomed, it will be banished instead of going to cemetery, and the death event won't trigger, so we have to check if it's copy or not in the death event handler, and only create larva if it's not copy
             for (var i = 0; i < 1; i++)
             {
-                await Game.CreateCard(CardId.EndregaEggs, PlayerIndex, Card.GetLocation(), card => card.Categories = new Categorie[] { Categorie.Insectoid , Categorie.Doomed}); 
+                await Game.CreateCard(CardId.EndregaEggs, PlayerIndex, Card.GetLocation(), card => card.Categories = new Categorie[] { Categorie.Insectoid , Categorie.Doomed}, source: Card);
             }
             return 0;
         }
@@ -41,7 +41,7 @@ namespace Cynthia.Card
         public async Task HandleEvent(AfterCardDeath @event)
         {
             if (@event.Target != Card) return;
-            await Game.CreateCard(CardId.EndregaLarva, PlayerIndex, @event.DeathLocation);
+            await Game.CreateCard(CardId.EndregaLarva, PlayerIndex, @event.DeathLocation, source: Card);
             if (IsCopy && !Card.IsAliveOnPlance())
             {
                 await Card.Effect.Banish();

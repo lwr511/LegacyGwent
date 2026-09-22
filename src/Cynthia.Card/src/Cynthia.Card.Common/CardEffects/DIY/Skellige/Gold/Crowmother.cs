@@ -16,11 +16,11 @@ namespace Cynthia.Card
             {
                 if(Game.RowToList(Card.PlayerIndex, Card.GetLocation().RowPosition).Count() < Game.RowMaxCount)
                 {
-                    await Game.CreateCard(CardId.Crow, PlayerIndex, Card.GetLocation() + 1);
+                    await Game.CreateCard(CardId.Crow, PlayerIndex, Card.GetLocation() + 1, source: Card);
                 }
                 else
                 {
-                    await Game.CreateCard(CardId.Crow, PlayerIndex, Game.GetRandomCanPlayLocation(PlayerIndex, true));
+                    await Game.CreateCard(CardId.Crow, PlayerIndex, Game.GetRandomCanPlayLocation(PlayerIndex, true), source: Card);
                 }
             }
             var cards = Game.PlayersCemetery[PlayerIndex].Where(x => x.Status.CardId == CardId.Crow && x.Status.Strength <= 2).ToList();

@@ -19,7 +19,7 @@ namespace Cynthia.Card
             var damage = 7;
             await target.Effect.Damage(damage, Card);
             if (target.IsDead){
-                await Game.CreateCard(CardId.CultistOblation, target.PlayerIndex, target.GetLocation());
+                await Game.CreateCard(CardId.CultistOblation, target.PlayerIndex, target.GetLocation(), source: Card);
             }
             return 0;
         }

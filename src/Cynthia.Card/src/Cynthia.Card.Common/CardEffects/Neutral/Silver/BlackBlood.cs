@@ -41,7 +41,7 @@ namespace Cynthia.Card
             var cards = GwentMap.GetCreateCardsId(x => x.Group == Group.Copper &&
                     (x.Categories.Contains(Categorie.Necrophage) ||
                     x.Categories.Contains(Categorie.Vampire)), Game.RNG).ToArray();
-            if ((await Game.CreateAndMoveStay(PlayerIndex, cards, isCanOver: true)) == 1)
+            if ((await Game.CreateAndMoveStay(PlayerIndex, cards, isCanOver: true, source: Card)) == 1)
             {
                 await Game.PlayersStay[PlayerIndex].First().Effect.Boost(2, Card);
                 return 1;

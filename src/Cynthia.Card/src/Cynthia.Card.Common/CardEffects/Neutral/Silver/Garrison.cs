@@ -16,7 +16,7 @@ namespace Cynthia.Card
                 .Mess(Game.RNG)
                 .Take(3)
                 .Select(x => x.CardId).ToArray();
-            if (await Game.CreateAndMoveStay(PlayerIndex, cardsId) == 0)
+            if (await Game.CreateAndMoveStay(PlayerIndex, cardsId, source: Card) == 0)
             {
                 return 0;
             }

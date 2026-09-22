@@ -11,7 +11,7 @@ namespace Cynthia.Card
         public override async Task<int> CardPlayEffect(bool isSpying, bool isReveal)
         {
             var ids = GwentMap.GetCreateCardsId(x => x.Is(filter: x => x.HasAllCategorie(Categorie.Organic) && x.IsAnyGroup(Group.Silver)), Game.RNG);
-            return await Game.CreateAndMoveStay(PlayerIndex, ids.ToArray());
+            return await Game.CreateAndMoveStay(PlayerIndex, ids.ToArray(), source: Card);
         }
     }
 }

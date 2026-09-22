@@ -14,10 +14,10 @@ namespace Cynthia.Card
             {
                 return 0;
             }
-			await Game.CreateCardAtEnd("13004", PlayerIndex, RowPosition.MyHand);
-			await Game.CreateCardAtEnd("13004", PlayerIndex, RowPosition.MyHand);
-			await Game.CreateCardAtEnd("13004", AnotherPlayer, RowPosition.MyHand);
-			await Game.CreateCardAtEnd("13004", AnotherPlayer, RowPosition.MyHand);
+			await Game.CreateCardAtEnd("13004", PlayerIndex, RowPosition.MyHand, source: Card);
+			await Game.CreateCardAtEnd("13004", PlayerIndex, RowPosition.MyHand, source: Card);
+			await Game.CreateCardAtEnd("13004", AnotherPlayer, RowPosition.MyHand, source: Card);
+			await Game.CreateCardAtEnd("13004", AnotherPlayer, RowPosition.MyHand, source: Card);
 			return 0;
 		}
 	}

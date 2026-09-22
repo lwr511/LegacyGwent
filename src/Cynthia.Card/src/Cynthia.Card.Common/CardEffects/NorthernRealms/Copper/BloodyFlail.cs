@@ -20,7 +20,7 @@ namespace Cynthia.Card
             //最右生成
             if (Game.GetRandomRow(PlayerIndex, out var rowIndex))
             {
-                await Game.CreateCardAtEnd(CardId.Specter, PlayerIndex, Game.GetRandomCanPlayLocation(Card.PlayerIndex,true).RowPosition);
+                await Game.CreateCardAtEnd(CardId.Specter, PlayerIndex, Game.GetRandomCanPlayLocation(Card.PlayerIndex,true).RowPosition, source: Card);
             }
             return 0;
         }
