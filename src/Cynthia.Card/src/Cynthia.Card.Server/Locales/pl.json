@@ -3821,7 +3821,7 @@
         },
         "70109": {
             "Name": "Straceniec",
-            "Info": "Rozmieszczenie: Wybierz 2 jednostki i przenieś je do swojego rzędu. Kiedy ta karta się przemieści wzmocnij losowego sojusznika w tym rzędzie o 2.",
+            "Info": "Rozmieszczenie: Wybierz 2 jednostki i przenieś je do tego samego rzędu co ta jednostka, po ich stronie planszy.\nGdy ta jednostka zostanie przeniesiona, wzmocnij losową jednostkę w jej rzędzie o 2.",
             "Flavor": "Wiem, że zginę. Więc upewniam się, że nie zabraknie mi towarzystwa."
         },
         "70110": {
@@ -3876,7 +3876,7 @@
         },
         "70121": {
             "Name": "Otkell",
-            "Info": "Zwiększ obrażenia zadawane przez Ulewny Deszcz i Skellige Burzę po przeciwnej stronie o 2.",
+            "Info": "Za każdego niezablokowanego Otkella po twojej stronie planszy Ulewny Deszcz po stronie przeciwnika zadaje o 1 pkt obrażeń więcej. Jeśli masz takiego Otkella, Skellige Burza po stronie przeciwnika zadaje o 1 pkt obrażeń więcej (nie kumuluje się).",
             "Flavor": "W godzinie grozy Wszechmatka Freya ukazała się Otkellowi na jego statku i pozwoliła mu uciszyć szalejący sztorm, gdyż wiedziała już, że Otkell, podobnie jak jego bracia, miał do opowiedzenia większą historię."
         },
         "70122": {
@@ -4066,7 +4066,7 @@
         },
         "70159": {
             "Name": "Krucza Matka",
-            "Info": "Stwórz 2 kruki. Ożyw wszystkie kruki z siłą równą lub mniejszą niż 2.\nFatum.",
+            "Info": "Stwórz 2 kruki. Ożyw wszystkie kruki o bazowej sile 2 lub mniejszej ze swojego cmentarza.\nFatum.",
             "Flavor": "Niektóre kruki uczą się ludzkich słów. A niektórzy ludzie uczą się języka kruków."
         },
         "70160": {
@@ -4086,7 +4086,7 @@
         },
         "70163": {
             "Name": "Raynard Odo",
-            "Info": "Na koniec rundy, jeśli ta jednostka jest wzmocniona przynajmniej o 3, zresetuj się i wzmocnij wszystkich sojuszników w tym rzędzie o 1.\nPowtórz do 2 razy.",
+            "Info": "Na koniec twojej tury, jeśli ta jednostka ma co najmniej 3 punkty wzmocnienia, zamień jej wzmocnienia na pancerz i zresetuj ją, a następnie wzmocnij wszystkich pozostałych sojuszników w tym samym rzędzie o 2. Może zadziałać maksymalnie 3 razy.",
             "Flavor": "Dziesięć lat służyłem pod waszym mężem, potem osiem pod tobą, pani... I nigdy nie walczyłem o słuszniejszą sprawę."
         },
         "70164": {
@@ -4142,7 +4142,7 @@
         },
         "70175": {
             "Name": "Zasadzka Długoszczura",
-            "Info": "Wybierz rząd przeciwnika. Jeśli zawiera mniej niż 4 jednostki, przenieś na ten rząd jego najsilniejszych sojuszników aż do osiągnięcia 4 jednostek. Jeśli ma więcej niż 4 jednostki, przenieś najsłabszych sojuszników z tego rzędu na losowe rzędy tak, aby zostały tam 4 jednostki. Każda przeniesiona karta otrzymuje 2 punkty obrażeń.",
+            "Info": "Wybierz rząd przeciwnika i zmień liczbę znajdujących się w nim jednostek na 4: jeśli jest ich mniej, przenieś do niego najsilniejsze jednostki z innych rzędów przeciwnika; jeśli jest ich więcej, przenieś najsilniejsze jednostki z tego rzędu do innych rzędów przeciwnika. Każda przeniesiona jednostka otrzymuje 2 obrażenia.",
             "Flavor": "Z nimi zawsze to samo: aaach, nie czuję nóg!. Ale żeby ktokolwiek docenił rzemiosło... Czy proszę o tak wiele?"
         },
         "70176": {
@@ -4152,7 +4152,7 @@
         },
         "70177": {
             "Name": "Pan Drapak",
-            "Info": "Rozmieszczenie: Ulepsz wszystkie sojsznicze bestie o 1 gdziekolwiek są, następnie Wzmocnij je o 1 jeśli są pod wpływem pełni księżyca.",
+            "Info": "Rozmieszczenie: Ulepsz wszystkie inne sojusznicze bestie w twojej ręce, talii i na planszy o 1, a następnie wzmocnij sojusznicze bestie w twoich rzędach pod wpływem pełni księżyca o 1.",
             "Flavor": "Jeśli cenisz gałki oczne, nie drocz się z nim."
         },
         "70178": {
@@ -4162,7 +4162,7 @@
         },
         "70179": {
             "Name": "Królowa Calanthe",
-            "Info": "Rozmieszczenie: Pozbądź się wszystkich wzmocnień i pancerza z niebędącego szpiegiem brązowego lub srebrnego sojusznika, następnie umieść go z powrotem w swojej talii. Następnie zagraj brązową lub srebrną jednostkę ze swojej talii.\nZałoga.",
+            "Info": "Rozmieszczenie: Przejmij wszystkie wzmocnienia i pancerz od brązowego lub srebrnego sojusznika, następnie umieść go z powrotem w swojej talii. Następnie zagraj brązową lub srebrną jednostkę ze swojej talii.\nZałoga.",
             "Flavor": "Zwano ją Lwicą. Nie bez powodu."
         },
         "70180": {

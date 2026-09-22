@@ -3821,9 +3821,9 @@
             "Flavor": ""
         },
         "70109": {
-            "Name": "Rowdy Dwarf",
-            "Info": "Deploy: Choose 2 units and move them to this unit's row.\nWhen this unit is moved, Boost a random unit in the same row as this unit by 2.",
-            "Flavor": "You can draw anything you like, my dear dwarves. But you can't build it, mark my words."
+            "Name": "Dwarf Berserker",
+            "Info": "Deploy: Choose 2 units and move them to the same row as this unit on their own side of the board.\nWhen this unit is moved, Boost a random unit in its row by 2.",
+            "Flavor": "I know I'm going to die. So I'm making sure I'll have company."
         },
         "70110": {
             "Name": "Knickers",
@@ -3877,7 +3877,7 @@
         },
         "70121": {
             "Name": "Otkell",
-            "Info": "Increase the Damage dealt by Torrential Rain and Skellige Storm on the opposite side by 2.",
+            "Info": "For each Otkell on your side of the board that is not Locked, Torrential Rain on the enemy side deals 1 additional Damage. While you have such an Otkell, Skellige Storm on the enemy side deals 1 additional Damage (does not stack).",
             "Flavor": "In his hour of doom, All-mother Freya appeared to Otkell on his ship, and gave him the means to soothe the raging tempest, for she already knew that Otkell, like his brothers, had a greater tale to tell."
         },
         "70122": {
@@ -4067,7 +4067,7 @@
         },
         "70159": {
             "Name": "Crowmother",
-            "Info": "Spawn 3 Crows. Resurrect all Crows with power equal to or less than 2 and give them Doomed.",
+            "Info": "Spawn 2 Crows. Resurrect all Crows with base Power of 2 or less from your graveyard.\nDoomed.",
             "Flavor": "Some crows learn human words. And some humans learn the language of the crows."
         },
         "70160": {
@@ -4087,7 +4087,7 @@
         },
         "70163": {
             "Name": "Reynard Odo",
-            "Info": "On turn end, if it has at least 3 Boosts, Gain Armor equal to its Boosts, then Reset self and Boost all allies on the same row by 1.\nRepeat up to 2 times.",
+            "Info": "At the end of your turn, if this unit has at least 3 Boosts, convert its Boosts into Armor and Reset it, then Boost all other allies on the same row by 2. Activates up to 3 times in total.",
             "Flavor": "Under your husband I served ten years, under you another eight. And never in that time did I fight for a more worthy cause."
         },
         "70164": {
@@ -4147,7 +4147,7 @@
         },
         "70175": {
             "Name": "Lure Trap",
-            "Info": "Select an enemy row, if it contains fewer than 4 units, move its highest allies to the row until it has 4 units, If it has more than 4 units, move the lowest allies on the row to random rows until it has 4 units, \ndamage any moved card by 1.",
+            "Info": "Select an enemy row and adjust it to 4 units: if it has fewer than 4 units, move the strongest units from other enemy rows into it; if it has more than 4 units, move the strongest units from it to other enemy rows. Each moved unit takes 2 damage.",
             "Flavor": "Always the same with these people: Ahhh, I can't feel my legs! You'd think they'd at least appreciate the craftsmanship..."
         },
         "70176": {
@@ -4157,7 +4157,7 @@
         },
         "70177": {
             "Name": "Sir Scratch-a-Lot",
-            "Info": "Deploy: Strengthen all allied Beasts by 1 wherever they are, then Boost them by 1 if they are under Full Moon.",
+            "Info": "Deploy: Strengthen all other allied Beasts in your hand, deck, and on the board by 1, then Boost allied Beasts on your Full Moon rows by 1.",
             "Flavor": "If you value your eyesight... Don't call him a pussy."
         },
         "70178": {
@@ -4167,7 +4167,7 @@
         },
         "70179": {
             "Name": "Queen Calanthe",
-            "Info": "Deploy: Play the Lowest non-Gold unit from your deck, then Shuffle a non-Gold ally back to your deck without changing its Power.",
+            "Info": "Deploy: Drain all boosts and armor from a bronze or silver ally, then return it to your deck. After that, play a bronze or silver unit from your deck.\nCrew.",
             "Flavor": "They call her the Lioness of Cintra. And not without good reason."
         },
         "70180": {
