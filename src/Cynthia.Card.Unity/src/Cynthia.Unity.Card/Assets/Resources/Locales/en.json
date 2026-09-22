@@ -4,6 +4,12 @@
         "Filename": "en"
     },
     "MenuLocales": {
+        "DailyQuest_GGStillAvailable": "Round win rewards are complete. You can still earn Good Game rewards today.",
+        "DailyQuest_GGCapReached": "Daily Good Game cap reached. Further Good Games give no powder.",
+        "DailyQuest_GGEarned": "GG powder today: {0} / {1}",
+        "DailyQuest_GGProgress": "Received {0} / {1}",
+        "DailyQuest_GGDescription": "Each Good Game you receive from an opponent: +{0} powder. Rewards are credited automatically.",
+        "DailyQuest_GGTitle": "Good Game received",
         "Settings_AnimatedCardQuality": "Animated card quality",
         "Settings_AnimatedCardsLow": "Low",
         "Settings_AnimatedCardsMedium": "Medium",
@@ -52,7 +58,7 @@
         "Common_CloseEsc": "[Esc] CLOSE",
         "DailyQuest_SyncError": "Quest synchronization is temporarily unavailable",
         "DailyQuest_Wallet": "Powder earned today: {0} / {1} · Balance: {2}",
-        "DailyQuest_Rules": "Each round won against a human earns half a crown. Six steps make three crowns. Rewards are credited automatically.",
+        "DailyQuest_OpponentRules":"Only the first match against each opponent each day grants crowns and GG powder.\nResets at 00:00 China time (UTC+8). Login rewards are unaffected.","DailyQuest_Rules": "Each round won against a human earns half a crown. Six steps make three crowns. Rewards are credited automatically.",
         "DailyQuest_Complete": "All of today's rewards received. Come back tomorrow.",
         "DailyQuest_Tier": "Crowns: {0:0.#}\n+{1} powder\n{2}",
         "DailyQuest_Incomplete": "Incomplete",

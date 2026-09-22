@@ -36,7 +36,7 @@ try {
     Check ($wallet.collection.meteoritePowder -eq 10) 'login itself pays ten before daily endpoint is called'
     $state=Invoke-Hub 'GetDailyQuests' @()
     Check ($state.wallet.collection.id -eq $user.id) 'daily data belongs to authenticated connection'
-    Check ($state.dailyCap -eq 70 -and $state.wallet.collection.dailyQuests.crowns -eq 0) 'fresh progress and approved cap'
+    Check ($state.dailyCap -eq 100 -and $state.wallet.collection.dailyQuests.crowns -eq 0) 'fresh progress and GG-inclusive fixture cap'
     $remaining=([DateTimeOffset]::Parse($state.resetUtc)-[DateTimeOffset]::Parse($state.serverUtc)).TotalSeconds
     Check ($remaining -gt 0 -and $remaining -le 86400 -and ([DateTimeOffset]$state.resetUtc).UtcDateTime.Hour -eq 16) 'server supplies UTC time and China midnight boundary'
     1..5 | ForEach-Object {$null=Invoke-Hub 'GetDailyQuests' @()}

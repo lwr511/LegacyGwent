@@ -4,6 +4,12 @@
         "Filename": "cn"
     },
     "MenuLocales": {
+        "DailyQuest_GGStillAvailable": "小局胜利奖励已完成，今日仍可获得 GG 奖励。",
+        "DailyQuest_GGCapReached": "今日 GG 奖励已达上限，继续收到 GG 不再获得粉尘。",
+        "DailyQuest_GGEarned": "今日 GG 粉尘：{0} / {1}",
+        "DailyQuest_GGProgress": "已收到 {0} / {1}",
+        "DailyQuest_GGDescription": "每收到对手 1 次 GG：+{0} 粉尘，奖励自动到账。",
+        "DailyQuest_GGTitle": "收到的 GG",
         "Settings_AnimatedCardQuality": "闪卡画质",
         "Settings_AnimatedCardsLow": "低",
         "Settings_AnimatedCardsMedium": "中",
@@ -52,7 +58,7 @@
         "Common_CloseEsc": "[Esc] 关闭",
         "DailyQuest_SyncError": "任务同步暂不可用",
         "DailyQuest_Wallet": "今日已获得 {0} / {1} 粉尘 · 持有 {2} 粉尘",
-        "DailyQuest_Rules": "每赢一个真人对局的小局，获得半个王冠；6 个刻度对应 3 个完整王冠。奖励自动到账。",
+        "DailyQuest_OpponentRules":"同一天与同一对手，仅首场对局计小王冠与 GG 粉尘奖励。\n每日中国时间 00:00（UTC+8）重置，登录奖励不受影响。","DailyQuest_Rules": "每赢一个真人对局的小局，获得半个王冠；6 个刻度对应 3 个完整王冠。奖励自动到账。",
         "DailyQuest_Complete": "今日奖励已全部获得，明日继续。",
         "DailyQuest_Tier": "{0:0.#} 个王冠\n+{1} 粉尘\n{2}",
         "DailyQuest_Incomplete": "未完成",

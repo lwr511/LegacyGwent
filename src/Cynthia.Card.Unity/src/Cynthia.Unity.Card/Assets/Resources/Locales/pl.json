@@ -4,6 +4,12 @@
         "Filename": "pl"
     },
     "MenuLocales": {
+        "DailyQuest_GGStillAvailable": "Nagrody za wygrane rundy odebrane. Nagrody za „Good Game” są jeszcze dostępne dzisiaj.",
+        "DailyQuest_GGCapReached": "Osiągnięto dzienny limit nagród za „Good Game”. Kolejne „Good Game” nie dają pyłu.",
+        "DailyQuest_GGEarned": "Pył za GG dzisiaj: {0} / {1}",
+        "DailyQuest_GGProgress": "Otrzymano: {0} / {1}",
+        "DailyQuest_GGDescription": "Za każde otrzymane od przeciwnika „Good Game”: +{0} pyłu. Nagrody otrzymasz automatycznie.",
+        "DailyQuest_GGTitle": "Otrzymane „Good Game”",
         "Settings_AnimatedCardQuality": "Jakość animacji kart",
         "Settings_AnimatedCardsLow": "Niska",
         "Settings_AnimatedCardsMedium": "Średnia",
@@ -53,7 +59,7 @@
         "Common_CloseEsc": "[Esc] ZAMKNIJ",
         "DailyQuest_SyncError": "Synchronizacja zadań jest chwilowo niedostępna",
         "DailyQuest_Wallet": "Pył zdobyty dzisiaj: {0} / {1} · Posiadany pył: {2}",
-        "DailyQuest_Rules": "Każda wygrana runda przeciw graczowi daje pół korony. Sześć stopni to trzy korony. Nagrody otrzymasz automatycznie.",
+        "DailyQuest_OpponentRules":"Każdego dnia korony i pył za GG daje tylko pierwszy mecz z każdym przeciwnikiem.\nReset o 00:00 czasu chińskiego (UTC+8). Nagroda za logowanie pozostaje bez zmian.","DailyQuest_Rules": "Każda wygrana runda przeciw graczowi daje pół korony. Sześć stopni to trzy korony. Nagrody otrzymasz automatycznie.",
         "DailyQuest_Complete": "Wszystkie dzisiejsze nagrody odebrane. Wróć jutro.",
         "DailyQuest_Tier": "Korony: {0:0.#}\n+{1} pyłu\n{2}",
         "DailyQuest_Incomplete": "Nieukończone",

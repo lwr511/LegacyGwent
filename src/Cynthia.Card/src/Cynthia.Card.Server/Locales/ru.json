@@ -4,6 +4,12 @@
         "Filename": "ru"
     },
     "MenuLocales": {
+        "DailyQuest_GGStillAvailable": "Награды за победы в раундах получены. Награды за «Good Game» ещё можно получить сегодня.",
+        "DailyQuest_GGCapReached": "Дневной лимит наград за «Good Game» достигнут. Дальнейшие «Good Game» не дают пыли.",
+        "DailyQuest_GGEarned": "Пыль за GG сегодня: {0} / {1}",
+        "DailyQuest_GGProgress": "Получено: {0} / {1}",
+        "DailyQuest_GGDescription": "За каждое полученное от соперника «Good Game»: +{0} пыли. Награды начисляются автоматически.",
+        "DailyQuest_GGTitle": "Полученные «Good Game»",
         "Settings_AnimatedCardQuality": "Качество анимации карт",
         "Settings_AnimatedCardsLow": "Низкое",
         "Settings_AnimatedCardsMedium": "Среднее",
@@ -67,7 +73,7 @@
         "Common_CloseEsc": "[Esc] ЗАКРЫТЬ",
         "DailyQuest_SyncError": "Синхронизация заданий временно недоступна",
         "DailyQuest_Wallet": "Пыль за сегодня: {0} / {1} · Всего: {2}",
-        "DailyQuest_Rules": "За каждый выигранный раунд против игрока вы получаете полкороны. Шесть делений — три короны. Награды начисляются автоматически.",
+        "DailyQuest_OpponentRules":"Только первый матч с каждым противником за день даёт короны и пыль за GG.\nСброс в 00:00 по китайскому времени (UTC+8). Награда за вход не меняется.","DailyQuest_Rules": "За каждый выигранный раунд против игрока вы получаете полкороны. Шесть делений — три короны. Награды начисляются автоматически.",
         "DailyQuest_Complete": "Все награды за сегодня получены. Возвращайтесь завтра.",
         "DailyQuest_Tier": "Короны: {0:0.#}\n+{1} пыли\n{2}",
         "DailyQuest_Incomplete": "Не выполнено",

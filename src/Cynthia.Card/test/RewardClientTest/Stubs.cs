@@ -37,3 +37,11 @@ public static class DependencyResolver
     public sealed class TestContainer
     {public Cynthia.Card.Client.GwentClientService Client;public T Resolve<T>()=>(T)(object)Client;}
 }
+namespace Assets.Script.Localization
+{
+    // Text rendering is outside these transport/cache tests; preserve a non-null error label.
+    public static class LocalizedLabel
+    {
+        public static string Get(string key, params object[] arguments) => key;
+    }
+}
