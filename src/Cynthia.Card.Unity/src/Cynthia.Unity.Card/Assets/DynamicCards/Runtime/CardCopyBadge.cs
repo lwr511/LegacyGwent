@@ -7,9 +7,8 @@ namespace Assets.Script.DynamicCards
 {
     public static class CardCopyBadge
     {
-        // Only the deck editor's premium copper cards display their existing counter.
-        public static bool ShowsCount(CardStatus card) => card != null &&
-            card.Group == Group.Copper && card.IsPremium == true;
+        // Both copper versions display their own counter; collections keep hiding it.
+        public static bool ShowsCount(CardStatus card) => card != null && card.Group == Group.Copper;
 
         public static void Apply(CardShowInfo view, int count)
         {

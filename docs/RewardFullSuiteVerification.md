@@ -119,3 +119,6 @@ Pop-Location
 已核对 5005、5016、28020、28021 无遗留监听，四个采样客户端已退出，Unity 已停止 Play。场景文件与 ProjectSettings 无新增磁盘修改。测试构建结束后编辑器中的 LoginScene 显示未保存标记；为保留可能的编辑器内改动，未替用户保存或丢弃。电脑控制会话已结束。
 
 本轮未提交 Git。原有无关修改保留；此前处理日期规则模型与数据库实现和本轮开始前备份哈希一致。汇总见 [summary.json](../work/RewardFullSuite/summary.json)。
+
+
+2026-09-30 修订：上述历史验收采用的“投降／断线未结算不计冠”规则已被修正；当前规则、独立回归及真实断线验证见 [ForfeitRewardsVerification.md](ForfeitRewardsVerification.md)。历史通过数字不代表本次验收。

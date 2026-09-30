@@ -80,22 +80,26 @@ public class EditorInfo : MonoBehaviour
         var card = view.CurrentCore;
         if (card == null) return;
         bool premium = card.IsPremium == true;
-        int owned = Assets.Script.DynamicCards.PremiumCollectionClient.Count(card.CardId, premium);
         var core = view.GetComponent<EditorUICoreCard>();
-        int used = 0;
-        if (core != null && _nowEditorDeck != null)
+        if (core == null)
         {
-            int total = _nowEditorDeck.Deck.Count(x => x == card.CardId);
-            int selected = CardInventory.DeckPremiumCount(_nowEditorDeck, card.CardId);
-            used = premium ? selected : total - selected;
-            if (_nowEditorDeck.Id == "blacklist") owned = 1;
-            else if (isSpecial && card.Group == Group.Gold && !premium) owned = 3;
-            core.Count = Math.Max(0, owned - used);
-            int limit = _nowEditorDeck.Id == "blacklist" ? 1 :
-                card.Group == Group.Copper || (isSpecial && card.Group == Group.Gold) ? 3 : 1;
-            core.Gray.SetActive(owned <= used || total >= limit);
+            // Collection entries keep hiding their quantity; only editors show it.
+            Assets.Script.DynamicCards.CardCopyBadge.Apply(view, 0);
+            return;
         }
-        Assets.Script.DynamicCards.CardCopyBadge.Apply(view, Math.Max(0, owned - used));
+        int addable = _nowEditorDeck == null ? 0 :
+            Assets.Script.DynamicCards.DeckCardCounts.AddableCopies(_nowEditorDeck, card.CardId, card.Group,
+                premium, OwnedVersionCopies(card, premium), isSpecial);
+        core.Count = addable; // the setter owns CountIcon visibility and the grayed-out state
+        Assets.Script.DynamicCards.CardCopyBadge.Apply(view, addable);
+    }
+
+    // Owned copies of exactly one version. Standard copies are always fully owned.
+    private int OwnedVersionCopies(CardStatus card, bool premium)
+    {
+        if (_nowEditorDeck != null && _nowEditorDeck.Id == "blacklist") return 1;
+        if (isSpecial && card.Group == Group.Gold && !premium) return 3;
+        return Assets.Script.DynamicCards.PremiumCollectionClient.Count(card.CardId, premium);
     }
 
     private void RefreshInventoryCounts()
@@ -463,7 +467,7 @@ public class EditorInfo : MonoBehaviour
         var deck = _clientService.User.Decks.Single(x => x.Id == Id);
         _nowEditorDeck = deck;
         CardInventory.InitializeDeck(_nowEditorDeck, Assets.Script.DynamicCards.PremiumCollectionClient.Account);
-        isSpecial = (!deck.IsHalfBasicDeck()) && deck.IsHalfSpecialDeck();
+        isSpecial = Assets.Script.DynamicCards.DeckCardCounts.IsSpecial(deck);
         _nowSwitchLeaderId = deck.Leader;
         _nowSwitchFaction = GwentMap.CardMap[deck.Leader].Faction;
         //
@@ -862,17 +866,13 @@ public class EditorInfo : MonoBehaviour
         {
             if (!Assets.Script.DynamicCards.PremiumCollectionClient.Ready) return;
             CardInventory.InitializeDeck(_nowEditorDeck, Assets.Script.DynamicCards.PremiumCollectionClient.Account);
-            int total = _nowEditorDeck.Deck.Count(x => x == card.CardId);
-            int selected = CardInventory.DeckPremiumCount(_nowEditorDeck, card.CardId);
-            int owned = Assets.Script.DynamicCards.PremiumCollectionClient.Count(card.CardId, premium);
-            if (isSpecial && card.Group == Group.Gold && !premium) owned = 3;
-            if ((premium ? selected : total - selected) >= owned)
-            { SelectSwitchUICard(card); return; }
-            int limit = card.Group == Group.Copper || (isSpecial && card.Group == Group.Gold) ? 3 : 1;
-            if (total >= limit || _nowEditorDeck.Deck.Count >= 40 ||
-                (card.Group == Group.Silver && _nowEditorDeck.Deck.Count(x => x.CardInfo().Group == Group.Silver) >= 6) ||
-                (card.Group == Group.Gold && _nowEditorDeck.Deck.Count(x => x.CardInfo().Group == Group.Gold) >= (isSpecial ? 12 : 4))) return;
-            if (premium) _nowEditorDeck.PremiumCards[card.CardId] = selected + 1;
+            int owned = OwnedVersionCopies(card, premium);
+            int used = Assets.Script.DynamicCards.DeckCardCounts.VersionInDeck(_nowEditorDeck, card.CardId, premium);
+            if (used >= owned)
+            { SelectSwitchUICard(card); return; } // no stock left: keep opening the details
+            if (Assets.Script.DynamicCards.DeckCardCounts.AddableCopies(_nowEditorDeck, card.CardId, card.Group,
+                premium, owned, isSpecial) <= 0) return;
+            if (premium) _nowEditorDeck.PremiumCards[card.CardId] = used + 1;
         }
         _nowEditorDeck.Deck.Add(card.CardId);
         SetEditorDeck(_nowEditorDeck);
@@ -918,7 +918,7 @@ public class EditorInfo : MonoBehaviour
     public void SetEditorDeck(DeckModel deck)
     {
         RemoveAllChild(EditorCListContext);
-        if (_nowEditorDeck.Id != "blacklist")
+        if (deck.Id != "blacklist")
         {
             var factionIndex = GetFactionIndex(_nowSwitchFaction);
             var leader = Instantiate(EditorLeadersPrefab[factionIndex]).GetComponent<LeaderShow>();
@@ -929,8 +929,8 @@ public class EditorInfo : MonoBehaviour
         foreach (var group in deck.Deck.GroupBy(x => x)
             .OrderByDescending(x => GwentMap.CardMap[x.Key].Group).ThenByDescending(x => GwentMap.CardMap[x.Key].Strength))
         {
-            int premium = CardInventory.DeckPremiumCount(deck, group.Key);
-            AddRow(group.Key, false, group.Count() - premium);
+            int premium = Assets.Script.DynamicCards.DeckCardCounts.VersionInDeck(deck, group.Key, true);
+            AddRow(group.Key, false, Assets.Script.DynamicCards.DeckCardCounts.VersionInDeck(deck, group.Key, false));
             AddRow(group.Key, true, premium);
         }
         void AddRow(string id, bool premium, int copies)
@@ -942,24 +942,21 @@ public class EditorInfo : MonoBehaviour
             row.Id = id; row.IsPremium = premium;
             card.transform.SetParent(EditorCListContext, false);
         }
-        AllCount.text = _nowEditorDeck.Deck.Count().ToString();
+        var counts = Assets.Script.DynamicCards.DeckCardCounts.Summarize(deck);
+        AllCount.text = counts.Total.ToString();
         bool valid = deck.Id == "blacklist" || (deck.IsSpecialDeck() || deck.IsBasicDeck());
         AllCount.color = valid ? ClientGlobalInfo.NormalColor : ClientGlobalInfo.ErrorColor;
         AllCountText.color = valid ? ClientGlobalInfo.NormalColor : ClientGlobalInfo.ErrorColor;
-        if (_nowEditorDeck.Id == "blacklist")
+        CopperCount.text = counts.Copper.ToString();
+        if (deck.Id == "blacklist")
         {
-            CopperCount.text = $"{_nowEditorDeck.Deck.Where(x => GwentMap.CardMap[x].Group == Group.Copper).Count()}";
-            GoldCount.text = $"{_nowEditorDeck.Deck.Where(x => GwentMap.CardMap[x].Group == Group.Gold).Count()}";
-            SilverCount.text = $"{_nowEditorDeck.Deck.Where(x => GwentMap.CardMap[x].Group == Group.Silver).Count()}";
+            GoldCount.text = counts.Gold.ToString();
+            SilverCount.text = counts.Silver.ToString();
         }
         else
         {
-            CopperCount.text = $"{_nowEditorDeck.Deck.Where(x => GwentMap.CardMap[x].Group == Group.Copper).Count()}";
-            if (isSpecial)
-                GoldCount.text = $"{_nowEditorDeck.Deck.Where(x => GwentMap.CardMap[x].Group == Group.Gold).Count()}/12";
-            else
-                GoldCount.text = $"{_nowEditorDeck.Deck.Where(x => GwentMap.CardMap[x].Group == Group.Gold).Count()}/4";
-            SilverCount.text = $"{_nowEditorDeck.Deck.Where(x => GwentMap.CardMap[x].Group == Group.Silver).Count()}/6";
+            GoldCount.text = $"{counts.Gold}/{(isSpecial ? Assets.Script.DynamicCards.DeckCardCounts.SpecialGoldCapacity : Assets.Script.DynamicCards.DeckCardCounts.StandardGoldCapacity)}";
+            SilverCount.text = $"{counts.Silver}/{Assets.Script.DynamicCards.DeckCardCounts.SilverCapacity}";
         }
         //*****************
         //等待补充？？？
