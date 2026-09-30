@@ -62,7 +62,8 @@ namespace Assets.Script.DynamicCards.Editor
             var cards = catalog.cards.OrderBy(c => c.prefab, StringComparer.Ordinal).ToArray();
             if (cards.Any(c => !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Old/Thronebreaker/", StringComparison.Ordinal) &&
                                !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Old/Legacy2017/", StringComparison.Ordinal) &&
-                               !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Latest/", StringComparison.Ordinal)))
+                               !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Latest/", StringComparison.Ordinal) &&
+                               !c.prefab.StartsWith(DynamicCardLibrary.ContentRoot + "Authored/", StringComparison.Ordinal)))
                 throw new BuildFailedException("Premium scenes must use an explicit supported source directory.");
             if (cards.GroupBy(c => c.id).Any(g => g.Count() != 1) ||
                 cards.SelectMany(c => c.artIds ?? new string[0]).GroupBy(id => id).Any(g => g.Count() != 1))
@@ -82,9 +83,10 @@ namespace Assets.Script.DynamicCards.Editor
             var fileHashes = new Dictionary<string, string>(StringComparer.Ordinal);
             int completed = 0;
             // Keep existing source partitions stable when adding missing modern cards.
-            foreach (string source in new[] { "Thronebreaker", "Legacy2017", "Latest" })
+            foreach (string source in new[] { "Thronebreaker", "Legacy2017", "Latest", "Authored" })
             {
-                string prefix = DynamicCardLibrary.ContentRoot + (source == "Latest" ? "Latest/" : "Old/" + source + "/");
+                string prefix = DynamicCardLibrary.ContentRoot +
+                    (source == "Latest" || source == "Authored" ? source + "/" : "Old/" + source + "/");
                 var cohort = cards.Where(c => c.prefab.StartsWith(prefix, StringComparison.Ordinal)).ToArray();
                 for (int offset = 0; offset < cohort.Length; offset += batchSize)
                 {

@@ -1,0 +1,4 @@
+# LadyLakePremium opt-in editor bridge.
+# Root writes ONE command to this file; the bridge consumes it and deletes the file.
+# While this file starts with '#' (or is empty) the bridge does nothing.
+# Commands: build | open | play | stop | capture [path] | validate | sample | status

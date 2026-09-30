@@ -1,0 +1,64 @@
+{
+  "output": "Assets/Experiments/LadyLakePremium/Environment/Audio/LadyLakeLoop.wav",
+  "durationSeconds": 12.0,
+  "sampleRate": 48000,
+  "channels": 2,
+  "bitDepth": 16,
+  "peak": 27570,
+  "peakDbfs": -1.5,
+  "clippedSamples": 0,
+  "seamCrossfadeSeconds": 0.35,
+  "endpointWindowSeconds": 0.02,
+  "dcRemoved": [
+    -1.7e-05,
+    4e-06
+  ],
+  "elements": [
+    {
+      "range": "0.0-12.0",
+      "role": "atmosphere bed",
+      "sources": [
+        "15010100 (Aeschna, Thronebreaker, the original numbered underwater layer scene)",
+        "56180101 (Latest, the DIY-art water scene)",
+        "16550101 (Tempest, Latest water scene, low-passed)"
+      ],
+      "processing": "one-pole low-pass 2600 Hz / 1200 Hz, fixed bed gains, 0.35 s loop crossfade"
+    },
+    {
+      "range": "1.0-3.4",
+      "role": "gentle falling-blade water movement",
+      "sources": [
+        "16550101 (Tempest, Latest water scene)"
+      ],
+      "processing": "excerpt 3.0 s slowed x1.18 (underwater drag), 90 Hz-5.2 kHz band-pass, swell envelope"
+    },
+    {
+      "range": "3.2",
+      "role": "catch glint",
+      "sources": [
+        "13680101 (Syanna, Latest, sword-flare premium scene)"
+      ],
+      "processing": "loudest transient excised, 1.8-9 kHz band-pass, 2.5 ms attack / 85 ms decay plus a 90 ms brighter reflection"
+    },
+    {
+      "range": "5.6-8.3",
+      "role": "lift magical swell",
+      "sources": [
+        "22500101 (Will of the Wisps, Latest magic scene)"
+      ],
+      "processing": "excerpt 4.0 s slowed x1.06, 320 Hz-8 kHz band-pass, asymmetric rise/hold/fall envelope"
+    },
+    {
+      "range": "8.25-9.0",
+      "role": "release shimmer",
+      "sources": [
+        "22500101 (Will of the Wisps, Latest magic scene)"
+      ],
+      "processing": "2.6-13 kHz band-pass, exponential decay, stereo-offset gains"
+    }
+  ],
+  "notVerified": [
+    "No listening test was performed by this worker; the mix is described by its numeric analysis only.",
+    "The selected catalog audio fields are the premium-card scene soundtracks. They are treated as non-speech ambience; the worker did not run a speech classifier, only modulation/zero-crossing statistics."
+  ]
+}

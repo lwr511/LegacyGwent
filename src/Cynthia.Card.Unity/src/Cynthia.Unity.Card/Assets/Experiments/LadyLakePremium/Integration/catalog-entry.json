@@ -1,0 +1,97 @@
+{
+    "id": "lady-lake-authored",
+    "sourceId": "lady-lake-authored",
+    "sourceVersion": "Authored",
+    "artIds": [
+        "c10000000"
+    ],
+    "prefab": "Assets/Experiments/LadyLakePremium/Integration/Card.prefab",
+    "audio": "Assets/Experiments/LadyLakePremium/Environment/Audio/LadyLakeLoop.wav",
+    "pivot": "Pivot",
+    "fieldOfView": 35.0,
+    "cameraDistance": -11.5,
+    "nearClip": 1.0,
+    "farClip": 300.0,
+    "xStart": -6.0,
+    "xEnd": 6.0,
+    "yStart": -2.0,
+    "yEnd": 2.0,
+    "introDuration": 12.0,
+    "topMargin": 0.0,
+    "loopDuration": 12.0,
+    "particleEvents": [
+        {
+            "path": "Pivot/Environment/Bubbles",
+            "time": 0.0,
+            "loop": true,
+            "sourceTiming": true,
+            "phaseStart": 0.0,
+            "period": 12.0
+        },
+        {
+            "path": "Pivot/Environment/Motes",
+            "time": 0.0,
+            "loop": true,
+            "sourceTiming": true,
+            "phaseStart": 0.0,
+            "period": 12.0
+        },
+        {
+            "path": "Pivot/Environment/Glints",
+            "time": 0.0,
+            "loop": true,
+            "sourceTiming": true,
+            "phaseStart": 0.0,
+            "period": 12.0
+        }
+    ],
+    "uvMotions": [
+        {
+            "path": "Pivot/Environment/CausticSheen",
+            "property": "_MainTex",
+            "materialIndex": 0,
+            "speed": {
+                "x": 0.019999999552965165,
+                "y": 0.03400000184774399
+            },
+            "start": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "forceStart": false
+        },
+        {
+            "path": "Pivot/Environment/WaterbedCaustics",
+            "property": "_MainTex",
+            "materialIndex": 0,
+            "speed": {
+                "x": 0.014000000432133675,
+                "y": 0.02199999988079071
+            },
+            "start": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "forceStart": false
+        }
+    ],
+    "transformPairs": [
+        {
+            "source": "Pivot/FigureRig/FigureRig/Sword/Grip",
+            "target": "Pivot/Environment/SwordGlow"
+        }
+    ],
+    "viewMotions": [],
+    "cameraParents": [],
+    "jiggles": [],
+    "wiggles": [],
+    "materialValues": [],
+    "initialTransforms": [],
+    "nonRenderingPaths": [],
+    "verticalFramingCorrection": 0.0,
+    "dragFramingCorrection": 0.0,
+    "thumbnailFramingCorrection": 0.0,
+    "cutTime": -1.0,
+    "beforeCut": "",
+    "afterCut": ""
+}

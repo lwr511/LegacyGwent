@@ -1,0 +1,1065 @@
+{
+  "frame_self_check": {
+    "checked": false,
+    "reason": "Unity runtime validation is used for fast iteration"
+  },
+  "geometry_self_check": [
+    {
+      "name": "Body",
+      "verts": 3188,
+      "tris": 6164,
+      "signed_volume": 0.75315,
+      "boundary_edges": 0,
+      "boundary_edge_length": 0.0,
+      "boundary_edges_longer_than_0.01": 0,
+      "nonmanifold_edges": 0,
+      "outward_face_ratio": 0.7446,
+      "outward": true
+    },
+    {
+      "name": "Hair",
+      "verts": 24454,
+      "tris": 48508,
+      "signed_volume": 2.89502,
+      "boundary_edges": 0,
+      "boundary_edge_length": 0.0,
+      "boundary_edges_longer_than_0.01": 0,
+      "nonmanifold_edges": 5,
+      "outward_face_ratio": 0.9331,
+      "outward": true
+    },
+    {
+      "name": "Sword",
+      "verts": 244,
+      "tris": 480,
+      "signed_volume": 0.02707,
+      "boundary_edges": 0,
+      "boundary_edge_length": 0.0,
+      "boundary_edges_longer_than_0.01": 0,
+      "nonmanifold_edges": 0,
+      "outward_face_ratio": 0.7667,
+      "outward": true
+    }
+  ],
+  "generated_utc": "2026-09-27T15:48:20.250761Z",
+  "generator": "Assets/Experiments/LadyLakePremium/Model/Source/build_figure.py",
+  "blender": "5.1.0",
+  "coordinate_contract": {
+    "world_from_art_px": "P(px,py,z)=((px-248.5)/100,(355-py)/100,z)",
+    "figure_registration": "card=(u*0.83+0.04, v*0.83+0.117) of figure-v5 normalised top-left",
+    "appearance_offset_applied": false,
+    "up_axis": "y",
+    "camera_looks": "+z"
+  },
+  "prefab_contract": {
+    "root": "FigureRig",
+    "static_method": "LegacyGwent.LadyLakePremium.Editor.LadyLakeModelBuilder.Build()",
+    "prefab_path": "Assets/Experiments/LadyLakePremium/Model/FigureRig.prefab"
+  },
+  "bones": [
+    {
+      "name": "Root",
+      "parent": null,
+      "head": [
+        -0.0,
+        0.0,
+        -0.0
+      ],
+      "tail": [
+        -0.0,
+        0.0,
+        -0.3
+      ],
+      "length": 0.3
+    },
+    {
+      "name": "Hips",
+      "parent": "Root",
+      "head": [
+        -0.51662,
+        1.029972,
+        0.02
+      ],
+      "tail": [
+        -0.162704,
+        0.754965,
+        0.02
+      ],
+      "length": 0.448202
+    },
+    {
+      "name": "Spine",
+      "parent": "Hips",
+      "head": [
+        -0.162704,
+        0.754965,
+        0.02
+      ],
+      "tail": [
+        0.151888,
+        0.519245,
+        0.02
+      ],
+      "length": 0.393106
+    },
+    {
+      "name": "Chest",
+      "parent": "Spine",
+      "head": [
+        0.151888,
+        0.519245,
+        0.02
+      ],
+      "tail": [
+        0.46648,
+        0.322811,
+        0.04
+      ],
+      "length": 0.371422
+    },
+    {
+      "name": "Neck",
+      "parent": "Chest",
+      "head": [
+        0.46648,
+        0.322811,
+        0.04
+      ],
+      "tail": [
+        0.631641,
+        0.220666,
+        0.03
+      ],
+      "length": 0.194453
+    },
+    {
+      "name": "Head",
+      "parent": "Neck",
+      "head": [
+        0.631641,
+        0.220666,
+        0.03
+      ],
+      "tail": [
+        0.639506,
+        0.377813,
+        0.02
+      ],
+      "length": 0.157661
+    },
+    {
+      "name": "HairRoot",
+      "parent": "Head",
+      "head": [
+        0.741748,
+        0.204951,
+        0.1
+      ],
+      "tail": [
+        0.46648,
+        -0.345063,
+        0.14
+      ],
+      "length": 0.61635
+    },
+    {
+      "name": "HairA",
+      "parent": "HairRoot",
+      "head": [
+        0.46648,
+        -0.345063,
+        0.14
+      ],
+      "tail": [
+        0.07324,
+        -0.934363,
+        0.16
+      ],
+      "length": 0.70874
+    },
+    {
+      "name": "HairB",
+      "parent": "HairA",
+      "head": [
+        0.07324,
+        -0.934363,
+        0.16
+      ],
+      "tail": [
+        -0.241352,
+        -1.366517,
+        0.16
+      ],
+      "length": 0.534532
+    },
+    {
+      "name": "HairC",
+      "parent": "HairB",
+      "head": [
+        -0.241352,
+        -1.366517,
+        0.16
+      ],
+      "tail": [
+        -0.437972,
+        -1.68081,
+        0.15
+      ],
+      "length": 0.370864
+    },
+    {
+      "name": "HairD",
+      "parent": "HairC",
+      "head": [
+        -0.437972,
+        -1.68081,
+        0.15
+      ],
+      "tail": [
+        -0.187972,
+        -1.66081,
+        0.6
+      ],
+      "length": 0.51517
+    },
+    {
+      "name": "ShoulderR",
+      "parent": "Chest",
+      "head": [
+        0.250198,
+        0.519245,
+        0.02
+      ],
+      "tail": [
+        0.230536,
+        0.578175,
+        0.0
+      ],
+      "length": 0.065264
+    },
+    {
+      "name": "ShoulderL",
+      "parent": "Chest",
+      "head": [
+        -0.241352,
+        0.578175,
+        0.03
+      ],
+      "tail": [
+        -0.359324,
+        0.637105,
+        0.05
+      ],
+      "length": 0.13338
+    },
+    {
+      "name": "UpperArmR",
+      "parent": "ShoulderR",
+      "head": [
+        0.230536,
+        0.578175,
+        0.0
+      ],
+      "tail": [
+        0.46648,
+        -0.777216,
+        -0.06
+      ],
+      "length": 1.377082
+    },
+    {
+      "name": "ForearmR",
+      "parent": "UpperArmR",
+      "head": [
+        0.46648,
+        -0.777216,
+        -0.06
+      ],
+      "tail": [
+        1.037,
+        -1.799,
+        -0.02
+      ],
+      "length": 1.170955
+    },
+    {
+      "name": "UpperArmL",
+      "parent": "ShoulderL",
+      "head": [
+        -0.359324,
+        0.637105,
+        0.05
+      ],
+      "tail": [
+        -0.654254,
+        1.344265,
+        -0.06
+      ],
+      "length": 0.774054
+    },
+    {
+      "name": "ForearmL",
+      "parent": "UpperArmL",
+      "head": [
+        -0.654254,
+        1.344265,
+        -0.06
+      ],
+      "tail": [
+        -0.614,
+        1.934,
+        0.06
+      ],
+      "length": 0.603164
+    },
+    {
+      "name": "HandR",
+      "parent": "ForearmR",
+      "head": [
+        1.037,
+        -1.799,
+        -0.02
+      ],
+      "tail": [
+        1.127,
+        -2.094,
+        -0.02
+      ],
+      "length": 0.308423
+    },
+    {
+      "name": "IdxR_1",
+      "parent": "HandR",
+      "head": [
+        1.048893,
+        -2.105283,
+        -0.016
+      ],
+      "tail": [
+        1.064024,
+        -2.154878,
+        0.024511
+      ],
+      "length": 0.0658
+    },
+    {
+      "name": "IdxR_2",
+      "parent": "IdxR_1",
+      "head": [
+        1.064024,
+        -2.154878,
+        0.024511
+      ],
+      "tail": [
+        1.066009,
+        -2.161384,
+        0.072915
+      ],
+      "length": 0.04888
+    },
+    {
+      "name": "IdxR_3",
+      "parent": "IdxR_2",
+      "head": [
+        1.066009,
+        -2.161384,
+        0.072915
+      ],
+      "tail": [
+        1.059904,
+        -2.141374,
+        0.106396
+      ],
+      "length": 0.03948
+    },
+    {
+      "name": "MidR_1",
+      "parent": "HandR",
+      "head": [
+        1.097673,
+        -2.090401,
+        -0.016
+      ],
+      "tail": [
+        1.11377,
+        -2.143161,
+        0.027096
+      ],
+      "length": 0.07
+    },
+    {
+      "name": "MidR_2",
+      "parent": "MidR_1",
+      "head": [
+        1.11377,
+        -2.143161,
+        0.027096
+      ],
+      "tail": [
+        1.115881,
+        -2.150083,
+        0.07859
+      ],
+      "length": 0.052
+    },
+    {
+      "name": "MidR_3",
+      "parent": "MidR_2",
+      "head": [
+        1.115881,
+        -2.150083,
+        0.07859
+      ],
+      "tail": [
+        1.109387,
+        -2.128795,
+        0.114208
+      ],
+      "length": 0.042
+    },
+    {
+      "name": "RngR_1",
+      "parent": "HandR",
+      "head": [
+        1.149323,
+        -2.074644,
+        -0.016
+      ],
+      "tail": [
+        1.164615,
+        -2.124766,
+        0.024941
+      ],
+      "length": 0.0665
+    },
+    {
+      "name": "RngR_2",
+      "parent": "RngR_1",
+      "head": [
+        1.164615,
+        -2.124766,
+        0.024941
+      ],
+      "tail": [
+        1.166621,
+        -2.131341,
+        0.073861
+      ],
+      "length": 0.0494
+    },
+    {
+      "name": "RngR_3",
+      "parent": "RngR_2",
+      "head": [
+        1.166621,
+        -2.131341,
+        0.073861
+      ],
+      "tail": [
+        1.160451,
+        -2.111118,
+        0.107698
+      ],
+      "length": 0.0399
+    },
+    {
+      "name": "LitR_1",
+      "parent": "HandR",
+      "head": [
+        1.198104,
+        -2.059762,
+        -0.016
+      ],
+      "tail": [
+        1.210981,
+        -2.101969,
+        0.018477
+      ],
+      "length": 0.056
+    },
+    {
+      "name": "LitR_2",
+      "parent": "LitR_1",
+      "head": [
+        1.210981,
+        -2.101969,
+        0.018477
+      ],
+      "tail": [
+        1.21267,
+        -2.107507,
+        0.059672
+      ],
+      "length": 0.0416
+    },
+    {
+      "name": "LitR_3",
+      "parent": "LitR_2",
+      "head": [
+        1.21267,
+        -2.107507,
+        0.059672
+      ],
+      "tail": [
+        1.207474,
+        -2.090477,
+        0.088167
+      ],
+      "length": 0.0336
+    },
+    {
+      "name": "ThbR_1",
+      "parent": "HandR",
+      "head": [
+        1.132866,
+        -1.86649,
+        -0.008
+      ],
+      "tail": [
+        1.169269,
+        -1.896839,
+        0.031972
+      ],
+      "length": 0.062
+    },
+    {
+      "name": "ThbR_2",
+      "parent": "ThbR_1",
+      "head": [
+        1.169269,
+        -1.896839,
+        0.031972
+      ],
+      "tail": [
+        1.190397,
+        -1.894341,
+        0.07722
+      ],
+      "length": 0.05
+    },
+    {
+      "name": "ThbR_3",
+      "parent": "ThbR_2",
+      "head": [
+        1.190397,
+        -1.894341,
+        0.07722
+      ],
+      "tail": [
+        1.201241,
+        -1.872487,
+        0.108918
+      ],
+      "length": 0.04
+    },
+    {
+      "name": "HandL",
+      "parent": "ForearmL",
+      "head": [
+        -0.614,
+        1.934,
+        0.06
+      ],
+      "tail": [
+        -0.594,
+        2.17,
+        0.06
+      ],
+      "length": 0.236846
+    },
+    {
+      "name": "IdxL_1",
+      "parent": "HandL",
+      "head": [
+        -0.672735,
+        2.164629,
+        0.056
+      ],
+      "tail": [
+        -0.68163,
+        2.286051,
+        0.045481
+      ],
+      "length": 0.1222
+    },
+    {
+      "name": "IdxL_2",
+      "parent": "IdxL_1",
+      "head": [
+        -0.68163,
+        2.286051,
+        0.045481
+      ],
+      "tail": [
+        -0.688994,
+        2.382001,
+        0.023551
+      ],
+      "length": 0.0987
+    },
+    {
+      "name": "IdxL_3",
+      "parent": "IdxL_2",
+      "head": [
+        -0.688994,
+        2.382001,
+        0.023551
+      ],
+      "tail": [
+        -0.69486,
+        2.452088,
+        -0.003066
+      ],
+      "length": 0.0752
+    },
+    {
+      "name": "MidL_1",
+      "parent": "HandL",
+      "head": [
+        -0.621917,
+        2.160323,
+        0.056
+      ],
+      "tail": [
+        -0.618037,
+        2.289772,
+        0.044686
+      ],
+      "length": 0.13
+    },
+    {
+      "name": "MidL_2",
+      "parent": "MidL_1",
+      "head": [
+        -0.618037,
+        2.289772,
+        0.044686
+      ],
+      "tail": [
+        -0.615097,
+        2.392046,
+        0.021102
+      ],
+      "length": 0.105
+    },
+    {
+      "name": "MidL_3",
+      "parent": "MidL_2",
+      "head": [
+        -0.615097,
+        2.392046,
+        0.021102
+      ],
+      "tail": [
+        -0.613131,
+        2.466723,
+        -0.007526
+      ],
+      "length": 0.08
+    },
+    {
+      "name": "RngL_1",
+      "parent": "HandL",
+      "head": [
+        -0.56811,
+        2.155763,
+        0.056
+      ],
+      "tail": [
+        -0.551048,
+        2.277606,
+        0.045252
+      ],
+      "length": 0.1235
+    },
+    {
+      "name": "RngL_2",
+      "parent": "RngL_1",
+      "head": [
+        -0.551048,
+        2.277606,
+        0.045252
+      ],
+      "tail": [
+        -0.537451,
+        2.373851,
+        0.022846
+      ],
+      "length": 0.09975
+    },
+    {
+      "name": "RngL_3",
+      "parent": "RngL_2",
+      "head": [
+        -0.537451,
+        2.373851,
+        0.022846
+      ],
+      "tail": [
+        -0.527353,
+        2.444096,
+        -0.004349
+      ],
+      "length": 0.076
+    },
+    {
+      "name": "LitL_1",
+      "parent": "HandL",
+      "head": [
+        -0.517292,
+        2.151456,
+        0.056
+      ],
+      "tail": [
+        -0.49244,
+        2.252046,
+        0.047047
+      ],
+      "length": 0.104
+    },
+    {
+      "name": "LitL_2",
+      "parent": "LitL_1",
+      "head": [
+        -0.49244,
+        2.252046,
+        0.047047
+      ],
+      "tail": [
+        -0.47252,
+        2.331487,
+        0.028384
+      ],
+      "length": 0.084
+    },
+    {
+      "name": "LitL_3",
+      "parent": "LitL_2",
+      "head": [
+        -0.47252,
+        2.331487,
+        0.028384
+      ],
+      "tail": [
+        -0.457561,
+        2.389444,
+        0.005731
+      ],
+      "length": 0.064
+    },
+    {
+      "name": "ThbL_1",
+      "parent": "HandL",
+      "head": [
+        -0.679743,
+        2.01088,
+        0.048
+      ],
+      "tail": [
+        -0.700891,
+        2.068783,
+        0.054637
+      ],
+      "length": 0.062
+    },
+    {
+      "name": "ThbL_2",
+      "parent": "ThbL_1",
+      "head": [
+        -0.700891,
+        2.068783,
+        0.054637
+      ],
+      "tail": [
+        -0.719127,
+        2.101539,
+        0.087719
+      ],
+      "length": 0.05
+    },
+    {
+      "name": "ThbL_3",
+      "parent": "ThbL_2",
+      "head": [
+        -0.719127,
+        2.101539,
+        0.087719
+      ],
+      "tail": [
+        -0.735325,
+        2.108759,
+        0.123573
+      ],
+      "length": 0.04
+    },
+    {
+      "name": "ThighA",
+      "parent": "Hips",
+      "head": [
+        -0.241352,
+        0.872825,
+        0.02
+      ],
+      "tail": [
+        -0.768294,
+        0.389599,
+        -0.04
+      ],
+      "length": 0.717478
+    },
+    {
+      "name": "ShinA",
+      "parent": "ThighA",
+      "head": [
+        -0.768294,
+        0.389599,
+        -0.04
+      ],
+      "tail": [
+        -1.291303,
+        -0.451137,
+        -0.06
+      ],
+      "length": 0.990341
+    },
+    {
+      "name": "FootA",
+      "parent": "ShinA",
+      "head": [
+        -1.291303,
+        -0.451137,
+        -0.06
+      ],
+      "tail": [
+        -1.51545,
+        -0.659356,
+        -0.1
+      ],
+      "length": 0.30854
+    },
+    {
+      "name": "ToeA",
+      "parent": "FootA",
+      "head": [
+        -1.51545,
+        -0.659356,
+        -0.1
+      ],
+      "tail": [
+        -1.35545,
+        -0.659356,
+        -0.0
+      ],
+      "length": 0.18868
+    },
+    {
+      "name": "ThighB",
+      "parent": "Hips",
+      "head": [
+        -0.300338,
+        -0.659356,
+        0.02
+      ],
+      "tail": [
+        -1.09075,
+        -1.65331,
+        -0.06
+      ],
+      "length": 1.272437
+    },
+    {
+      "name": "ShinB",
+      "parent": "ThighB",
+      "head": [
+        -1.09075,
+        -1.65331,
+        -0.06
+      ],
+      "tail": [
+        -1.452531,
+        -2.175823,
+        -0.08
+      ],
+      "length": 0.63585
+    },
+    {
+      "name": "FootB",
+      "parent": "ShinB",
+      "head": [
+        -1.452531,
+        -2.175823,
+        -0.08
+      ],
+      "tail": [
+        -1.735664,
+        -2.564761,
+        -0.12
+      ],
+      "length": 0.482739
+    },
+    {
+      "name": "ToeB",
+      "parent": "FootB",
+      "head": [
+        -1.735664,
+        -2.564761,
+        -0.12
+      ],
+      "tail": [
+        -1.595664,
+        -2.564761,
+        0.02
+      ],
+      "length": 0.19799
+    },
+    {
+      "name": "SwordBone",
+      "parent": "Root",
+      "head": [
+        1.315,
+        -1.88,
+        -0.15
+      ],
+      "tail": [
+        0.973964,
+        -1.586435,
+        -0.146252
+      ],
+      "length": 0.45
+    }
+  ],
+  "bone_count": 58,
+  "hand_bones_right": [
+    "ShoulderR",
+    "UpperArmR",
+    "ForearmR",
+    "HandR",
+    "IdxR_1",
+    "IdxR_2",
+    "IdxR_3",
+    "MidR_1",
+    "MidR_2",
+    "MidR_3",
+    "RngR_1",
+    "RngR_2",
+    "RngR_3",
+    "LitR_1",
+    "LitR_2",
+    "LitR_3",
+    "ThbR_1",
+    "ThbR_2",
+    "ThbR_3"
+  ],
+  "skeleton_notes": [
+    "4 fingers x 3 phalanges + 3-segment inner thumb per hand",
+    "explicit per-vertex weights, max 4 influences (Unity SkinQuality.Bone4)",
+    "rest pose reproduces the approved figure-v5 painting pose"
+  ],
+  "sword": {
+    "grip_px": [
+      380.0,
+      543.0
+    ],
+    "guard_px": [
+      364.0,
+      529.0
+    ],
+    "tip_px": [
+      107.0,
+      308.0
+    ],
+    "pommel_px": [
+      420.0,
+      583.0
+    ],
+    "grip_world": [
+      1.315,
+      -1.88,
+      -0.15
+    ],
+    "tip_world": [
+      -1.415,
+      0.47,
+      -0.12
+    ],
+    "pommel_world": [
+      1.715,
+      -2.28,
+      -0.16
+    ],
+    "guard_world": [
+      1.155,
+      -1.74,
+      -0.14
+    ],
+    "texture": "Model/Generated/Textures/Sword.png (derived from LadyLake/Textures/sword.png)",
+    "uv_axis": "blade local +Y maps pommel(855,1169) -> tip(141,510) in texture px",
+    "local_origin": "contract grip point"
+  },
+  "clip": {
+    "name": "LadyLakeCycle",
+    "fps": 30,
+    "frames": 361,
+    "seconds": 12.0,
+    "seamless": true,
+    "master_driver": "sword: the hand is solved by two-bone IK onto the sword grip each frame",
+    "key_times": {
+      "0.0-1.3": "hand open, sword high (top position)",
+      "1.3-3.2": "sword falls with underwater drag, arm reaches to intercept",
+      "3.2": "fingers close around the hilt",
+      "3.2-5.6": "lift to the exact static card resting pose",
+      "5.6-8.3": "held serene float",
+      "8.3-10.8": "water magic carries the sword up while the fingers release",
+      "10.8-12.0": "continuous return to the start pose"
+    }
+  },
+  "anchors": {
+    "Grip": "child empty of Sword at the grip point",
+    "GripSocket": "bone-parented empty on HandR (grip lives in the palm)"
+  },
+  "meshes": [
+    {
+      "name": "Body",
+      "verts": 3188,
+      "tris": 6164,
+      "materials": [
+        "FigureFront (painting-projected)",
+        "GoldSkin (coherent hidden surface tile)"
+      ]
+    },
+    {
+      "name": "Hair",
+      "verts": 24454,
+      "tris": 48508,
+      "materials": [
+        "HairSheet (projected, alpha)"
+      ]
+    },
+    {
+      "name": "Sword",
+      "verts": 244,
+      "tris": 480,
+      "materials": [
+        "SwordBlade (sword.png projected)"
+      ]
+    }
+  ],
+  "textures": {
+    "FigureSkin.png": "figure-v5 with hair/background grown over by skin so the front projection never samples hair or white",
+    "GoldSkin.png": "seamless gold skin tile cut from the cleanest 128x128 skin window of figure-v5",
+    "Hair.png": "hair/ink sheet, white background removed and un-premultiplied",
+    "Sword.png": "sword.png with white background removed and un-premultiplied"
+  },
+  "previews": [],
+  "artifacts": {
+    "fbx": "Model/Generated/FigureRig.fbx",
+    "fbx_bytes": 4422540
+  },
+  "runtime_notes": [
+    "No image swaps, no CPU vertex wobble, no Billboard/plane fakes.",
+    "Hands, arms and body are real closed meshes with meaningful thickness.",
+    "Face and hair are carefully shaped projected meshes over real volume.",
+    "C# builder is Unity 2019.4 compatible and editor-only."
+  ],
+  "elapsed_seconds": 150.5
+}

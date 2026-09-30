@@ -1,0 +1,231 @@
+{
+    "rows": [
+        {
+            "prefab": "Assets/DynamicCards/Content/Old/Legacy2017/20161801/Card.prefab",
+            "skinnedRenderers": 5,
+            "animators": 3,
+            "particles": 20,
+            "meshes": [
+                {
+                    "name": "_1_Head",
+                    "vertices": 166,
+                    "triangles": 273,
+                    "bones": 60,
+                    "weightedVertices": 166,
+                    "multiWeightedVertices": 72,
+                    "posedSize": {
+                        "x": 1.6016719341278077,
+                        "y": 2.448418617248535,
+                        "z": 1.3521270751953126
+                    },
+                    "closed": false,
+                    "boundaryEdges": 51
+                },
+                {
+                    "name": "_1_Mesh",
+                    "vertices": 1425,
+                    "triangles": 1765,
+                    "bones": 60,
+                    "weightedVertices": 1425,
+                    "multiWeightedVertices": 354,
+                    "posedSize": {
+                        "x": 55.95014953613281,
+                        "y": 41.611968994140628,
+                        "z": 98.08623504638672
+                    },
+                    "closed": false,
+                    "boundaryEdges": 961
+                },
+                {
+                    "name": "_2_Head2",
+                    "vertices": 150,
+                    "triangles": 259,
+                    "bones": 60,
+                    "weightedVertices": 150,
+                    "multiWeightedVertices": 72,
+                    "posedSize": {
+                        "x": 1.4814035892486573,
+                        "y": 2.44842529296875,
+                        "z": 1.3521194458007813
+                    },
+                    "closed": false,
+                    "boundaryEdges": 37
+                },
+                {
+                    "name": "HelmFireRefl",
+                    "vertices": 48,
+                    "triangles": 76,
+                    "bones": 60,
+                    "weightedVertices": 48,
+                    "multiWeightedVertices": 0,
+                    "posedSize": {
+                        "x": 2.129293918609619,
+                        "y": 2.048497200012207,
+                        "z": 1.8958425521850587
+                    },
+                    "closed": false,
+                    "boundaryEdges": 18
+                },
+                {
+                    "name": "SeltkirkEmitter",
+                    "vertices": 36,
+                    "triangles": 20,
+                    "bones": 60,
+                    "weightedVertices": 36,
+                    "multiWeightedVertices": 18,
+                    "posedSize": {
+                        "x": 5.127817153930664,
+                        "y": 8.015117645263672,
+                        "z": 1.4308929443359376
+                    },
+                    "closed": false,
+                    "boundaryEdges": 36
+                }
+            ],
+            "clips": [
+                "Global_Source_2580136d__20161801_Seltkirk_VFX_Intro 2.967s",
+                "Global_Source_2580136d__20161801_Seltkirk_VFX_Loop 9.000s",
+                "Source_279e8f9c_Intro 2.967s",
+                "Source_279e8f9c_Loop 9.000s",
+                "Source_279e8f9c__20161801_Seltkirk_Ogo_Intro 2.967s",
+                "Source_279e8f9c__20161801_Seltkirk_Ogo_Loop 9.000s",
+                "Source_ec65446a__20161801_Seltkirk_VFX_Intro 2.967s",
+                "Source_ec65446a__20161801_Seltkirk_VFX_Loop 9.000s"
+            ]
+        },
+        {
+            "prefab": "Assets/DynamicCards/Content/Old/Thronebreaker/15010100/Card.prefab",
+            "skinnedRenderers": 8,
+            "animators": 3,
+            "particles": 12,
+            "meshes": [
+                {
+                    "name": "_0_Riverbed",
+                    "vertices": 24,
+                    "triangles": 30,
+                    "bones": 203,
+                    "weightedVertices": 24,
+                    "multiWeightedVertices": 0,
+                    "posedSize": {
+                        "x": 25.061370849609376,
+                        "y": 15.63662338256836,
+                        "z": 22.579526901245118
+                    },
+                    "closed": false,
+                    "boundaryEdges": 16
+                },
+                {
+                    "name": "_1_RiverbedCaustics",
+                    "vertices": 19,
+                    "triangles": 18,
+                    "bones": 203,
+                    "weightedVertices": 19,
+                    "multiWeightedVertices": 0,
+                    "posedSize": {
+                        "x": 21.141902923583986,
+                        "y": 4.238569259643555,
+                        "z": 20.96444320678711
+                    },
+                    "closed": false,
+                    "boundaryEdges": 16
+                },
+                {
+                    "name": "_2_WaterSurface",
+                    "vertices": 8,
+                    "triangles": 6,
+                    "bones": 203,
+                    "weightedVertices": 8,
+                    "multiWeightedVertices": 0,
+                    "posedSize": {
+                        "x": 20.43631362915039,
+                        "y": 2.9147887229919435,
+                        "z": 25.933317184448243
+                    },
+                    "closed": false,
+                    "boundaryEdges": 8
+                },
+                {
+                    "name": "_4_Fish",
+                    "vertices": 189,
+                    "triangles": 225,
+                    "bones": 203,
+                    "weightedVertices": 189,
+                    "multiWeightedVertices": 151,
+                    "posedSize": {
+                        "x": 5.60976505279541,
+                        "y": 5.225512504577637,
+                        "z": 8.512913703918457
+                    },
+                    "closed": false,
+                    "boundaryEdges": 121
+                },
+                {
+                    "name": "_5_FoliageBack",
+                    "vertices": 428,
+                    "triangles": 482,
+                    "bones": 203,
+                    "weightedVertices": 428,
+                    "multiWeightedVertices": 2,
+                    "posedSize": {
+                        "x": 15.105125427246094,
+                        "y": 9.10940933227539,
+                        "z": 21.316987991333009
+                    },
+                    "closed": false,
+                    "boundaryEdges": 332
+                },
+                {
+                    "name": "_6_Aeschna",
+                    "vertices": 1032,
+                    "triangles": 1393,
+                    "bones": 203,
+                    "weightedVertices": 1032,
+                    "multiWeightedVertices": 298,
+                    "posedSize": {
+                        "x": 11.469249725341797,
+                        "y": 10.408012390136719,
+                        "z": 13.351814270019532
+                    },
+                    "closed": false,
+                    "boundaryEdges": 591
+                },
+                {
+                    "name": "_7_AeschnaCaustics",
+                    "vertices": 133,
+                    "triangles": 155,
+                    "bones": 203,
+                    "weightedVertices": 133,
+                    "multiWeightedVertices": 44,
+                    "posedSize": {
+                        "x": 2.9117095470428469,
+                        "y": 4.701871871948242,
+                        "z": 10.559440612792969
+                    },
+                    "closed": false,
+                    "boundaryEdges": 99
+                },
+                {
+                    "name": "_8_FoliageFront",
+                    "vertices": 33,
+                    "triangles": 30,
+                    "bones": 203,
+                    "weightedVertices": 33,
+                    "multiWeightedVertices": 20,
+                    "posedSize": {
+                        "x": 6.8217549324035648,
+                        "y": 3.6348609924316408,
+                        "z": 4.358493804931641
+                    },
+                    "closed": false,
+                    "boundaryEdges": 30
+                }
+            ],
+            "clips": [
+                "Source_346ff1ac_Intro 0.567s",
+                "Source_346ff1ac_Loop 6.300s",
+                "Source_d5d58856__15010300_AeschnaVFX_Intro 0.400s",
+                "Source_d5d58856__15010300_AeschnaVFX_Loop 6.300s"
+            ]
+        }
+    ]
+}

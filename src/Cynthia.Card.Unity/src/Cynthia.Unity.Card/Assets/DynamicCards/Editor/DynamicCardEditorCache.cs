@@ -30,8 +30,17 @@ namespace Assets.Script.DynamicCards.Editor
                 }
                 catch(Exception exception){Debug.LogWarning("Recalculating dynamic card file manifest: "+exception.Message);previous.Clear();}
             }
+            // Authored cards can reference source meshes, clips and textures outside Content.
+            // Track those dependencies as well so a rebuilt model cannot use a stale package.
+            var catalog=JsonUtility.FromJson<DynamicCardCatalog>(File.ReadAllText(DynamicCardLibrary.CatalogAsset));
+            var authoredRoots=(catalog.cards ?? new DynamicCardEntry[0])
+                .Where(card=>card.prefab.StartsWith(DynamicCardLibrary.ContentRoot+"Authored/",StringComparison.Ordinal))
+                .SelectMany(card=>new[]{card.prefab,card.audio}).Where(path=>!string.IsNullOrEmpty(path)).ToArray();
+            var authoredDependencies=authoredRoots.Length==0 ? new string[0] : AssetDatabase.GetDependencies(authoredRoots,true);
             var files=new[]{"Assets/DynamicCards/Content","Assets/DynamicCards/Shaders"}
                 .SelectMany(root=>Directory.GetFiles(root,"*",SearchOption.AllDirectories))
+                .Concat(authoredDependencies.SelectMany(path=>new[]{path,path+".meta"}).Where(File.Exists))
+                .Select(path=>path.Replace('\\','/')).Distinct(StringComparer.Ordinal)
                 .Where(path=>!path.EndsWith(".meta") || !Directory.Exists(path.Substring(0,path.Length-5)))
                 .Select(path=>ManifestEntry(path,previous)).ToArray();
             File.WriteAllText(Bundle+".editor-files.json",JsonUtility.ToJson(new FileManifest{files=files}));
@@ -82,8 +91,7 @@ namespace Assets.Script.DynamicCards.Editor
         private static void OnPostprocessAllAssets(string[] imported,string[] deleted,string[] moved,string[] previous)
         {
             if(!File.Exists(Bundle+".editor-ready"))return;
-            var changed=imported.Concat(deleted).Concat(moved).Concat(previous)
-                .Where(p=>p.StartsWith("Assets/DynamicCards/Content/") || p.StartsWith("Assets/DynamicCards/Shaders/")).Distinct().ToArray();
+            var changed=imported.Concat(deleted).Concat(moved).Concat(previous).Distinct().ToArray();
             if(changed.Length==0)return;
             try
             {
@@ -105,13 +113,17 @@ namespace Assets.Script.DynamicCards.Editor
                     }
                     // Reimporting unchanged delivered files does not invalidate a prebuilt cache.
                     // Actual content or importer-setting changes still invalidate it.
-                    var mismatch=changed.FirstOrDefault(p=>!MatchesDeliveredPath(p));
+                    var mismatch=changed.Where(p=>p.StartsWith("Assets/DynamicCards/Content/") ||
+                        p.StartsWith("Assets/DynamicCards/Shaders/") || hashes.ContainsKey(p) ||
+                        hashes.ContainsKey(p+".meta") || directories.Contains(p)).FirstOrDefault(p=>!MatchesDeliveredPath(p));
                     if(mismatch==null)return;
                     Debug.LogWarning("Dynamic card package cache invalidated by changed content: "+mismatch);
                 }
             }
             catch(Exception exception){Debug.LogWarning("Dynamic card cache validation: "+exception.Message);}
-            File.Delete(Bundle+".editor-ready");
+            // Without a readable manifest only changes to known source trees invalidate.
+            if(hashes!=null || changed.Any(p=>p.StartsWith("Assets/DynamicCards/Content/") || p.StartsWith("Assets/DynamicCards/Shaders/")))
+                File.Delete(Bundle+".editor-ready");
         }
     }
 }

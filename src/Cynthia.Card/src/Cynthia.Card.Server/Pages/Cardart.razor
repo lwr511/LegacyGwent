@@ -14,7 +14,7 @@
 <div class="cardart-page">
     <div class="cardart-toolbar">
         <input class="cardart-search" type="text" value="@_searchText" @oninput="OnSearchInput"
-               placeholder="搜索中文名 / 英文名 / 卡图ID / 卡牌ID（空格分隔多个关键词）" autocomplete="off" />
+               placeholder="搜索中英文名 / 卡图ID / 小窝卡牌ID / GWENT编号（空格分词）" autocomplete="off" />
         @if (!string.IsNullOrEmpty(_searchText))
         {
             <button class="cardart-clear" type="button" @onclick="ClearSearch">清除</button>
@@ -147,7 +147,19 @@
 
     private sealed class CardNameInfo
     {
-        public string CardId { get; set; }
+        // true 表示这行编号来自 GWENT 客户端 TemplateId，false 表示小窝项目卡号。
+        public bool IsClientId { get; set; }
+        public List<string> Ids { get; set; }
+        public string ChineseName { get; set; }
+        public string EnglishName { get; set; }
+    }
+
+    // ClientArtNames 的解析结果，保留每行的编号来源与拆分后的编号。
+    private sealed class ClientArtRow
+    {
+        public string ArtId { get; set; }
+        public bool IsClientId { get; set; }
+        public List<string> Ids { get; set; }
         public string ChineseName { get; set; }
         public string EnglishName { get; set; }
     }
@@ -159,13 +171,21 @@
     private const string UnknownChineseName = "未命名";
     private const string UnknownEnglishName = "Unnamed";
 
+    // 提示里区分两种编号来源，不把项目卡号与客户端编号混写。
+    private const string ProjectIdLabel = "小窝卡牌ID";
+    private const string ClientIdLabel = "GWENT客户端编号";
+
+    // 已核实名称表里唯一一条用项目卡号登记的记录（63010 是项目卡号，不是客户端TemplateId）。
+    private const string ProjectNumberClientArtId = "d22990000";
+
     protected override void OnInitialized()
     {
         _cards = BuildCardArtItems();
     }
 
     /// <summary>
-    /// 按中文名、英文名、卡图ID、卡牌ID 过滤，多个关键词以空格分隔（全部命中才算匹配）。
+    /// 按中文名、英文名、卡图ID、小窝卡牌ID、GWENT客户端编号过滤，
+    /// 多个关键词以空格分隔（全部命中才算匹配）。
     /// </summary>
     private List<CardArtItem> GetFilteredCards()
     {
@@ -228,8 +248,9 @@
             var artId = Path.GetFileNameWithoutExtension(fileName) ?? string.Empty;
             var chineseNames = new List<string>();
             var englishNames = new List<string>();
-            var cardIds = new List<string>();
-            var details = new List<string>();
+            var searchIds = new List<string>();
+            var detailLines = new List<string>();
+            var shownNamePairs = new HashSet<string>(StringComparer.Ordinal);
 
             if (artNames.TryGetValue(artId, out var infos))
             {
@@ -245,15 +266,27 @@
                         englishNames.Add(info.EnglishName);
                     }
 
-                    if (!string.IsNullOrWhiteSpace(info.CardId))
+                    foreach (var id in info.Ids)
                     {
-                        cardIds.Add(info.CardId);
-                        var namePair = string.Join(" / ", new[] { info.ChineseName, info.EnglishName }
-                            .Where(name => !string.IsNullOrWhiteSpace(name)));
-                        // 只有名称存在时才写“名称（卡牌ID）”，避免出现空括号。
-                        details.Add(string.IsNullOrWhiteSpace(namePair)
-                            ? $"卡牌ID：{info.CardId}"
-                            : $"{namePair}（{info.CardId}）");
+                        if (!string.IsNullOrWhiteSpace(id) && !searchIds.Contains(id))
+                        {
+                            searchIds.Add(id);
+                        }
+                    }
+
+                    // 每条来源单独成行，明确区分小窝卡牌ID与GWENT客户端编号；
+                    // 同一名称只写一次，避免重复显示。
+                    var idText = string.Join(", ", info.Ids);
+                    var idLabel = info.IsClientId ? ClientIdLabel : ProjectIdLabel;
+                    var namePair = string.Join(" / ", new[] { info.ChineseName, info.EnglishName }
+                        .Where(name => !string.IsNullOrWhiteSpace(name)));
+                    if (namePair.Length > 0 && shownNamePairs.Add(namePair))
+                    {
+                        detailLines.Add($"{idLabel} {idText}：{namePair}");
+                    }
+                    else
+                    {
+                        detailLines.Add($"{idLabel} {idText}");
                     }
                 }
             }
@@ -270,7 +303,7 @@
             }
 
             var searchParts = new List<string> { fileName, artId, chinese, english };
-            searchParts.AddRange(cardIds);
+            searchParts.AddRange(searchIds);
 
             items.Add(new CardArtItem
             {
@@ -282,7 +315,7 @@
                 // 占位名不是卡图身份，alt 只保留卡图ID。
                 AltText = hasName ? $"{chinese} {english} {artId}".Trim() : artId,
                 Tooltip = hasName
-                    ? $"{string.Join("\n", details)}\n卡图ID：{artId}"
+                    ? $"{string.Join("\n", detailLines)}\n卡图ID：{artId}"
                     : $"卡图ID：{artId}（未收录卡牌名称）",
             });
         }
@@ -302,10 +335,17 @@
         var englishLocale = LoadLocale("en");
         var map = new Dictionary<string, List<CardNameInfo>>(StringComparer.OrdinalIgnoreCase);
 
+        var clientRows = ParseClientArtRows();
+        // 已核实名称表给出的 客户端TemplateId -> 所有实际卡图ID 索引（多编号行逐一拆分）。
+        var clientTemplateArtIndex = BuildIndex(clientRows, isClientId: true);
+        // 唯一以项目卡号登记的特例（d22990000 的 63010），单独建索引，不并入客户端编号。
+        var clientProjectArtIndex = BuildIndex(clientRows, isClientId: false);
+
         foreach (var pair in GwentMap.CardMap)
         {
             var card = pair.Value;
-            if (string.IsNullOrWhiteSpace(card.CardArtsId))
+            var cardArtsId = card.CardArtsId;
+            if (string.IsNullOrWhiteSpace(cardArtsId))
             {
                 continue;
             }
@@ -316,38 +356,150 @@
                 chineseName = card.Name;
             }
 
-            if (!map.TryGetValue(card.CardArtsId, out var infos))
+            // 优先使用 Locales 既有英文，仅在缺失时使用本页补充译名。
+            var englishName = GetLocaleCardName(englishLocale, pair.Key);
+            if (string.IsNullOrWhiteSpace(englishName))
             {
-                infos = new List<CardNameInfo>();
-                map[card.CardArtsId] = infos;
+                englishName = GetSupplementalEnglish(englishLocale, pair.Key);
             }
 
-            infos.Add(new CardNameInfo
+            var info = new CardNameInfo
             {
-                CardId = pair.Key,
+                IsClientId = false,
+                Ids = new List<string> { pair.Key },
                 ChineseName = chineseName,
-                EnglishName = GetLocaleCardName(englishLocale, pair.Key),
-            });
+                EnglishName = englishName,
+            };
+
+            // 原有行为：CardArtsId 直接对应同名卡图。
+            AddNameInfo(map, cardArtsId, info);
+
+            // 新增关联：GwentMap.CardArtsId 若是已核实的客户端 TemplateId，
+            // 就把该项目的卡号与中英文名称挂到该编号对应的所有实际卡图上。
+            if (clientTemplateArtIndex.TryGetValue(cardArtsId, out var templateArts))
+            {
+                foreach (var artId in templateArts)
+                {
+                    AddNameInfo(map, artId, info);
+                }
+            }
+
+            // 特例：补充表中以项目卡号登记的行。
+            if (clientProjectArtIndex.TryGetValue(pair.Key, out var projectArts))
+            {
+                foreach (var artId in projectArts)
+                {
+                    AddNameInfo(map, artId, info);
+                }
+            }
         }
 
-        // GwentMap 中没有的卡图，使用客户端卡图数据及同图核对结果补齐。
-        foreach (var pair in BuildClientArtNameMap())
+        // 已核实名称表：官方名与项目名并存，只补充不覆盖。
+        foreach (var row in clientRows)
         {
-            if (!map.ContainsKey(pair.Key))
+            AddNameInfo(map, row.ArtId, new CardNameInfo
             {
-                map[pair.Key] = new List<CardNameInfo> { pair.Value };
-            }
+                IsClientId = row.IsClientId,
+                Ids = row.Ids,
+                ChineseName = row.ChineseName,
+                EnglishName = row.EnglishName,
+            });
         }
 
         return map;
     }
 
     /// <summary>
-    /// 解析卡图名称表。每行格式：卡图ID|中文名|英文名|卡牌ID。
-    /// 多数 d 前缀卡图可去掉前缀匹配客户端贴图；旧编号及其他 ID 由同图核对得到。
+    /// 按 (来源, 编号) 去重后加入映射，避免同一项目卡或同一客户端编号重复出现。
     /// </summary>
-    private static IEnumerable<KeyValuePair<string, CardNameInfo>> BuildClientArtNameMap()
+    private static void AddNameInfo(Dictionary<string, List<CardNameInfo>> map, string artId, CardNameInfo info)
     {
+        if (string.IsNullOrWhiteSpace(artId))
+        {
+            return;
+        }
+
+        if (!map.TryGetValue(artId, out var infos))
+        {
+            infos = new List<CardNameInfo>();
+            map[artId] = infos;
+        }
+
+        foreach (var existing in infos)
+        {
+            if (existing.IsClientId == info.IsClientId && IdsEqual(existing.Ids, info.Ids))
+            {
+                return;
+            }
+        }
+
+        infos.Add(info);
+    }
+
+    private static bool IdsEqual(List<string> left, List<string> right)
+    {
+        if (left == null || right == null)
+        {
+            return ReferenceEquals(left, right);
+        }
+
+        if (left.Count != right.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < left.Count; i++)
+        {
+            if (!string.Equals(left[i], right[i], StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// 由已核实名称表建立 编号 -> 实际卡图ID 的索引；多编号行按逗号逐一拆分。
+    /// </summary>
+    private static Dictionary<string, List<string>> BuildIndex(IEnumerable<ClientArtRow> rows, bool isClientId)
+    {
+        var index = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var row in rows)
+        {
+            if (row.IsClientId != isClientId)
+            {
+                continue;
+            }
+
+            foreach (var id in row.Ids)
+            {
+                if (!index.TryGetValue(id, out var artIds))
+                {
+                    artIds = new List<string>();
+                    index[id] = artIds;
+                }
+
+                if (!artIds.Contains(row.ArtId))
+                {
+                    artIds.Add(row.ArtId);
+                }
+            }
+        }
+
+        return index;
+    }
+
+    /// <summary>
+    /// 解析已核实卡图名称表。每行格式：卡图ID|中文名|英文名|编号（多个编号以逗号分隔）。
+    /// 第四列多数是客户端 TemplateId；唯一特例 d22990000 的 63010 是项目卡号，
+    /// 单独标记为项目编号，不作为客户端编号建索引。
+    /// </summary>
+    private static List<ClientArtRow> ParseClientArtRows()
+    {
+        var rows = new List<ClientArtRow>();
+
         foreach (var rawLine in ClientArtNames.Split('\n'))
         {
             var line = rawLine.Trim();
@@ -370,13 +522,22 @@
                 continue;
             }
 
-            yield return new KeyValuePair<string, CardNameInfo>(artId, new CardNameInfo
+            var ids = parts[3].Split(',')
+                .Select(id => id.Trim())
+                .Where(id => id.Length > 0)
+                .ToList();
+
+            rows.Add(new ClientArtRow
             {
-                CardId = parts[3].Trim(),
+                ArtId = artId,
+                IsClientId = !string.Equals(artId, ProjectNumberClientArtId, StringComparison.OrdinalIgnoreCase),
+                Ids = ids,
                 ChineseName = chineseName,
                 EnglishName = englishName,
             });
         }
+
+        return rows;
     }
 
     /// <summary>
@@ -386,7 +547,8 @@
     /// 同图核对的客户端贴图：c10000700→33800000，c10001100→13690000，
     /// c10001600→13640000，d17970000→40800000，d20650000→40320000。
     /// 比对前需去除客户端贴图的底部填充区域；名称按对应 TemplateId 取双语词条。
-    /// 每行格式：卡图ID|中文名|英文名|卡牌ID（# 开头为注释）。
+    /// 每行格式：卡图ID|中文名|英文名|编号（多个客户端TemplateId以逗号分隔；
+    /// 唯一特例 d22990000 一行的 63010 是项目卡号）。（# 开头为注释）
     /// </summary>
     private const string ClientArtNames = @"
 14800000|考德威尔伯爵|Count Caldwell|202101
@@ -895,6 +1057,63 @@ d23000000|卓尔坦的伙伴|Zoltan's Company|202471
 d23010000|红色突变诱发物|Red Mutagen|202788
 d23020000|绿色突变诱发物|Green Mutagen|202790
 ";
+
+    /// <summary>
+    /// 上游 Locales/en.json 缺少英文时的项目卡补充译名，仅覆盖已确认的 27 个项目卡号；
+    /// 能从 Locales 读到的英文一律优先，不在此覆盖。
+    /// “晋升”沿用基础卡既有英文并加 “: Ascended”（项目补充译名，不冒充官方文本）；
+    /// 同名变体沿用基础卡既有英文。基础卡号来自逐条核对的中文名对应关系，
+    /// 不使用“去掉末尾 0”之类的推断。
+    /// </summary>
+    private static readonly Dictionary<string, string> AscendedBaseCardIds =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        { "130010", "13001" }, { "130020", "13002" }, { "130030", "13003" },
+        { "130040", "13004" }, { "130050", "13005" }, { "130060", "13006" },
+        { "130070", "13007" }, { "130080", "13008" }, { "130090", "13009" },
+        { "130100", "13010" }, { "130120", "13012" }, { "130130", "13013" },
+        { "130140", "13014" }, { "130150", "13015" }, { "130160", "13016" },
+        { "130170", "13017" }, { "130180", "13018" }, { "130190", "13019" },
+        { "130200", "13020" }, { "130210", "13021" }, { "130220", "13022" },
+        { "240140", "24014" }, { "640080", "64008" },
+    };
+
+    private static readonly Dictionary<string, string> SameNameVariantBaseCardIds =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        { "130110", "13011" }, // Carlo Varese
+        { "240230", "24023" }, // Wyvern
+        { "240250", "24025" }, // Barbegazi
+    };
+
+    // 上游没有 70018 词条；沿用 fork en.json 已有译名，保证只移植本页时也可用。
+    private const string ReaverHunterNightmareArmorCardId = "70018";
+    private const string ReaverHunterNightmareArmorEnglish = "Reaver Hunter's Nightmare Armor";
+
+    private static string GetSupplementalEnglish(GameLocale englishLocale, string cardId)
+    {
+        if (string.Equals(cardId, ReaverHunterNightmareArmorCardId, StringComparison.Ordinal))
+        {
+            return ReaverHunterNightmareArmorEnglish;
+        }
+
+        if (SameNameVariantBaseCardIds.TryGetValue(cardId, out var variantBaseId))
+        {
+            // 同名变体保留基础卡既有英文，不添加后缀。
+            return GetLocaleCardName(englishLocale, variantBaseId);
+        }
+
+        if (AscendedBaseCardIds.TryGetValue(cardId, out var ascendedBaseId))
+        {
+            var baseName = GetLocaleCardName(englishLocale, ascendedBaseId);
+            if (!string.IsNullOrWhiteSpace(baseName))
+            {
+                return baseName + ": Ascended";
+            }
+        }
+
+        return null;
+    }
 
     private static string GetLocaleCardName(GameLocale locale, string cardId)
     {

@@ -1,0 +1,17 @@
+{
+  "built_by": "LegacyGwent.LadyLakePremium.Editor.LadyLakeModelBuilder.Build()",
+  "unity": "2019.4.41f2",
+  "prefab": "Assets/Experiments/LadyLakePremium/Model/FigureRig.prefab",
+  "fbx": "Assets/Experiments/LadyLakePremium/Model/Generated/FigureRig.fbx",
+  "source_clip": "__preview__Scene",
+  "source_clip_seconds": 12,
+  "avatar": null,
+  "controller": "Assets/Experiments/LadyLakePremium/Model/Generated/FigureRig.controller",
+  "clips": ["Assets/Experiments/LadyLakePremium/Model/Generated/Clips/Intro.anim", "Assets/Experiments/LadyLakePremium/Model/Generated/Clips/Loop.anim"],
+  "materials": ["Assets/Experiments/LadyLakePremium/Model/Generated/Materials/FigureFront.mat", "Assets/Experiments/LadyLakePremium/Model/Generated/Materials/GoldSkin.mat", "Assets/Experiments/LadyLakePremium/Model/Generated/Materials/HairSheet.mat", "Assets/Experiments/LadyLakePremium/Model/Generated/Materials/SwordBlade.mat"],
+  "transform_count": 65,
+  "notes": [
+    "GripSocket under HandR localPosition=(-0.0182, -0.0168, 0.0002)  (world grip (1.3150, -1.8800, -0.1500))",
+    "Grip marker at Sword local origin (contract grip point)"
+  ]
+}

@@ -1,0 +1,190 @@
+{
+    "generatedAtUtc": "2026-09-27T15:22:37Z",
+    "unityVersion": "2019.4.41f2",
+    "prefabPath": "Assets/Experiments/LadyLakePremium/Environment/Environment.prefab",
+    "controllerPath": "Assets/Experiments/LadyLakePremium/Environment/LadyLakeEnvironment.controller",
+    "cycleDuration": 12.0,
+    "cameraDistance": 11.5,
+    "audioPath": "Assets/Experiments/LadyLakePremium/Environment/Audio/LadyLakeLoop.wav",
+    "verified": [
+        "Accent gates are sampled from background.png's own luminance and the plant wave mask from foreground.png's own alpha; nothing is gated by a rectangle with a visible edge.",
+        "Env_SwayMask.png is generated from the plant painting's own alpha times a height ramp, so only the stems carry the wavey-shader displacement and the lily pads stay rigid.",
+        "All materials use original DynamicCards shaders imported from the real premium pipeline; no new shader was written.",
+        "Animator controller has Intro (12 s) -> Loop (12 s, looping) with both clips baked from the shared 12 s envelope; every sway curve uses an integer cycle count so the seam is continuous.",
+        "catalog-fragment.json written with production particleEvents/uvMotions on the shared 12 s cycle."
+    ],
+    "warnings": [],
+    "unverified": [
+        "Visual acceptance: nothing was rendered by this builder. A Unity render/capture is required (root owns it).",
+        "ParticleSystem appearance with the original premium shaders was not observed; only the created assets and parameters were verified.",
+        "The catalog fragment paths are relative to the Environment prefab root; Integration/root must prefix them with the real instance path inside Card.prefab.",
+        "The builder never enters play mode, so Animator transitions/clip playback were not observed at runtime.",
+        "The model rig is authored by another worker; GripSocket/Grip presence is discovered at runtime and was not verified here."
+    ],
+    "meshes": [
+        {
+            "name": "Env_Backdrop",
+            "path": "Assets/Experiments/LadyLakePremium/Environment/Meshes/Env_Backdrop.asset",
+            "vertices": 4617,
+            "triangles": 8960,
+            "subMeshes": 1,
+            "boundsCenter": "(0.000, -0.023, 1.541)",
+            "boundsSize": "(5.791, 8.267, 0.184)"
+        },
+        {
+            "name": "Env_WaterbedCaustics",
+            "path": "Assets/Experiments/LadyLakePremium/Environment/Meshes/Env_WaterbedCaustics.asset",
+            "vertices": 1333,
+            "triangles": 2520,
+            "subMeshes": 1,
+            "boundsCenter": "(0.000, 0.000, 0.950)",
+            "boundsSize": "(5.496, 7.882, 0.000)"
+        },
+        {
+            "name": "Env_CausticSheen",
+            "path": "Assets/Experiments/LadyLakePremium/Environment/Meshes/Env_CausticSheen.asset",
+            "vertices": 999,
+            "triangles": 1872,
+            "subMeshes": 1,
+            "boundsCenter": "(0.000, 0.000, 0.500)",
+            "boundsSize": "(5.297, 7.597, 0.000)"
+        },
+        {
+            "name": "Env_SunRays",
+            "path": "Assets/Experiments/LadyLakePremium/Environment/Meshes/Env_SunRays.asset",
+            "vertices": 630,
+            "triangles": 960,
+            "subMeshes": 1,
+            "boundsCenter": "(-0.305, 1.813, 0.800)",
+            "boundsSize": "(4.952, 4.161, 0.000)"
+        },
+        {
+            "name": "Env_Foreground",
+            "path": "Assets/Experiments/LadyLakePremium/Environment/Meshes/Env_Foreground.asset",
+            "vertices": 7373,
+            "triangles": 14400,
+            "subMeshes": 1,
+            "boundsCenter": "(0.000, 0.000, -0.420)",
+            "boundsSize": "(4.927, 7.066, 0.160)"
+        },
+        {
+            "name": "Env_SwordGlowHalo",
+            "path": "Assets/Experiments/LadyLakePremium/Environment/Meshes/Env_SwordGlowHalo.asset",
+            "vertices": 162,
+            "triangles": 280,
+            "subMeshes": 1,
+            "boundsCenter": "(0.000, 0.000, 0.000)",
+            "boundsSize": "(1.700, 1.700, 0.000)"
+        },
+        {
+            "name": "Env_ParticleDisc",
+            "path": "Assets/Experiments/LadyLakePremium/Environment/Meshes/Env_ParticleDisc.asset",
+            "vertices": 91,
+            "triangles": 162,
+            "subMeshes": 1,
+            "boundsCenter": "(0.000, 0.000, -0.048)",
+            "boundsSize": "(1.000, 0.985, 0.096)"
+        }
+    ],
+    "materials": [
+        {
+            "name": "LadyLake_Env_Backdrop",
+            "shader": "DynamicCards/Native/VFX_Common_AlphaBlended_moveInDirection_VertexColor_UVNoise",
+            "queue": 2990,
+            "provenance": "Aeschna _0_Riverbed / WaterSurface shader configuration, pass-through tint, carrying the whole 497x710 backdrop painting at 1:1"
+        },
+        {
+            "name": "LadyLake_Env_WaterbedCaustics",
+            "shader": "DynamicCards/Native/VFX_Common_Additive_moveInDirection_VertexColor_UVNoise",
+            "queue": 2994,
+            "provenance": "Aeschna _1_RiverbedCaustics configuration; the bed gate is baked into mesh vertex alpha from the painting's own luminance so the layer has no plate edge"
+        },
+        {
+            "name": "LadyLake_Env_CausticSheen",
+            "shader": "DynamicCards/Native/VFX_Common_Additive_moveInDirection_VertexColor_UVNoise",
+            "queue": 2998,
+            "provenance": "Aeschna RiverbedCaustics shader at the production sheen level (_AlphaMult .26; Integration's SheenAnimation drives .12-.40)"
+        },
+        {
+            "name": "LadyLake_Env_SunRays",
+            "shader": "DynamicCards/Native/VFX_Common_Additive_moveInDirection_VertexColor_UVNoise",
+            "queue": 2996,
+            "provenance": "Aeschna _Aeschna_Shafts parameters at a whisper level; the painting already carries the shafts, this layer only drifts"
+        },
+        {
+            "name": "LadyLake_Env_Foreground",
+            "shader": "DynamicCards/Legacy/VFX_Common_AlphaBlended_moveInDirection_VertexColor_Wavey_2Sided",
+            "queue": 3006,
+            "provenance": "Aeschna _Aeschna_FoliageFront wavey foliage shader carrying the whole plant painting: white tint, no main-UV scroll, art-weighted _WaveyMask"
+        },
+        {
+            "name": "LadyLake_Env_Bubbles",
+            "shader": "DynamicCards/Native/VFX_Common_AlphaBlended_moveInDirection_VertexColor_UVNoise",
+            "queue": 2999,
+            "provenance": "Aeschna _Aeschna_FX_Bubbles parameters"
+        },
+        {
+            "name": "LadyLake_Env_Motes",
+            "shader": "DynamicCards/Native/VFX_Common_AlphaBlended_moveInDirection_VertexColor_UVNoise",
+            "queue": 3000,
+            "provenance": "Aeschna _Aeschna_FX_FloatingDirt / noise configuration"
+        },
+        {
+            "name": "LadyLake_Env_Glint",
+            "shader": "DynamicCards/Native/VFX_Common_Additive_moveInDirection_VertexColor_UVNoise",
+            "queue": 3003,
+            "provenance": "Aeschna caustics additive shader, small sparkle variant"
+        },
+        {
+            "name": "LadyLake_Env_SwordGlow",
+            "shader": "DynamicCards/Legacy/VFX_Common_Additive_moveInDirection_VertexColor_UVNoise",
+            "queue": 3021,
+            "provenance": "Seltkirk 20161801 SwordGlow: same legacy additive shader, queue 3021, idle _AlphaMult .10 driven to 1.0 by Integration's GlowAnimation"
+        }
+    ],
+    "copies": [
+        {
+            "destination": "Assets/Experiments/LadyLakePremium/Environment/Textures/Env_Background.png",
+            "source": "Assets/Experiments/LadyLake/Textures/background.png",
+            "bytes": 2169960,
+            "kind": "selected custom art / old experiment backdrop painting (byte-identical copy, whole-plate source)"
+        },
+        {
+            "destination": "Assets/Experiments/LadyLakePremium/Environment/Textures/Env_Foreground.png",
+            "source": "Assets/Experiments/LadyLake/Textures/foreground.png",
+            "bytes": 873629,
+            "kind": "selected custom art / old experiment foreground plants (byte-identical copy, whole-plate source, straight alpha)"
+        },
+        {
+            "destination": "Assets/Experiments/LadyLakePremium/Environment/Textures/AeschnaCaustics.png",
+            "source": "Assets/DynamicCards/Content/Old/Thronebreaker/OriginalTextures/74809d523530d3f7696d6e455aeca9dd.png",
+            "bytes": 52108,
+            "kind": "Aeschna 15010100 RiverbedCaustics _MainTex"
+        },
+        {
+            "destination": "Assets/Experiments/LadyLakePremium/Environment/Textures/AeschnaBubbles.png",
+            "source": "Assets/DynamicCards/Content/Old/Thronebreaker/OriginalTextures/963cbb367e53ed41e9e55e8a50c83fc5.png",
+            "bytes": 39233,
+            "kind": "Aeschna 15010100 FX_Bubbles _MainTex"
+        },
+        {
+            "destination": "Assets/Experiments/LadyLakePremium/Environment/Textures/AeschnaShafts.png",
+            "source": "Assets/DynamicCards/Content/Old/Thronebreaker/OriginalTextures/9fc0f47eaffcb437f12633105906e41b.png",
+            "bytes": 37912,
+            "kind": "Aeschna 15010100 Shafts _MainTex"
+        },
+        {
+            "destination": "Assets/Experiments/LadyLakePremium/Environment/Textures/AeschnaNoiseTiling.png",
+            "source": "Assets/DynamicCards/Content/Old/Thronebreaker/Shared/13890100_105470_TilingNoise3D_small_uncompressed.png",
+            "bytes": 115570,
+            "kind": "Aeschna FX noise _NoiseTex"
+        },
+        {
+            "destination": "Assets/Experiments/LadyLakePremium/Environment/Textures/AeschnaNoiseForceTiling.png",
+            "source": "Assets/DynamicCards/Content/Old/Thronebreaker/Shared/14990100_163662_Noise3D_ForceTiling.png",
+            "bytes": 81940,
+            "kind": "Aeschna caustics _NoiseTex"
+        }
+    ],
+    "groupingOverrides": []
+}
